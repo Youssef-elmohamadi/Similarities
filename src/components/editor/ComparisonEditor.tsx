@@ -67,11 +67,11 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
   const [isDiffModalOpen, setIsDiffModalOpen] = useState(false);
   const [activeComparisonId, setActiveComparisonId] = useState<string | null>(null);
 
-  // Set of collapsed comparison IDs
-  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
+  // Set of expanded comparison IDs (default: empty set -> all collapsed by default)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
-  const toggleCollapse = (id: string) => {
-    setCollapsedIds(prev => {
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -80,11 +80,11 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
   };
 
   const collapseAll = () => {
-    setCollapsedIds(new Set(comparisons.map(c => c.id)));
+    setExpandedIds(new Set());
   };
 
   const expandAll = () => {
-    setCollapsedIds(new Set());
+    setExpandedIds(new Set(comparisons.map(c => c.id)));
   };
 
   // New comparison form state
@@ -418,7 +418,8 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
                   : comparison.verses[0]);
 
             const otherVerses = comparison.verses.filter(v => v !== anchorVerse);
-            const isCollapsed = collapsedIds.has(comparison.id);
+            const isExpanded = expandedIds.has(comparison.id);
+            const isCollapsed = !isExpanded;
 
             return (
               <Card
@@ -429,36 +430,61 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
               >
                 {/* Cluster Header (Clickable to Collapse / Expand) */}
                 <div
-                  onClick={() => toggleCollapse(comparison.id)}
-                  className="flex items-center justify-between gap-3 cursor-pointer select-none group/hdr"
+                  onClick={() => toggleExpand(comparison.id)}
+                  className="flex items-start justify-between gap-3 cursor-pointer select-none group/hdr"
                 >
-                  <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-[11px] font-bold shrink-0">
+                  <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-[11px] font-bold shrink-0 mt-0.5">
                       {isRtl ? toArabicDigits(idx + 1) : idx + 1}
                     </span>
-                    <h4 className="font-bold text-sm sm:text-base text-text-primary group-hover/hdr:text-primary transition truncate">
-                      {comparison.title}
-                    </h4>
-                    {anchorVerse && (
-                      <Badge variant="gold" size="sm" className="shrink-0 text-[11px]">
-                        <Sparkles className="w-3 h-3 me-1 inline-block" />
-                        {anchorVerse.surahNameArabic} [{toArabicDigits(anchorVerse.ayahNumber)}]
-                      </Badge>
-                    )}
-                    {isCollapsed && otherVerses.length > 0 && (
-                      <span className="text-[11px] text-text-secondary hidden md:inline truncate">
-                        مقابل: {otherVerses.map(v => `${v.surahNameArabic} [${toArabicDigits(v.ayahNumber)}]`).join(' • ')}
-                      </span>
-                    )}
-                    {isCollapsed && comparison.differences && comparison.differences.length > 0 && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent-tint text-accent font-bold">
-                        {toArabicDigits(comparison.differences.length)} فوارق
-                      </span>
-                    )}
+
+                    <div className="space-y-1 flex-1 min-w-0 text-start">
+                      {/* Top Row: Title + Anchor Badge + Differences Badge */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-bold text-sm sm:text-base text-text-primary group-hover/hdr:text-primary transition">
+                          {comparison.title}
+                        </h4>
+
+                        {anchorVerse && (
+                          <Badge variant="gold" size="sm" className="shrink-0 text-[11px]">
+                            <Sparkles className="w-3 h-3 me-1 inline-block" />
+                            {anchorVerse.surahNameArabic} [{toArabicDigits(anchorVerse.ayahNumber)}]
+                          </Badge>
+                        )}
+
+                        {comparison.differences && comparison.differences.length > 0 && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent-tint text-accent font-bold shrink-0">
+                            {toArabicDigits(comparison.differences.length)} {t('فوارق', 'diffs')}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Middle Row: The Core Wording / Title (يكون برّا - ALWAYS visible outside!) */}
+                      {comparison.sharedPhrases && comparison.sharedPhrases !== comparison.title && (
+                        <p className="text-xs sm:text-sm font-bold text-primary font-quran leading-relaxed">
+                          « {comparison.sharedPhrases} »
+                        </p>
+                      )}
+
+                      {/* Bottom Row: Comparative Verses Overview (Visible outside) */}
+                      {otherVerses.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-text-secondary pt-0.5">
+                          <span className="font-medium text-text-secondary/80">{t('مقابل:', 'Parallels:')}</span>
+                          {otherVerses.map(v => (
+                            <span
+                              key={v.quranVerseId}
+                              className="px-1.5 py-0.5 rounded bg-background border border-border/80 text-[11px] font-medium"
+                            >
+                              {v.surahNameArabic} [{toArabicDigits(v.ayahNumber)}]
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Actions & Collapse Toggle */}
-                  <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center gap-1 shrink-0 pt-0.5" onClick={e => e.stopPropagation()}>
                     <Button
                       size="sm"
                       variant="outline"
@@ -480,7 +506,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
 
                     <button
                       type="button"
-                      onClick={() => toggleCollapse(comparison.id)}
+                      onClick={() => toggleExpand(comparison.id)}
                       className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-text-secondary hover:bg-charcoal-100 hover:text-text-primary transition"
                       title={isCollapsed ? t('فتح الموضع', 'Expand Position') : t('طي الموضع', 'Collapse Position')}
                       aria-label={isCollapsed ? t('فتح الموضع', 'Expand Position') : t('طي الموضع', 'Collapse Position')}
