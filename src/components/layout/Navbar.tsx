@@ -154,3 +154,5 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
         </div>
       </div>
     </header>
+  );
+};

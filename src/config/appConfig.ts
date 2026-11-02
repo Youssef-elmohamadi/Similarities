@@ -19,3 +19,4 @@ export function formatWhatsAppDisplay(numberStr: string = WHATSAPP_NUMBER): stri
   }
   return `+${digits}`;
 }
+

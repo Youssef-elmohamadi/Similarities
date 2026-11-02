@@ -625,3 +625,7 @@ export const LandingPage: React.FC = () => {
       <AppFooter />
     </div>
   );
+};
+
+export default LandingPage;
+

@@ -97,4 +97,32 @@ export const AppRoutes: React.FC = () => {
       />
       <Route
         path="/register"
-        eleme
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        }
+      />
+
+      {/* Protected Application Routes */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/search" element={<QuranSearchPage />} />
+        <Route path="/library" element={<MyLibraryPage />} />
+        <Route path="/collections/new" element={<CreateCollectionPage />} />
+        <Route path="/collections/:id" element={<CollectionDetailsPage />} />
+        <Route path="/collections/:id/edit" element={<EditCollectionPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Route>
+
+      {/* Fallback to root */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+};
