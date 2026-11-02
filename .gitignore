@@ -53,10 +53,14 @@ publish-selfcontained/
 # --------------------------------------------------------------------
 # 2. Frontend (Node.js, React, Vite, TypeScript, PWA)
 # --------------------------------------------------------------------
+node_modules/
 **/node_modules/
+dist/
 **/dist/
+dev-dist/
 **/dist-ssr/
-frontend/.vite/
+.vite/
+*.tsbuildinfo
 .eslintcache
 .stylelintcache
 **/coverage/
