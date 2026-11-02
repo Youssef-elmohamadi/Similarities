@@ -79,7 +79,8 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`${tData.ariaWhatsapp}: ${formattedNumber}`}
-                className="min-h-[44px] px-5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20BD5A] text-white font-medium text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition duration-150 shadow-xs hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]"
+                style={{ backgroundColor: '#25D366', color: '#ffffff' }}
+                className="min-h-[44px] px-5 py-2.5 rounded-xl text-white font-medium text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition duration-150 shadow-sm hover:brightness-105 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]"
               >
                 {/* Clean WhatsApp SVG icon in crisp white */}
                 <svg
@@ -90,7 +91,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
                   <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.074-1.995-.466-.999-.414-1.637-1.428-1.687-1.494-.049-.066-.401-.533-.401-1.017 0-.484.254-.722.345-.821.09-.098.197-.123.262-.123.065 0 .131.001.189.004.06.003.14-.023.218.164.082.197.279.68.303.73.025.049.041.107.008.172-.033.066-.049.107-.098.164-.049.057-.104.127-.148.171-.049.049-.1.102-.043.2.057.098.256.422.548.682.377.336.695.441.793.49.099.049.156.041.214-.025.057-.066.246-.287.311-.385.066-.098.131-.082.222-.049.09.033.574.271.672.32.099.049.164.074.189.115.025.041.025.238-.119.643zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.66 1.434 5.176L2 22l4.954-1.399C8.423 21.493 10.153 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.05c-1.642 0-3.167-.487-4.449-1.325l-.319-.209-2.943.832.842-2.871-.225-.327C3.996 14.839 3.45 13.468 3.45 12c0-4.714 3.836-8.55 8.55-8.55 4.714 0 8.55 3.836 8.55 8.55 0 4.714-3.836 8.55-8.55 8.55z" />
                 </svg>
                 <span className="text-white font-medium">{tData.whatsappContact}</span>
-                <span className="opacity-60 text-white">|</span>
+                <span className="opacity-70 text-white">|</span>
                 <bdi dir="ltr" className="font-mono text-xs sm:text-sm font-semibold text-white">
                   {formattedNumber}
                 </bdi>

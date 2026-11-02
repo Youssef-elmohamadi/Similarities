@@ -610,9 +610,9 @@ export const LandingPage: React.FC = () => {
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="min-h-[44px] px-6 py-2.5 rounded-xl border border-border bg-background hover:bg-surface text-text-primary font-medium text-sm inline-flex items-center justify-center gap-2 transition duration-150 w-full sm:w-auto"
+                  className="min-h-[44px] px-6 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-elevated text-text-primary font-medium text-sm inline-flex items-center justify-center gap-2 transition duration-150 w-full sm:w-auto shadow-2xs"
                 >
-                  <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <MessageCircle className="w-4 h-4 text-[#25D366] shrink-0" />
                   <span>{tData.cta.whatsappBtn}</span>
                 </a>
               )}
