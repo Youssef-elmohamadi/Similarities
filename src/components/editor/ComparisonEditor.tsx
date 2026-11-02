@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { VerseComparison, VerseDifference } from '@/types/comparison';
 import { CollectionVerse } from '@/types/collection';
@@ -14,6 +14,20 @@ import { useLanguage } from '@/context/LanguageContext';
 import { getVersesBySurahId, isOfflineDatasetAvailable, CompactVerse } from '@/offline/quranDb';
 import { searchLocalWorker } from '@/offline/searchWorkerClient';
 import { api } from '@/lib/api';
+
+function normalizeArabicSearch(text: string): string {
+  if (!text) return '';
+  const easternDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  let res = text;
+  easternDigits.forEach((d, idx) => {
+    res = res.split(d).join(idx.toString());
+  });
+  res = res.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '');
+  res = res.replace(/[إأآٱ]/g, 'ا');
+  res = res.replace(/ة/g, 'ه');
+  res = res.replace(/ى/g, 'ي');
+  return res.trim().toLowerCase();
+}
 
 export interface ComparisonEditorProps {
   collectionId: string;
@@ -58,6 +72,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
 
   // Modal verse search state
   const [searchQuery, setSearchQuery] = useState('');
+  const [anchorSearchQuery, setAnchorSearchQuery] = useState('');
 
   // New difference form state
   const [diffVerseId, setDiffVerseId] = useState<number>(verses[0]?.quranVerseId || 0);
@@ -82,6 +97,44 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
     },
     enabled: !!baseSurahId,
   });
+
+  // Filter base surah verses for anchor selection by Ayah Number or Ayah Text
+  const filteredBaseVerses = useMemo(() => {
+    const sourceList: CompactVerse[] = baseSurahVerses.length > 0
+      ? baseSurahVerses
+      : verses.map(v => ({
+          id: v.quranVerseId,
+          surahId: v.surahId,
+          ayahNumber: v.ayahNumber,
+          juzNumber: 1,
+          uthmaniText: v.uthmaniText,
+          normalizedText: v.uthmaniText,
+          consonantalSkeleton: '',
+        }));
+
+    if (!sourceList || sourceList.length === 0) return [];
+    const q = anchorSearchQuery.trim();
+    if (!q) return sourceList;
+
+    const normQ = normalizeArabicSearch(q);
+    const numQ = parseInt(normQ, 10);
+    const isNum = !isNaN(numQ) && numQ > 0;
+
+    const filtered = sourceList.filter(v => {
+      if (isNum && v.ayahNumber === numQ) return true;
+      if (v.ayahNumber.toString().startsWith(normQ)) return true;
+      const normText = normalizeArabicSearch(v.normalizedText || v.uthmaniText);
+      return normText.includes(normQ);
+    });
+
+    return filtered.sort((a, b) => {
+      if (isNum) {
+        if (a.ayahNumber === numQ) return -1;
+        if (b.ayahNumber === numQ) return 1;
+      }
+      return a.ayahNumber - b.ayahNumber;
+    });
+  }, [baseSurahVerses, verses, anchorSearchQuery]);
 
   // Modal verse search query
   const { data: searchResults = [], isFetching: isSearching } = useQuery<QuranVerse[]>({
@@ -118,6 +171,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
     setDescription('');
     setSharedPhrases('');
     setSearchQuery('');
+    setAnchorSearchQuery('');
 
     // Pre-select base verse
     if (baseSurahVerses.length > 0) {
@@ -243,7 +297,8 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
   });
 
-  const activeAnchorPreview = baseSurahVerses.find(v => v.id === anchorVerseId);
+  const activeAnchorPreview = baseSurahVerses.find(v => v.id === anchorVerseId) ||
+    verses.find(v => v.quranVerseId === anchorVerseId);
 
   return (
     <div className="space-y-6 text-start">
@@ -539,53 +594,111 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
         maxWidth="lg"
       >
         <form onSubmit={handleSaveComparison} className="space-y-5 text-start">
-          {/* Step 1: Base Verse Selection */}
+          {/* Step 1: Base Verse Selection with Search */}
           <div className="p-4 rounded-xl bg-primary-tint/25 border border-primary/30 space-y-3">
-            <div className="flex items-center gap-2 text-primary font-bold text-sm">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span>
-                {baseSurahNameArabic
-                  ? t(`١. موضع الآية الأصل في سورة ${baseSurahNameArabic} (المرجع الأساس) *`, `1. Anchor Verse in Surah ${baseSurahNameArabic} *`)
-                  : t('١. الآية المرجع الأساسية للمقارنة (الموضع الأصل) *', '1. Anchor Verse *')}
-              </span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span>
+                  {baseSurahNameArabic
+                    ? t(`١. موضع الآية الأصل في سورة ${baseSurahNameArabic} (المرجع الأساس) *`, `1. Anchor Verse in Surah ${baseSurahNameArabic} *`)
+                    : t('١. الآية المرجع الأساسية للمقارنة (الموضع الأصل) *', '1. Anchor Verse *')}
+                </span>
+              </div>
+              {activeAnchorPreview && (
+                <span className="text-xs font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10">
+                  {t('الآية:', 'Ayah:')} {toArabicDigits(activeAnchorPreview.ayahNumber)}
+                </span>
+              )}
             </div>
 
-            {baseSurahVerses.length > 0 ? (
-              <Select
-                label={t('اختر الآية الكريمة من السورة *', 'Select Verse from Surah *')}
-                value={anchorVerseId || ''}
-                onChange={e => {
-                  const val = Number(e.target.value);
-                  setAnchorVerseId(val);
-                  const verseObj = baseSurahVerses.find(v => v.id === val);
-                  if (verseObj && !title) {
-                    setTitle(`موضع الآية ${toArabicDigits(verseObj.ayahNumber)} من سورة ${baseSurahNameArabic}`);
-                  }
-                }}
-                options={baseSurahVerses.map(v => ({
-                  value: v.id,
-                  label: `الآية ${toArabicDigits(v.ayahNumber)}: ${v.uthmaniText.slice(0, 45)}...`,
-                }))}
+            {/* Quick Search Input for Base Ayah */}
+            <div className="relative">
+              <Search className="absolute inset-y-0 start-3 my-auto w-4 h-4 text-text-secondary pointer-events-none" />
+              <input
+                type="text"
+                value={anchorSearchQuery}
+                onChange={e => setAnchorSearchQuery(e.target.value)}
+                placeholder={
+                  baseSurahNameArabic
+                    ? t(`ابحث في سورة ${baseSurahNameArabic} برقم الآية (مثال: 10) أو بكلمة من الآية...`, `Search verse in Surah ${baseSurahNameArabic}...`)
+                    : t('ابحث برقم الآية أو بكلمة منها...', 'Search verse by number or word...')
+                }
+                className="w-full h-10 ps-9 pe-8 text-xs sm:text-sm bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:border-primary transition text-start"
               />
-            ) : (
-              <Select
-                label={t('اختر الآية المرجع من القائمة *', 'Select Verse *')}
-                value={anchorVerseId || ''}
-                onChange={e => setAnchorVerseId(Number(e.target.value))}
-                options={verses.map(v => ({
-                  value: v.quranVerseId,
-                  label: `سورة ${v.surahNameArabic} - الآية ${toArabicDigits(v.ayahNumber)}: ${v.uthmaniText.slice(0, 40)}...`,
-                }))}
-              />
-            )}
+              {anchorSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setAnchorSearchQuery('')}
+                  className="absolute inset-y-0 end-2.5 my-auto text-text-secondary hover:text-text-primary p-1"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Matching Verses List (Scrollable) */}
+            <div className="space-y-1.5 max-h-44 overflow-y-auto p-1.5 border border-border/80 rounded-lg bg-surface">
+              {filteredBaseVerses.length === 0 ? (
+                <p className="text-xs text-text-secondary p-3 text-center">
+                  {t('لا توجد آيات تطابق بحثك في هذه السورة.', 'No verses match your search in this Surah.')}
+                </p>
+              ) : (
+                filteredBaseVerses.map(v => {
+                  const isSelected = anchorVerseId === v.id;
+                  return (
+                    <div
+                      key={v.id}
+                      onClick={() => {
+                        setAnchorVerseId(v.id);
+                        if (!title && baseSurahNameArabic) {
+                          setTitle(`موضع الآية ${toArabicDigits(v.ayahNumber)} من سورة ${baseSurahNameArabic}`);
+                        }
+                      }}
+                      className={`p-2.5 rounded-lg border text-xs flex items-center justify-between gap-3 cursor-pointer transition ${
+                        isSelected
+                          ? 'bg-primary-tint/50 border-primary shadow-xs font-semibold'
+                          : 'bg-background border-border/70 hover:bg-surface hover:border-primary/40'
+                      }`}
+                    >
+                      <div className="flex-1 truncate text-start">
+                        <span className="font-bold text-primary inline-block me-1.5">
+                          [الآية {toArabicDigits(v.ayahNumber)}]
+                        </span>
+                        <span className="font-quran text-text-primary">{v.uthmaniText}</span>
+                      </div>
+
+                      {isSelected ? (
+                        <span className="flex items-center gap-1 text-[11px] font-bold text-primary shrink-0 bg-primary/10 px-2 py-0.5 rounded-md">
+                          <Check className="w-3.5 h-3.5" />
+                          {t('المختارة', 'Selected')}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          className="text-[11px] text-text-secondary hover:text-primary px-2 py-0.5 rounded border border-border shrink-0"
+                        >
+                          {t('تحديد', 'Select')}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
 
             {/* Live Preview of Anchor Verse */}
             {activeAnchorPreview && (
-              <div className="p-3 rounded-lg bg-surface border border-border/80">
-                <span className="text-[11px] font-semibold text-text-secondary block mb-1">
-                  {t('نص الآية المرجع:', 'Anchor Verse Text:')}
-                </span>
-                <p dir="rtl" lang="ar" className="font-quran text-base text-text-primary leading-loose">
+              <div className="p-3.5 rounded-xl bg-surface border-2 border-primary/30 shadow-xs">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <span className="text-xs font-bold text-primary flex items-center gap-1">
+                    <Check className="w-3.5 h-3.5 text-primary" />
+                    <span>
+                      {t('الآية المرجع المحددة:', 'Selected Anchor Verse:')} {baseSurahNameArabic ? `سورة ${baseSurahNameArabic}` : ''} [الآية {toArabicDigits(activeAnchorPreview.ayahNumber)}]
+                    </span>
+                  </span>
+                </div>
+                <p dir="rtl" lang="ar" className="font-quran text-base sm:text-lg text-text-primary text-start leading-loose">
                   {activeAnchorPreview.uthmaniText}{' '}
                   <span className="ayah-number-badge text-primary font-bold">
                     {formatAyahOrnament(activeAnchorPreview.ayahNumber)}
