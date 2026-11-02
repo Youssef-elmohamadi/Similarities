@@ -299,56 +299,65 @@ export const CreateCollectionPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-16 text-start animate-fade-in">
-      {/* Top Header */}
-      <PageHeader
-        title={t('إنشاء مجموعة متشابهات جديدة', 'Create Similarity Collection')}
-        description={t(
-          'اكتب عنواناً معبراً للمجموعة، ورتب الآيات المتشابهة لتتمكن لاحقاً من مقارنتها وتدوين روابطها.',
-          'Name your collection, arrange the verses, and document relationships.'
-        )}
-        actions={
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            icon={isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-          >
-            {t('رجوع', 'Back')}
-          </Button>
-        }
-      />
+    <div className="max-w-4xl mx-auto space-y-3.5 sm:space-y-6 pb-16 text-start animate-fade-in">
+      {/* Top Header: Compact on Mobile */}
+      <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
+        <div className="space-y-0.5 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="p-1 -ms-1 text-text-secondary hover:text-text-primary shrink-0"
+              title={t('رجوع', 'Back')}
+              aria-label={t('رجوع', 'Back')}
+            >
+              {isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+            </Button>
+            <h1 className="text-base sm:text-2xl font-bold text-text-primary truncate">
+              {t('إنشاء مجموعة متشابهات جديدة', 'Create Similarity Collection')}
+            </h1>
+          </div>
+          <p className="hidden sm:block text-xs sm:text-sm text-text-secondary leading-relaxed ps-6">
+            {t(
+              'اكتب عنواناً معبراً للمجموعة، ورتب الآيات المتشابهة لتتمكن لاحقاً من مقارنتها وتدوين روابطها.',
+              'Name your collection, arrange the verses, and document relationships.'
+            )}
+          </p>
+        </div>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Collection Type Selector */}
-        <div className="space-y-2.5">
-          <label className="block text-sm font-semibold text-text-primary">
+      <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-6">
+        {/* Collection Type Selector: Side-by-side on mobile */}
+        <div className="space-y-1.5 sm:space-y-2.5">
+          <label className="block text-xs sm:text-sm font-semibold text-text-primary">
             {t('نوع المجموعة الهيكلي', 'Collection Structure Type')}
           </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3.5">
             {/* Surah-based option */}
             <div
               onClick={() => setCollectionType('surah')}
-              className={`cursor-pointer p-4 rounded-xl border-2 transition-all flex flex-col justify-between ${
+              className={`cursor-pointer p-2.5 sm:p-4 rounded-xl border-2 transition-all flex flex-col justify-between ${
                 collectionType === 'surah'
                   ? 'border-primary bg-primary-tint/30 shadow-xs'
                   : 'border-border bg-surface hover:border-border/80'
               }`}
             >
-              <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg shrink-0 ${collectionType === 'surah' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
-                  <BookOpen className="w-5 h-5" />
+              <div className="flex items-start gap-2 sm:gap-3">
+                <div className={`p-1.5 sm:p-2 rounded-lg shrink-0 ${collectionType === 'surah' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
+                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-text-primary text-sm sm:text-base">
-                      {t('مجموعة سورة (المرجع سورة محددة)', 'Surah-Based Collection')}
+                <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-bold text-text-primary text-xs sm:text-base leading-tight">
+                      <span className="sm:hidden">{t('مجموعة سورة', 'Surah-Based')}</span>
+                      <span className="hidden sm:inline">{t('مجموعة سورة (المرجع سورة محددة)', 'Surah-Based Collection')}</span>
                     </span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                    <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold whitespace-nowrap">
                       {t('الأنسب للحفظ', 'Recommended')}
                     </span>
                   </div>
-                  <p className="text-xs text-text-secondary leading-relaxed">
+                  <p className="hidden sm:block text-xs text-text-secondary leading-relaxed">
                     {t(
                       'تُربط المجموعة بسورة محددة؛ فتكون مواضعها هي الأساس، وتُبنى عليها المقارنات مع السور الأخرى.',
                       'Anchored to a specific Surah whose verses act as the base against other surahs.'
@@ -361,21 +370,22 @@ export const CreateCollectionPage: React.FC = () => {
             {/* Custom/Thematic option */}
             <div
               onClick={() => setCollectionType('custom')}
-              className={`cursor-pointer p-4 rounded-xl border-2 transition-all flex flex-col justify-between ${
+              className={`cursor-pointer p-2.5 sm:p-4 rounded-xl border-2 transition-all flex flex-col justify-between ${
                 collectionType === 'custom'
                   ? 'border-primary bg-primary-tint/30 shadow-xs'
                   : 'border-border bg-surface hover:border-border/80'
               }`}
             >
-              <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg shrink-0 ${collectionType === 'custom' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
-                  <Layers className="w-5 h-5" />
+              <div className="flex items-start gap-2 sm:gap-3">
+                <div className={`p-1.5 sm:p-2 rounded-lg shrink-0 ${collectionType === 'custom' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
+                  <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div className="space-y-1">
-                  <span className="font-bold text-text-primary text-sm sm:text-base">
-                    {t('مجموعة موضوعية / حرة', 'Thematic / Custom Collection')}
+                <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                  <span className="font-bold text-text-primary text-xs sm:text-base leading-tight block">
+                    <span className="sm:hidden">{t('مجموعة موضوعية', 'Thematic')}</span>
+                    <span className="hidden sm:inline">{t('مجموعة موضوعية / حرة', 'Thematic / Custom Collection')}</span>
                   </span>
-                  <p className="text-xs text-text-secondary leading-relaxed">
+                  <p className="hidden sm:block text-xs text-text-secondary leading-relaxed">
                     {t(
                       'لجمع المتشابهات حول موضوع أو لفظ محدد عبر سور متعددة دون التقيد بسورة مرجع واحدة.',
                       'A flexible collection grouping verses across multiple surahs by topic or recurring phrase.'
@@ -389,12 +399,12 @@ export const CreateCollectionPage: React.FC = () => {
 
         {/* Base Surah Selector (when Surah type is active) */}
         {collectionType === 'surah' && (
-          <Card className="p-4 sm:p-5 bg-primary-tint/20 border-primary/30 space-y-3">
-            <div className="flex items-center gap-2 text-primary font-semibold text-sm">
-              <Sparkles className="w-4 h-4 text-primary" />
+          <Card className="p-2.5 sm:p-5 bg-primary-tint/20 border-primary/30 space-y-1.5 sm:space-y-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-primary font-semibold text-xs sm:text-sm">
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
               <span>{t('اختر السورة الأساس (المرجع لهذه المجموعة)', 'Choose the Anchor Surah')}</span>
             </div>
-            <p className="text-xs text-text-secondary leading-relaxed">
+            <p className="hidden sm:block text-xs text-text-secondary leading-relaxed">
               {t(
                 'آيات هذه السورة ستكون هي المرجع الأساسي، وكل مقارنة ستشمل موضعاً من هذه السورة ومواضعه الشبيهة في السور الأخرى.',
                 'Verses from this Surah will serve as the primary anchor for all comparisons in this collection.'
@@ -412,7 +422,7 @@ export const CreateCollectionPage: React.FC = () => {
         )}
 
         {/* Collection Metadata Card */}
-        <Card className="space-y-4">
+        <Card className="p-3 sm:p-5 space-y-3 sm:space-y-4">
           <Input
             label={t('عنوان المجموعة *', 'Collection Title *')}
             value={title}
@@ -427,7 +437,7 @@ export const CreateCollectionPage: React.FC = () => {
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder={t('اكتب نبذة أو ملاحظات تود تذكرها حول هذه المجموعة من المتشابهات...', 'Add any general summary or context...')}
-            rows={3}
+            rows={2}
           />
         </Card>
 

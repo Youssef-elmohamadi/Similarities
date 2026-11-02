@@ -104,10 +104,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
                 aria-label={t('قائمة المستخدم', 'User Menu')}
               >
                 <div className="w-8 h-8 rounded-full bg-primary-tint text-primary flex items-center justify-center font-bold text-xs border border-primary/20">
-                  {user.fullName.charAt(0)}
+                  {(user.fullName || user.email || 'U').charAt(0)}
                 </div>
                 <span className="hidden md:block text-xs font-semibold text-text-primary max-w-[120px] truncate">
-                  <bdi>{user.fullName}</bdi>
+                  <bdi>{user.fullName || user.email}</bdi>
                 </span>
               </button>
 

@@ -191,45 +191,55 @@ export const EditCollectionPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 pb-16 text-start animate-fade-in">
-      <PageHeader
-        title={t('تعديل بيانات المجموعة', 'Edit Collection')}
-        description={t('تحديث عنوان ووصف المجموعة القرآنية', 'Update collection title and description')}
-        actions={
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(`/collections/${id}`)}
-            icon={isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-          >
-            {t('رجوع', 'Back')}
-          </Button>
-        }
-      />
+    <div className="max-w-2xl mx-auto space-y-3.5 sm:space-y-6 pb-16 text-start animate-fade-in">
+      {/* Top Header: Compact on Mobile */}
+      <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
+        <div className="space-y-0.5 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/collections/${id}`)}
+              className="p-1 -ms-1 text-text-secondary hover:text-text-primary shrink-0"
+              title={t('رجوع', 'Back')}
+              aria-label={t('رجوع', 'Back')}
+            >
+              {isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+            </Button>
+            <h1 className="text-base sm:text-2xl font-bold text-text-primary truncate">
+              {t('تعديل بيانات المجموعة', 'Edit Collection')}
+            </h1>
+          </div>
+          <p className="hidden sm:block text-xs sm:text-sm text-text-secondary leading-relaxed ps-6">
+            {t('تحديث عنوان ووصف المجموعة القرآنية', 'Update collection title and description')}
+          </p>
+        </div>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-6">
         {/* Collection Type Selector */}
-        <div className="space-y-2.5">
-          <label className="block text-sm font-semibold text-text-primary">
+        <div className="space-y-1.5 sm:space-y-2.5">
+          <label className="block text-xs sm:text-sm font-semibold text-text-primary">
             {t('نوع المجموعة الهيكلي', 'Collection Structure Type')}
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <div
               onClick={() => setCollectionType('surah')}
-              className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all flex items-start gap-3 ${
+              className={`cursor-pointer p-2.5 sm:p-3.5 rounded-xl border-2 transition-all flex items-start gap-2 sm:gap-3 ${
                 collectionType === 'surah'
                   ? 'border-primary bg-primary-tint/30 shadow-xs'
                   : 'border-border bg-surface hover:border-border/80'
               }`}
             >
-              <div className={`p-2 rounded-lg shrink-0 ${collectionType === 'surah' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
+              <div className={`p-1.5 sm:p-2 rounded-lg shrink-0 ${collectionType === 'surah' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
                 <BookOpen className="w-4 h-4" />
               </div>
-              <div className="space-y-0.5">
-                <span className="font-bold text-text-primary text-sm block">
-                  {t('مجموعة سورة (المرجع سورة محددة)', 'Surah-Based')}
+              <div className="space-y-0.5 min-w-0">
+                <span className="font-bold text-text-primary text-xs sm:text-sm block leading-tight">
+                  <span className="sm:hidden">{t('مجموعة سورة', 'Surah-Based')}</span>
+                  <span className="hidden sm:inline">{t('مجموعة سورة (المرجع سورة محددة)', 'Surah-Based')}</span>
                 </span>
-                <p className="text-xs text-text-secondary">
+                <p className="hidden sm:block text-xs text-text-secondary">
                   {t('مربوطة بسورة مرجعية تقاس عليها باقي السور', 'Anchored to a specific base Surah')}
                 </p>
               </div>
@@ -237,20 +247,21 @@ export const EditCollectionPage: React.FC = () => {
 
             <div
               onClick={() => setCollectionType('custom')}
-              className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all flex items-start gap-3 ${
+              className={`cursor-pointer p-2.5 sm:p-3.5 rounded-xl border-2 transition-all flex items-start gap-2 sm:gap-3 ${
                 collectionType === 'custom'
                   ? 'border-primary bg-primary-tint/30 shadow-xs'
                   : 'border-border bg-surface hover:border-border/80'
               }`}
             >
-              <div className={`p-2 rounded-lg shrink-0 ${collectionType === 'custom' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
+              <div className={`p-1.5 sm:p-2 rounded-lg shrink-0 ${collectionType === 'custom' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
                 <Layers className="w-4 h-4" />
               </div>
-              <div className="space-y-0.5">
-                <span className="font-bold text-text-primary text-sm block">
-                  {t('مجموعة موضوعية / حرة', 'Thematic / Custom')}
+              <div className="space-y-0.5 min-w-0">
+                <span className="font-bold text-text-primary text-xs sm:text-sm block leading-tight">
+                  <span className="sm:hidden">{t('مجموعة موضوعية', 'Thematic')}</span>
+                  <span className="hidden sm:inline">{t('مجموعة موضوعية / حرة', 'Thematic / Custom')}</span>
                 </span>
-                <p className="text-xs text-text-secondary">
+                <p className="hidden sm:block text-xs text-text-secondary">
                   {t('متشابهات عامة حول موضوع أو ألفاظ محددة', 'Cross-Quran topical grouping')}
                 </p>
               </div>
@@ -260,9 +271,9 @@ export const EditCollectionPage: React.FC = () => {
 
         {/* Base Surah Selector (when Surah type is active) */}
         {collectionType === 'surah' && (
-          <Card className="p-4 bg-primary-tint/20 border-primary/30 space-y-2.5">
-            <div className="flex items-center gap-2 text-primary font-semibold text-xs sm:text-sm">
-              <Sparkles className="w-4 h-4 text-primary" />
+          <Card className="p-2.5 sm:p-4 bg-primary-tint/20 border-primary/30 space-y-1.5 sm:space-y-2.5">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-primary font-semibold text-xs sm:text-sm">
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
               <span>{t('السورة الأساس (المرجع لهذه المجموعة)', 'Anchor Surah')}</span>
             </div>
             <Select
