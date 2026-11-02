@@ -270,22 +270,22 @@ export const LandingPage: React.FC = () => {
         <section className="py-6 sm:py-12 md:py-16 px-4 sm:px-6 border-b border-border/50">
           <div className="max-w-5xl mx-auto space-y-6 md:space-y-8 text-center">
             {/* Main Headline & Subtext */}
-            <div className="space-y-3 md:space-y-4 max-w-3xl mx-auto">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-text-primary leading-[1.25]">
+            <div className="space-y-2.5 sm:space-y-3 max-w-2xl mx-auto">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-[2.1rem] font-bold tracking-tight text-text-primary leading-[1.35]">
                 {tData.hero.h1}
               </h1>
-              <p className="text-sm sm:text-base md:text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto">
+              <p className="text-xs sm:text-sm md:text-base text-text-secondary leading-relaxed max-w-xl mx-auto">
                 {tData.hero.subtext}
               </p>
             </div>
 
             {/* Action Buttons (Visible on mobile 360x640 above the fold) */}
-            <div className="flex flex-row items-center justify-center gap-3 pt-1">
+            <div className="flex flex-row items-center justify-center gap-2.5 pt-1">
               <Link to="/register">
                 <Button
                   variant="primary"
-                  size="md"
-                  className="min-h-[44px] px-6 text-sm font-semibold shadow-xs"
+                  size="sm"
+                  className="min-h-[40px] px-5 text-xs sm:text-sm font-semibold shadow-xs"
                 >
                   {tData.hero.getStartedBtn}
                 </Button>
@@ -293,8 +293,8 @@ export const LandingPage: React.FC = () => {
               <Link to="/login">
                 <Button
                   variant="outline"
-                  size="md"
-                  className="min-h-[44px] px-6 text-sm font-semibold"
+                  size="sm"
+                  className="min-h-[40px] px-5 text-xs sm:text-sm font-semibold"
                 >
                   {tData.hero.haveAccountBtn}
                 </Button>
