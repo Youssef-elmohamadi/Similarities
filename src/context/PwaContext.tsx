@@ -48,6 +48,10 @@ export const PwaProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     
     setIsIOS(isIosDevice && !isStandalone);
 
+    if (typeof window !== 'undefined') {
+      (window as any).__triggerPwaUpdateToast = () => setNeedRefresh(true);
+    }
+
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -97,22 +101,51 @@ export const PwaProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
       {/* SW Update Toast Notification */}
       {needRefresh && (
-        <div className="fixed bottom-6 end-6 z-50 max-w-sm bg-surface p-4 rounded-xl border border-primary/40 shadow-xl flex items-center justify-between gap-3 animate-fade-in text-start">
-          <div className="space-y-0.5">
-            <p className="text-xs font-bold text-text-primary flex items-center gap-1.5">
-              <RefreshCw className="w-3.5 h-3.5 text-primary animate-spin" />
-              {t('تحديث جديد متوفر!', 'New update available!')}
-            </p>
-            <p className="text-[11px] text-text-secondary">
-              {t('يتوفر إصدار جديد من المنصة مع تحسينات ومزايا إضافية.', 'A new app version is ready with fresh updates.')}
-            </p>
+        <div
+          role="alert"
+          aria-live="polite"
+          className="fixed bottom-20 sm:bottom-4 inset-x-4 sm:inset-x-auto sm:end-4 z-50 max-w-sm mx-auto sm:mx-0 bg-surface p-4 rounded-xl border border-border shadow-xl flex items-start justify-between gap-3 animate-fade-in text-start mb-safe"
+        >
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <div className="w-8 h-8 rounded-lg bg-primary-tint text-primary flex items-center justify-center shrink-0 mt-0.5">
+              <RefreshCw className="w-4 h-4 text-primary animate-spin" />
+            </div>
+            <div className="space-y-1 min-w-0 flex-1">
+              <p className="text-sm font-bold text-text-primary leading-snug">
+                {t('تحديث جديد متوفر!', 'New update available!')}
+              </p>
+              <p className="text-xs text-text-secondary leading-relaxed break-words">
+                {t(
+                  'يتوفر إصدار جديد من المنصة مع تحسينات ومزايا إضافية.',
+                  'A new app version is ready with fresh updates.'
+                )}
+              </p>
+              <div className="pt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => updateServiceWorker(true)}
+                  className="px-3.5 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-hover transition shadow-sm"
+                >
+                  {t('تحديث', 'Update')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNeedRefresh(false)}
+                  className="px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-text-primary text-xs transition"
+                >
+                  {t('لاحقاً', 'Later')}
+                </button>
+              </div>
+            </div>
           </div>
           <button
             type="button"
-            onClick={() => updateServiceWorker(true)}
-            className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-hover transition shrink-0"
+            onClick={() => setNeedRefresh(false)}
+            className="p-1.5 -me-1 -mt-1 rounded-lg text-text-secondary hover:text-text-primary hover:bg-charcoal-100 transition shrink-0"
+            title={t('إغلاق', 'Dismiss')}
+            aria-label={t('إغلاق', 'Dismiss')}
           >
-            {t('تحديث', 'Update')}
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
