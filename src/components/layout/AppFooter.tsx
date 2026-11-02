@@ -80,7 +80,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
                 rel="noopener noreferrer"
                 aria-label={`${tData.ariaWhatsapp}: ${formattedNumber}`}
                 style={{ backgroundColor: '#25D366', color: '#ffffff' }}
-                className="min-h-[44px] px-5 py-2.5 rounded-xl text-white font-medium text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition duration-150 shadow-sm hover:brightness-105 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]"
+                className="min-h-[44px] px-5 py-2.5 rounded-xl !bg-[#25D366] hover:!bg-[#20BD5A] !text-white font-medium text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition duration-150 shadow-sm hover:brightness-105 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]"
               >
                 {/* Clean WhatsApp SVG icon in crisp white */}
                 <svg

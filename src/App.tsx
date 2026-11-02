@@ -11,12 +11,17 @@ import { AppRoutes } from './routes/AppRoutes';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      networkMode: 'offlineFirst',
       refetchOnWindowFocus: false,
       retry: 1,
       staleTime: 1000 * 60 * 5, // 5 minutes
     },
   },
 });
+
+if (typeof window !== 'undefined') {
+  (window as any).__queryClient = queryClient;
+}
 
 export const App: React.FC = () => {
   return (

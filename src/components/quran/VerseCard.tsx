@@ -6,6 +6,8 @@ import { copyToClipboard, toArabicDigits, formatAyahOrnament, tokenizeQuranText 
 import { useToast } from '@/components/common/Toast';
 import { useLanguage } from '@/context/LanguageContext';
 import { api } from '@/lib/api';
+import { isOfflineDatasetAvailable } from '@/offline/quranDb';
+import { getLocalVerseContext } from '@/offline/searchWorkerClient';
 
 export interface VerseCardProps {
   verse: VerseSearchResult | QuranVerse;
@@ -50,6 +52,23 @@ export const VerseCard: React.FC<VerseCardProps> = ({
     if (!showContext && !contextData) {
       setIsLoadingContext(true);
       try {
+        const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+        const hasLocal = await isOfflineDatasetAvailable();
+        if (hasLocal) {
+          try {
+            const localCtx = await getLocalVerseContext(verse.id, 1, 1);
+            if (localCtx) {
+              setContextData(localCtx);
+              setShowContext(true);
+              setIsLoadingContext(false);
+              return;
+            }
+          } catch (workerErr) {
+            console.warn('Local verse context failed:', workerErr);
+            if (isOffline) throw workerErr;
+          }
+        }
+
         const res = await api.get<VerseContext>(`/quran/verses/${verse.id}/context?before=1&after=1`);
         setContextData(res.data);
       } catch {

@@ -37,12 +37,14 @@ import {
   ChevronDown,
   Info,
   ArrowUpDown,
+  AlertTriangle,
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useDataset } from '@/context/DatasetContext';
 import { useQuranSearch } from '@/hooks/useQuranSearch';
 import { toArabicDigits } from '@/lib/utils';
 import { useToast } from '@/components/common/Toast';
+import { getQuranDB } from '@/offline/quranDb';
 
 const RECENT_SEARCHES_KEY = 'quran_recent_searches';
 const SEARCH_OPTIONS_KEY = 'quran_search_options';
@@ -219,10 +221,28 @@ export const QuranSearchPage: React.FC = () => {
   // Single character warning (when typing 1 char and no surah/juz filter)
   const isSingleCharQuery = searchInput.trim().length === 1 && !isDirectRef && !selectedSurahId && !selectedJuz;
 
-  // Load Surahs for the filter dropdown
+  // Load Surahs for the filter dropdown (IndexedDB first, fallback to API)
   const { data: surahs } = useQuery<Surah[]>({
+    networkMode: 'always',
     queryKey: ['surahs'],
     queryFn: async () => {
+      try {
+        const db = await getQuranDB();
+        const localSurahs = await db.getAll('surahs');
+        if (localSurahs && localSurahs.length > 0) {
+          return localSurahs.map(s => ({
+            id: s.id,
+            number: s.number,
+            nameArabic: s.nameArabic,
+            nameEnglish: s.nameEnglish,
+            ayahCount: s.ayahCount,
+            revelationType: s.revelationType,
+            bismillahText: s.bismillahText,
+          }));
+        }
+      } catch (err) {
+        console.warn('Could not read surahs from local IndexedDB:', err);
+      }
       const res = await api.get<Surah[]>('/quran/surahs');
       return res.data;
     },
@@ -230,7 +250,14 @@ export const QuranSearchPage: React.FC = () => {
   });
 
   // Query verses using unified useQuranSearch (local offline worker when available, fallback to remote API)
-  const { data: searchResponse, isLoading, isFetching } = useQuranSearch({
+  const {
+    data: searchResponse,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    refetch,
+  } = useQuranSearch({
     q: queryParam,
     surahId: surahParam,
     juz: juzParam,
@@ -385,11 +412,6 @@ export const QuranSearchPage: React.FC = () => {
     setSearchInput('');
     updateUrl({ q: '', page: 1 }, true);
     searchInputRef.current?.focus();
-  };
-
-  const handleSurahFacetClick = (surahId?: number) => {
-    setSelectedSurahId(surahId);
-    updateUrl({ surah: surahId, page: 1 });
   };
 
   const handleResetOptions = () => {
@@ -1115,58 +1137,6 @@ export const QuranSearchPage: React.FC = () => {
         </div>
       )}
 
-      {/* Surah Facet Chips Bar (Top matching surahs with counts) */}
-      {isSearchActive && searchResponse?.facets && searchResponse.facets.length > 1 && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-text-secondary px-1">
-            <span className="font-semibold flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-primary" />
-              {t('توزيع الآيات المطابقة على السور:', 'Distribution across Surahs:')}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-            <button
-              type="button"
-              onClick={() => handleSurahFacetClick(undefined)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition shrink-0 flex items-center gap-1.5 ${
-                !selectedSurahId
-                  ? 'bg-primary text-white border-primary shadow-xs'
-                  : 'bg-surface hover:bg-background text-text-secondary border-border'
-              }`}
-            >
-              <span>{t('جميع السور', 'All Surahs')}</span>
-              <span className="text-[10px] bg-black/15 px-1.5 py-0.2 rounded-full">
-                {isRtl ? toArabicDigits(searchResponse.totalCount) : searchResponse.totalCount}
-              </span>
-            </button>
-
-            {searchResponse.facets.map(facet => {
-              const isSelected = selectedSurahId === facet.surahId;
-              return (
-                <button
-                  key={facet.surahId}
-                  type="button"
-                  onClick={() => handleSurahFacetClick(facet.surahId)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition shrink-0 flex items-center gap-1.5 ${
-                    isSelected
-                      ? 'bg-primary text-white border-primary shadow-xs'
-                      : 'bg-surface hover:bg-background text-text-secondary border-border hover:border-primary/40'
-                  }`}
-                >
-                  <span>{facet.surahNameArabic}</span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                      isSelected ? 'bg-black/20 text-white' : 'bg-primary-tint text-primary'
-                    }`}
-                  >
-                    {isRtl ? toArabicDigits(facet.count) : facet.count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* View Switcher: Verses View vs Words Occurrences View */}
       {isSearchActive && queryParam && (
@@ -1412,6 +1382,22 @@ export const QuranSearchPage: React.FC = () => {
               {[1, 2, 3, 4, 5].map(i => (
                 <VerseCardSkeleton key={i} />
               ))}
+            </div>
+          ) : isError ? (
+            <div className="bg-surface p-8 sm:p-12 rounded-xl border border-red-200 dark:border-red-900/60 text-center space-y-4 animate-fade-in">
+              <AlertTriangle className="w-10 h-10 text-red-500 mx-auto" />
+              <h3 className="text-lg font-semibold text-text-primary">
+                {t('تعذر إكمال عملية البحث', 'Failed to complete search')}
+              </h3>
+              <p className="text-sm text-text-secondary max-w-md mx-auto">
+                {error instanceof Error ? error.message : t('حدث خطأ أثناء معالجة البحث. يرجى إعادة المحاولة.', 'An error occurred during search. Please try again.')}
+              </p>
+              <div className="pt-2 flex justify-center">
+                <Button variant="primary" size="sm" onClick={() => refetch()}>
+                  <RotateCcw className="w-4 h-4 me-1.5" />
+                  {t('إعادة المحاولة', 'Try Again')}
+                </Button>
+              </div>
             </div>
           ) : searchResponse && searchResponse.items.length > 0 ? (
             <div className="space-y-4">

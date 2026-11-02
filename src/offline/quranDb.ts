@@ -104,10 +104,15 @@ export function getQuranDB(): Promise<IDBPDatabase<QuranDBSchema>> {
   return dbPromise;
 }
 
+let isDatasetCachedAvailable: boolean | null = null;
+
 export async function getStoredDatasetVersion(): Promise<string | null> {
   try {
     const db = await getQuranDB();
     const ver = await db.get('metadata', 'versionHash');
+    if (ver) {
+      isDatasetCachedAvailable = true;
+    }
     return ver || null;
   } catch {
     return null;
@@ -115,8 +120,14 @@ export async function getStoredDatasetVersion(): Promise<string | null> {
 }
 
 export async function isOfflineDatasetAvailable(): Promise<boolean> {
+  if (isDatasetCachedAvailable === true) return true;
   const version = await getStoredDatasetVersion();
-  return Boolean(version);
+  isDatasetCachedAvailable = Boolean(version);
+  return isDatasetCachedAvailable;
+}
+
+export function isOfflineDatasetAvailableSync(): boolean {
+  return isDatasetCachedAvailable === true;
 }
 
 export async function getCompactVerseById(id: number): Promise<CompactVerse | undefined> {
@@ -249,5 +260,6 @@ export async function saveDatasetToIndexedDB(
   await txMeta.done;
 
   onProgress?.(100, 'اكتمل تحميل المصحف الشريف للعمل بدون إنترنت بنجاح.');
+  isDatasetCachedAvailable = true;
   return true;
 }

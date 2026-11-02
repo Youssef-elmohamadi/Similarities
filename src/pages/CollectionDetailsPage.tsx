@@ -35,7 +35,7 @@ import {
 import { QuranVerse } from '@/types/quran';
 import { useAuth } from '@/context/AuthContext';
 import { searchLocalWorker } from '@/offline/searchWorkerClient';
-import { getFullVerseById } from '@/offline/quranDb';
+import { getFullVerseById, isOfflineDatasetAvailable } from '@/offline/quranDb';
 import {
   getCachedCollectionDetail,
   setCachedCollectionDetail,
@@ -90,9 +90,19 @@ export const CollectionDetailsPage: React.FC = () => {
 
   // Modal Verse Search
   const { data: searchVerses, isFetching: isSearching } = useQuery<QuranVerse[]>({
+    networkMode: 'always',
     queryKey: ['addVerseSearch', verseSearchQuery],
     queryFn: async () => {
       if (!verseSearchQuery.trim()) return [];
+      const hasLocal = await isOfflineDatasetAvailable();
+      if (hasLocal) {
+        try {
+          const local = await searchLocalWorker({ q: verseSearchQuery.trim(), pageSize: 10 });
+          return local.items;
+        } catch (e) {
+          console.warn('Local search in modal failed:', e);
+        }
+      }
       if (!navigator.onLine) {
         const local = await searchLocalWorker({ q: verseSearchQuery.trim(), pageSize: 10 });
         return local.items;

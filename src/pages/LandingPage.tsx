@@ -270,11 +270,11 @@ export const LandingPage: React.FC = () => {
         <section className="py-6 sm:py-12 md:py-16 px-4 sm:px-6 border-b border-border/50">
           <div className="max-w-5xl mx-auto space-y-6 md:space-y-8 text-center">
             {/* Main Headline & Subtext */}
-            <div className="space-y-2.5 sm:space-y-3 max-w-2xl mx-auto">
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-[2.1rem] font-bold tracking-tight text-text-primary leading-[1.35]">
+            <div className="space-y-2 sm:space-y-2.5 max-w-xl mx-auto">
+              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-[1.75rem] font-bold tracking-tight text-text-primary leading-[1.35]">
                 {tData.hero.h1}
               </h1>
-              <p className="text-xs sm:text-sm md:text-base text-text-secondary leading-relaxed max-w-xl mx-auto">
+              <p className="text-xs sm:text-sm md:text-[0.925rem] text-text-secondary leading-relaxed max-w-lg mx-auto">
                 {tData.hero.subtext}
               </p>
             </div>

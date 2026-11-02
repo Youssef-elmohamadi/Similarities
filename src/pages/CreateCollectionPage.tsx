@@ -15,7 +15,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { toArabicDigits, formatAyahOrnament } from '@/lib/utils';
 import { Plus, Trash2, ChevronUp, ChevronDown, BookOpen, Search, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { getFullVersesByIds } from '@/offline/quranDb';
+import { getFullVersesByIds, isOfflineDatasetAvailable } from '@/offline/quranDb';
 import { searchLocalWorker } from '@/offline/searchWorkerClient';
 import {
   setCachedCollectionDetail,
@@ -84,9 +84,19 @@ export const CreateCollectionPage: React.FC = () => {
 
   // Modal verse search query
   const { data: modalSearchResults, isFetching: isSearchingModal } = useQuery<QuranVerse[]>({
+    networkMode: 'always',
     queryKey: ['modalVerseSearch', modalSearchQuery],
     queryFn: async () => {
       if (!modalSearchQuery.trim()) return [];
+      const hasLocal = await isOfflineDatasetAvailable();
+      if (hasLocal) {
+        try {
+          const localRes = await searchLocalWorker({ q: modalSearchQuery.trim(), pageSize: 10 });
+          return localRes.items;
+        } catch (e) {
+          console.warn('Local search in modal failed:', e);
+        }
+      }
       if (!navigator.onLine) {
         const localRes = await searchLocalWorker({ q: modalSearchQuery.trim(), pageSize: 10 });
         return localRes.items;

@@ -3,6 +3,7 @@ import { api } from '@/lib/api';
 import { QuranSearchResponse, SearchMode, MatchBasis, SortOption } from '@/types/quran';
 import { useDataset } from '@/context/DatasetContext';
 import { searchLocalWorker } from '@/offline/searchWorkerClient';
+import { isOfflineDatasetAvailable, isOfflineDatasetAvailableSync } from '@/offline/quranDb';
 
 export interface QuranSearchParams {
   q?: string;
@@ -27,11 +28,12 @@ export function useQuranSearch(params: QuranSearchParams) {
   const isBrowseMode = hasFilterActive && trimmedQuery.length === 0;
   const isSearchActive = (isQueryExecutable || isBrowseMode) && (params.enabled !== false);
 
-  const isLocalSource = isOfflineReady;
+  const isLocalSource = isOfflineReady || isOfflineDatasetAvailableSync();
   const activeWordMatch = params.wordMatch || 'smart';
   const activeSort = params.sort || (activeWordMatch === 'smart' ? 'relevance' : 'mushaf');
 
   return useQuery<QuranSearchResponse>({
+    networkMode: 'always', // Essential: never pause offline search; served from Web Worker
     queryKey: [
       'quranSearch',
       isLocalSource ? 'local' : 'remote',
@@ -66,7 +68,32 @@ export function useQuranSearch(params: QuranSearchParams) {
         }
       }
 
-      // 2. Remote API fallback
+      // If isLocalSource wasn't true yet on initial render, check if dataset is available
+      const hasLocalDataset = await isOfflineDatasetAvailable();
+      if (hasLocalDataset) {
+        try {
+          return await searchLocalWorker({
+            q: trimmedQuery,
+            surahId: params.surahId,
+            juz: params.juz,
+            mode: params.mode,
+            matchBy: params.matchBy,
+            wordMatch: activeWordMatch,
+            sort: activeSort,
+            page: params.page,
+            pageSize: params.pageSize || 20,
+          });
+        } catch (err) {
+          console.warn('Local worker search fallback to API:', err);
+          if (isOffline) throw err;
+        }
+      }
+
+      // 2. Remote API fallback ONLY when dataset is NOT installed
+      if (isOffline) {
+        throw new Error('لا يوجد اتصال بالإنترنت ولم يتم تحميل المصحف الشريف للعمل بدون إنترنت بعد.');
+      }
+
       const searchParams = new URLSearchParams();
       if (trimmedQuery) searchParams.append('q', trimmedQuery);
       if (params.surahId) searchParams.append('surahId', params.surahId.toString());
@@ -85,4 +112,3 @@ export function useQuranSearch(params: QuranSearchParams) {
     placeholderData: keepPreviousData,
   });
 }
-
