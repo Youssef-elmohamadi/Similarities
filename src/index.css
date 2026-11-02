@@ -101,3 +101,16 @@ mark.quran-highlight {
     scroll-behavior: auto !important;
   }
 }
+
+/* Hide scrollbar while preserving touch & swipe scroll functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+

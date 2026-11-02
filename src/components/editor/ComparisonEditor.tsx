@@ -45,6 +45,8 @@ export interface ComparisonEditorProps {
   onDeleteComparison: (comparisonId: string) => Promise<void>;
   onAddDifference: (comparisonId: string, payload: { quranVerseId: number; selectedText: string; explanation: string }) => Promise<void>;
   onDeleteDifference: (differenceId: string) => Promise<void>;
+  isCreateModalOpen?: boolean;
+  onCloseCreateModal?: () => void;
 }
 
 export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
@@ -56,9 +58,12 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
   onDeleteComparison,
   onAddDifference,
   onDeleteDifference,
+  isCreateModalOpen: externalCreateModalOpen,
+  onCloseCreateModal,
 }) => {
   const { t, direction } = useLanguage();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [internalCreateModalOpen, setInternalCreateModalOpen] = useState(false);
+  const isCreateModalOpen = externalCreateModalOpen !== undefined ? externalCreateModalOpen : internalCreateModalOpen;
   const [isDiffModalOpen, setIsDiffModalOpen] = useState(false);
   const [activeComparisonId, setActiveComparisonId] = useState<string | null>(null);
 
@@ -216,8 +221,19 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
       }));
     setSelectedOtherVerses(existingOther);
 
-    setIsCreateModalOpen(true);
+    setInternalCreateModalOpen(true);
   };
+
+  const handleCloseCreateModal = () => {
+    setInternalCreateModalOpen(false);
+    onCloseCreateModal?.();
+  };
+
+  useEffect(() => {
+    if (externalCreateModalOpen) {
+      handleOpenCreateModal();
+    }
+  }, [externalCreateModalOpen]);
 
   const handleAddComparativeVerse = (v: QuranVerse) => {
     if (v.id === anchorVerseId) return;
@@ -266,7 +282,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
         quranVerseIds: distinctIds,
         anchorQuranVerseId: anchorVerseId,
       });
-      setIsCreateModalOpen(false);
+      handleCloseCreateModal();
     } finally {
       setIsSubmitting(false);
     }
@@ -321,62 +337,60 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
     verses.find(v => v.quranVerseId === anchorVerseId);
 
   return (
-    <div className="space-y-6 text-start">
-      {/* Top Banner and Action */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-primary-tint/60 to-primary-tint/20 border border-primary/25 shadow-xs">
-        <div className="space-y-1">
+    <div className="space-y-3 text-start">
+      {/* Sub-header Bar: Position Count + Collapse / Expand All */}
+      {sortedComparisons.length > 0 && (
+        <div className="flex items-center justify-between gap-2 px-1 pb-0.5">
           <div className="flex items-center gap-2">
-            <h3 className="font-bold text-base sm:text-lg text-primary flex items-center gap-2">
-              <Layers className="w-5 h-5 text-primary" />
+            <span className="text-xs sm:text-sm font-bold text-text-primary flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-primary" />
               <span>
                 {baseSurahNameArabic
-                  ? t(`مواضع متشابهات سورة ${baseSurahNameArabic}`, `Positions in Surah ${baseSurahNameArabic}`)
-                  : t('مواضع المتشابهات والمقارنات', 'Similar Positions & Clusters')}
+                  ? t(`مواضع سورة ${baseSurahNameArabic}`, `Positions in Surah ${baseSurahNameArabic}`)
+                  : t('مواضع المتشابهات', 'Similar Positions')}
               </span>
-            </h3>
-            <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
-              {isRtl ? toArabicDigits(comparisons.length) : comparisons.length} {t('مواضع', 'positions')}
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-primary-tint text-primary text-xs font-bold border border-primary/20">
+              {isRtl ? toArabicDigits(sortedComparisons.length) : sortedComparisons.length} {t('مواضع', 'positions')}
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-text-secondary leading-relaxed max-w-2xl">
-            {baseSurahNameArabic
-              ? t(
-                  `مرتبة بحسب تسلسل آيات سورة ${baseSurahNameArabic}؛ كل موضع يضم آية السورة الأصل مع نظائرها المقابلة والفروق الدقيقة الخاصة بها.`,
-                  `Ordered by ayah sequence; each position groups the anchor verse with its parallels and distinctions.`
-                )
-              : t(
-                  'كل موضع يجمع الآيات المتشابهة مع الفوارق الدقيقة ورصد أوجه التمييز.',
-                  'Each position clusters similar verses with documented wording distinctions.'
-                )}
-          </p>
-        </div>
 
-        <Button
-          variant="primary"
-          size="md"
-          icon={<Plus className="w-4 h-4" />}
-          onClick={handleOpenCreateModal}
-          className="shrink-0 shadow-sm"
-        >
-          {baseSurahNameArabic
-            ? t(`+ إضافة موضع متشابه جديد في السورة`, `+ Add Position in Surah`)
-            : t(`+ إضافة موضع متشابه جديد`, `+ Add Similar Position`)}
-        </Button>
-      </div>
+          <div className="flex items-center gap-1.5">
+            {sortedComparisons.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={collapseAll}
+                  className="px-2.5 py-1 rounded-lg border border-border bg-surface hover:bg-background text-text-secondary hover:text-text-primary transition text-xs font-medium"
+                >
+                  {t('طي الكل', 'Collapse All')}
+                </button>
+                <button
+                  type="button"
+                  onClick={expandAll}
+                  className="px-2.5 py-1 rounded-lg border border-border bg-surface hover:bg-background text-text-secondary hover:text-text-primary transition text-xs font-medium"
+                >
+                  {t('فتح الكل', 'Expand All')}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Comparisons / Positions Clusters List */}
       {sortedComparisons.length === 0 ? (
-        <div className="text-center py-16 px-4 rounded-2xl border-2 border-dashed border-border bg-surface space-y-4">
-          <div className="w-16 h-16 rounded-full bg-primary-tint text-primary flex items-center justify-center mx-auto">
-            <GitCompare className="w-8 h-8" />
+        <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-border bg-surface space-y-4">
+          <div className="w-14 h-14 rounded-full bg-primary-tint text-primary flex items-center justify-center mx-auto">
+            <GitCompare className="w-7 h-7" />
           </div>
           <div className="space-y-1.5 max-w-md mx-auto">
-            <h4 className="font-bold text-lg text-text-primary">
+            <h4 className="font-bold text-base sm:text-lg text-text-primary">
               {baseSurahNameArabic
                 ? t(`لم تُضف أي مواضع متشابهة بعد في سورة ${baseSurahNameArabic}`, `No positions documented yet in Surah ${baseSurahNameArabic}`)
                 : t('لا توجد مواضع متشابهة بعد في هذه المجموعة', 'No similarity positions documented yet')}
             </h4>
-            <p className="text-sm text-text-secondary leading-relaxed">
+            <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
               {baseSurahNameArabic
                 ? t(
                     `ابدأ بإضافة أول موضع متشابه؛ حدد آية الأساس في سورة ${baseSurahNameArabic} ثم أضف الآيات المقابلة لها في السور الأخرى ورصد الفروق بينها.`,
@@ -390,37 +404,12 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
           </div>
           <Button variant="primary" size="md" icon={<Plus className="w-4 h-4" />} onClick={handleOpenCreateModal}>
             {baseSurahNameArabic
-              ? t(`إضافة أول موضع في سورة ${baseSurahNameArabic}`, `Add First Position`)
-              : t('إضافة أول موضع متشابه', 'Create First Position')}
+              ? t(`+ إضافة أول موضع في سورة ${baseSurahNameArabic}`, `+ Add First Position`)
+              : t('+ إضافة أول موضع متشابه', '+ Create First Position')}
           </Button>
         </div>
       ) : (
         <div className="space-y-3">
-          {/* Collapse / Expand all controls & count */}
-          {sortedComparisons.length > 1 && (
-            <div className="flex items-center justify-between gap-2 text-xs text-text-secondary px-1 pb-1">
-              <span className="font-medium">
-                {t(`إجمالي المواضع: ${isRtl ? toArabicDigits(sortedComparisons.length) : sortedComparisons.length}`, `Total positions: ${sortedComparisons.length}`)}
-              </span>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={collapseAll}
-                  className="px-2.5 py-1 rounded-lg border border-border bg-surface hover:bg-background text-text-secondary hover:text-text-primary transition text-xs"
-                >
-                  {t('طي الكل', 'Collapse All')}
-                </button>
-                <button
-                  type="button"
-                  onClick={expandAll}
-                  className="px-2.5 py-1 rounded-lg border border-border bg-surface hover:bg-background text-text-secondary hover:text-text-primary transition text-xs"
-                >
-                  {t('فتح الكل', 'Expand All')}
-                </button>
-              </div>
-            </div>
-          )}
-
           {sortedComparisons.map((comparison, idx) => {
             const anchorVerse = comparison.anchorQuranVerseId
               ? comparison.verses.find(v => v.quranVerseId === comparison.anchorQuranVerseId)
@@ -664,7 +653,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
       {/* Modal: Create Position Cluster */}
       <Modal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={handleCloseCreateModal}
         title={
           baseSurahNameArabic
             ? t(`إضافة موضع متشابه جديد في سورة ${baseSurahNameArabic}`, `Add New Position in Surah ${baseSurahNameArabic}`)
@@ -922,7 +911,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
             <Button
               type="button"
               variant="secondary"
-              onClick={() => setIsCreateModalOpen(false)}
+              onClick={handleCloseCreateModal}
             >
               {t('إلغاء', 'Cancel')}
             </Button>

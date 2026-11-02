@@ -54,6 +54,7 @@ export const CollectionDetailsPage: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'comparisons' | 'verses' | 'connections' | 'notes'>('comparisons');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isCreateComparisonOpen, setIsCreateComparisonOpen] = useState(false);
 
   // Add Verse Quick Search Modal
   const [isAddVerseModalOpen, setIsAddVerseModalOpen] = useState(false);
@@ -891,11 +892,11 @@ export const CollectionDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 pb-20 text-start animate-fade-in">
+    <div className="space-y-3.5 pb-16 text-start animate-fade-in">
       {/* Header Info Card */}
-      <Card className="p-5 md:p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-2 flex-1 text-start">
+      <Card className="p-4 sm:p-5 space-y-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="space-y-1.5 flex-1 text-start">
             <div className="flex items-center gap-2 flex-wrap">
               <Button
                 variant="ghost"
@@ -907,7 +908,7 @@ export const CollectionDetailsPage: React.FC = () => {
               >
                 {isRtl ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
               </Button>
-              <h1 className="text-2xl md:text-3xl font-bold text-text-primary tracking-tight leading-snug">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-text-primary tracking-tight leading-snug">
                 {collection.title}
               </h1>
               {collection.baseSurahNameArabic ? (
@@ -923,30 +924,57 @@ export const CollectionDetailsPage: React.FC = () => {
             </div>
 
             {collection.description && (
-              <p className="text-sm md:text-base text-text-secondary leading-relaxed ps-7">
+              <p className="text-xs sm:text-sm text-text-secondary leading-relaxed ps-7">
                 {collection.description}
               </p>
             )}
           </div>
 
           {/* Actions & Saving Status */}
-          <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center">
+          <div className="flex items-center gap-2 shrink-0 self-stretch sm:self-center justify-end flex-wrap">
+            {/* Primary Action Button for active tab */}
+            {activeTab === 'comparisons' && (
+              <Button
+                size="sm"
+                variant="primary"
+                icon={<Plus className="w-4 h-4" />}
+                onClick={() => setIsCreateComparisonOpen(true)}
+                className="font-bold shadow-sm text-xs sm:text-sm whitespace-nowrap"
+              >
+                {collection.baseSurahNameArabic
+                  ? t(`+ إضافة موضع في سورة ${collection.baseSurahNameArabic}`, `+ Add Position in Surah`)
+                  : t('+ إضافة موضع جديد', '+ Add Position')}
+              </Button>
+            )}
+
+            {activeTab === 'verses' && (
+              <Button
+                size="sm"
+                variant="primary"
+                icon={<Plus className="w-4 h-4" />}
+                onClick={() => setIsAddVerseModalOpen(true)}
+                className="font-bold shadow-sm text-xs sm:text-sm whitespace-nowrap"
+              >
+                {t('+ إضافة آية', '+ Add Verse')}
+              </Button>
+            )}
+
             {id?.startsWith('temp-') && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                {t('محفوظ محلياً — في انتظار المزامنة', 'Saved locally — pending sync')}
+                {t('محفوظ محلياً', 'Saved locally')}
               </span>
             )}
             {/* Live Save Status Indicator */}
-            <div className="text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5 font-medium">
+            <div className="text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5 font-medium bg-surface">
               {isAnySaving ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 text-accent animate-spin" />
-                  <span className="text-accent">{t('جارٍ الحفظ...', 'Saving...')}</span>
+                  <span className="text-accent text-[11px]">{t('جارٍ الحفظ...', 'Saving...')}</span>
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-3.5 h-3.5 text-success" />
-                  <span className="text-text-secondary">{t('محفوظ', 'Saved')}</span>
+                  <span className="text-text-secondary text-[11px]">{t('محفوظ', 'Saved')}</span>
                 </>
               )}
             </div>
@@ -971,7 +999,7 @@ export const CollectionDetailsPage: React.FC = () => {
         </div>
 
         {/* Metadata Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-border text-xs text-text-secondary">
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-border text-xs text-text-secondary">
           <div className="flex flex-wrap items-center gap-2.5">
             <Badge variant="primary">
               <BookMarked className="w-3.5 h-3.5 me-1" />
@@ -996,8 +1024,8 @@ export const CollectionDetailsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Tabs Navigation: Horizontal scroll on mobile */}
-      <div className="flex items-center gap-2 border-b border-border overflow-x-auto pb-px">
+      {/* Tabs Navigation: Horizontal scroll on mobile without visible scrollbar */}
+      <div className="flex items-center gap-2 border-b border-border overflow-x-auto pb-px no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <button
           onClick={() => setActiveTab('comparisons')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition whitespace-nowrap min-h-[44px] ${
@@ -1071,6 +1099,8 @@ export const CollectionDetailsPage: React.FC = () => {
           onDeleteComparison={cmpId => deleteComparisonMutation.mutateAsync(cmpId)}
           onAddDifference={(cmpId, payload) => addDifferenceMutation.mutateAsync({ comparisonId: cmpId, payload })}
           onDeleteDifference={diffId => deleteDifferenceMutation.mutateAsync(diffId)}
+          isCreateModalOpen={isCreateComparisonOpen}
+          onCloseCreateModal={() => setIsCreateComparisonOpen(false)}
         />
       )}
 
