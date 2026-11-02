@@ -23,6 +23,14 @@ interface SearchPosting {
   wordIndex: number;
 }
 
+export type MatchKind = 'exact' | 'startsWith' | 'contains';
+
+interface CandidateWord {
+  targetWord: string;
+  kind: MatchKind;
+  score: number;
+}
+
 export class LocalQuranSearchEngine {
   private surahs: CompactSurah[] = [];
   private verses: CompactVerse[] = [];
@@ -33,6 +41,7 @@ export class LocalQuranSearchEngine {
   private verseMap = new Map<number, CompactVerse>();
 
   // Inverted indexes
+  private originalIndex = new Map<string, SearchPosting[]>();
   private normalizedIndex = new Map<string, SearchPosting[]>();
   private phoneticIndex = new Map<string, SearchPosting[]>();
   private skeletonIndex = new Map<string, SearchPosting[]>();
@@ -59,6 +68,7 @@ export class LocalQuranSearchEngine {
       this.verseWordsMap.set(v.id, []);
     }
 
+    this.originalIndex.clear();
     this.normalizedIndex.clear();
     this.phoneticIndex.clear();
     this.skeletonIndex.clear();
@@ -70,7 +80,17 @@ export class LocalQuranSearchEngine {
 
       const posting: SearchPosting = { verseId: w.verseId, wordIndex: w.wordIndex };
 
-      // 1. Normalized index
+      // 1. Original index
+      if (w.originalWord) {
+        let list = this.originalIndex.get(w.originalWord);
+        if (!list) {
+          list = [];
+          this.originalIndex.set(w.originalWord, list);
+        }
+        list.push(posting);
+      }
+
+      // 2. Normalized index
       if (w.normalizedWord) {
         let list = this.normalizedIndex.get(w.normalizedWord);
         if (!list) {
@@ -80,7 +100,7 @@ export class LocalQuranSearchEngine {
         list.push(posting);
       }
 
-      // 2. Phonetic index
+      // 3. Phonetic index
       if (w.phoneticWord) {
         let list = this.phoneticIndex.get(w.phoneticWord);
         if (!list) {
@@ -90,7 +110,7 @@ export class LocalQuranSearchEngine {
         list.push(posting);
       }
 
-      // 3. Skeleton index
+      // 4. Skeleton index
       if (w.skeletonWord) {
         let list = this.skeletonIndex.get(w.skeletonWord);
         if (!list) {
@@ -104,13 +124,76 @@ export class LocalQuranSearchEngine {
     this.isReady = true;
   }
 
+  private findCandidateDistinctWords(
+    token: string,
+    isRoot: boolean,
+    matchBy: MatchBasis,
+    wordMatch: 'smart' | 'whole' | 'partial'
+  ): { candidates: CandidateWord[]; isCapped: boolean } {
+    if (wordMatch === 'whole') {
+      return {
+        candidates: [{ targetWord: token, kind: 'exact', score: 3 }],
+        isCapped: false,
+      };
+    }
+
+    const indexToUse = isRoot
+      ? this.skeletonIndex
+      : matchBy === 'exact'
+      ? this.originalIndex
+      : matchBy === 'spelling'
+      ? this.normalizedIndex
+      : this.phoneticIndex;
+
+    const distinctKeys = Array.from(indexToUse.keys());
+
+    let altStem: string | null = null;
+    if (token.startsWith('است') && token.length >= 4) {
+      altStem = token.slice(1);
+    }
+
+    const candidates: CandidateWord[] = [];
+    const seenWords = new Set<string>();
+
+    for (const key of distinctKeys) {
+      if (key === token) {
+        seenWords.add(key);
+        candidates.push({ targetWord: key, kind: 'exact', score: 3 });
+      } else if (wordMatch === 'smart' && key.startsWith(token)) {
+        if (!seenWords.has(key)) {
+          seenWords.add(key);
+          candidates.push({ targetWord: key, kind: 'startsWith', score: 2 });
+        }
+      } else if (key.includes(token)) {
+        if (!seenWords.has(key)) {
+          seenWords.add(key);
+          candidates.push({ targetWord: key, kind: 'contains', score: 1 });
+        }
+      } else if (altStem && key.includes(altStem)) {
+        if (!seenWords.has(key)) {
+          seenWords.add(key);
+          candidates.push({ targetWord: key, kind: 'contains', score: 1 });
+        }
+      }
+    }
+
+    // Sort: Exact > StartsWith > Contains
+    candidates.sort((a, b) => b.score - a.score);
+
+    const isCapped = candidates.length > 500;
+    return {
+      candidates: isCapped ? candidates.slice(0, 500) : candidates,
+      isCapped,
+    };
+  }
+
   public search(params: {
     q?: string | null;
     surahId?: number;
     surahIds?: string;
     juz?: number;
     mode?: SearchMode;
-    wordMatch?: 'exact' | 'partial';
+    wordMatch?: 'smart' | 'whole' | 'partial' | 'exact';
     matchBy?: MatchBasis;
     diacritics?: boolean;
     sort?: SortOption;
@@ -123,8 +206,9 @@ export class LocalQuranSearchEngine {
     const pageSize = params.pageSize && params.pageSize > 0 ? params.pageSize : 20;
     const mode = params.mode || 'phrase';
     const matchBy = params.matchBy || (params.diacritics ? 'exact' : 'phonetic');
-    const wordMatch = params.wordMatch || 'exact';
-    const sort = params.sort || 'mushaf';
+    const rawWordMatch = params.wordMatch || 'smart';
+    const wordMatch: 'smart' | 'whole' | 'partial' = rawWordMatch === 'exact' ? 'whole' : rawWordMatch;
+    const sort = params.sort || (wordMatch === 'smart' ? 'relevance' : 'mushaf');
 
     const parsedQuery = parseQuery(query);
 
@@ -138,6 +222,11 @@ export class LocalQuranSearchEngine {
           const vWords = this.verseWordsMap.get(verse.id) || [];
           const wordIndexes = vWords.map(w => w.wordIndex);
           const executionTimeMs = Math.round(performance.now() - startTime);
+
+          const matchedWordKinds: Record<number, MatchKind> = {};
+          for (const idx of wordIndexes) {
+            matchedWordKinds[idx] = 'exact';
+          }
 
           const item: VerseSearchResult = {
             id: verse.id,
@@ -153,6 +242,8 @@ export class LocalQuranSearchEngine {
             relevanceScore: 100.0,
             isDirectReference: true,
             matchLevel: 'exact',
+            matchedWordKinds,
+            bestMatchKind: 'exact',
           };
 
           return {
@@ -167,6 +258,8 @@ export class LocalQuranSearchEngine {
             executionTimeMs,
             facets: [{ surahId: surah.id, surahNumber: surah.number, surahNameArabic: surah.nameArabic, surahNameEnglish: surah.nameEnglish, count: 1 }],
             directReferenceFound: true,
+            exactMatchesCount: 1,
+            partialMatchesCount: 0,
           };
         }
       }
@@ -205,6 +298,8 @@ export class LocalQuranSearchEngine {
           executionTimeMs,
           facets: [],
           directReferenceFound: false,
+          exactMatchesCount: 0,
+          partialMatchesCount: 0,
         };
       }
 
@@ -244,12 +339,13 @@ export class LocalQuranSearchEngine {
         executionTimeMs,
         facets: [],
         directReferenceFound: false,
+        exactMatchesCount: 0,
+        partialMatchesCount: 0,
       };
     }
 
     // 3. Prepare tokens
     const isRoot = mode === 'root';
-    const isPartial = wordMatch === 'partial';
 
     const searchTokens: string[] = [];
     if (parsedQuery.phrases.length > 0) {
@@ -263,16 +359,37 @@ export class LocalQuranSearchEngine {
       if (norm) searchTokens.push(norm);
     }
 
+    // Min query length: for smart/partial matching require >= 2 characters (1 char returns a hint)
+    if (wordMatch !== 'whole' && mode !== 'exact' && searchTokens.some(t => t.length < 2)) {
+      const executionTimeMs = Math.round(performance.now() - startTime);
+      return {
+        items: [],
+        totalCount: 0,
+        page: 1,
+        pageSize,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+        totalWordOccurrences: 0,
+        executionTimeMs,
+        facets: [],
+        directReferenceFound: false,
+        exactMatchesCount: 0,
+        partialMatchesCount: 0,
+        searchHint: 'يرجى إدخال حرفين على الأقل للبحث الذكي أو الجزئي.',
+      };
+    }
+
     const candidateIds = new Set(candidateVerses.map(v => v.id));
 
-    // Handle Exclusions
+    // Handle Exclusions: -word excludes by whole word only
     if (parsedQuery.excludedWords.length > 0) {
       for (const ex of parsedQuery.excludedWords) {
         const exNorm = isRoot ? toConsonantalSkeleton(ex) : matchBy === 'exact' ? ex : matchBy === 'spelling' ? normalizeArabic(ex) : toPhonetic(ex);
         const postings = isRoot
           ? this.skeletonIndex.get(exNorm) || []
           : matchBy === 'exact'
-          ? (this.words.filter(w => w.originalWord === exNorm).map(w => ({ verseId: w.verseId, wordIndex: w.wordIndex })))
+          ? this.originalIndex.get(exNorm) || []
           : matchBy === 'spelling'
           ? this.normalizedIndex.get(exNorm) || []
           : this.phoneticIndex.get(exNorm) || [];
@@ -283,9 +400,51 @@ export class LocalQuranSearchEngine {
       }
     }
 
-    // Matched positions and levels
+    // Helper to get postings for a candidate word
+    const getPostings = (targetWord: string): SearchPosting[] => {
+      if (isRoot) return this.skeletonIndex.get(targetWord) || [];
+      if (matchBy === 'exact') return this.originalIndex.get(targetWord) || [];
+      if (matchBy === 'spelling') return this.normalizedIndex.get(targetWord) || [];
+      return this.phoneticIndex.get(targetWord) || [];
+    };
+
+    // Tracking structures
     const positionsMap = new Map<number, number[]>();
+    const wordKindsMap = new Map<number, Record<number, MatchKind>>();
+    const verseBestKind = new Map<number, MatchKind>();
+    const verseExactCount = new Map<number, number>();
     const matchLevelsMap = new Map<number, string>();
+    let isResultsCapped = false;
+
+    const kindWeight = (k: MatchKind): number => (k === 'exact' ? 3 : k === 'startsWith' ? 2 : 1);
+
+    const recordMatch = (verseId: number, wordIndex: number, kind: MatchKind) => {
+      let posList = positionsMap.get(verseId);
+      if (!posList) {
+        posList = [];
+        positionsMap.set(verseId, posList);
+        wordKindsMap.set(verseId, {});
+      }
+      if (!posList.includes(wordIndex)) {
+        posList.push(wordIndex);
+      }
+
+      const kinds = wordKindsMap.get(verseId)!;
+      kinds[wordIndex] = kind;
+
+      const prevBest = verseBestKind.get(verseId);
+      if (!prevBest || kindWeight(kind) > kindWeight(prevBest)) {
+        verseBestKind.set(verseId, kind);
+      }
+
+      if (kind === 'exact') {
+        verseExactCount.set(verseId, (verseExactCount.get(verseId) || 0) + 1);
+      }
+
+      if (!matchLevelsMap.has(verseId)) {
+        matchLevelsMap.set(verseId, matchBy);
+      }
+    };
 
     if (mode === 'exact') {
       // Whole Ayah exact match
@@ -295,59 +454,24 @@ export class LocalQuranSearchEngine {
         const vText = isRoot ? toConsonantalSkeleton(v.normalizedText) : matchBy === 'exact' ? v.uthmaniText : matchBy === 'spelling' ? v.normalizedText : toPhonetic(v.uthmaniText);
         if (vText === targetQuery) {
           const vWords = this.verseWordsMap.get(v.id) || [];
-          positionsMap.set(v.id, vWords.map(w => w.wordIndex));
-          matchLevelsMap.set(v.id, 'exact');
-        }
-      }
-    } else if (mode === 'prefix' || mode === 'contains') {
-      // Substring / Prefix matching
-      for (const token of searchTokens) {
-        for (const w of this.words) {
-          if (!candidateIds.has(w.verseId)) continue;
-          const target = isRoot ? w.skeletonWord : matchBy === 'exact' ? w.originalWord : matchBy === 'spelling' ? w.normalizedWord : w.phoneticWord;
-          const matched = mode === 'prefix' ? target.startsWith(token) : target.includes(token);
-          if (matched) {
-            let list = positionsMap.get(w.verseId);
-            if (!list) {
-              list = [];
-              positionsMap.set(w.verseId, list);
-            }
-            if (!list.includes(w.wordIndex)) list.push(w.wordIndex);
-            if (!matchLevelsMap.has(w.verseId)) matchLevelsMap.set(w.verseId, 'phonetic');
+          for (const w of vWords) {
+            recordMatch(v.id, w.wordIndex, 'exact');
           }
+          matchLevelsMap.set(v.id, 'exact');
         }
       }
     } else if (mode === 'any') {
       // Any Word match
       for (const token of searchTokens) {
-        let postings: SearchPosting[] = [];
-        if (isPartial) {
-          // Substring in index keys
-          const indexToUse = isRoot ? this.skeletonIndex : matchBy === 'spelling' ? this.normalizedIndex : this.phoneticIndex;
-          for (const [key, list] of indexToUse.entries()) {
-            if (key.includes(token)) {
-              postings.push(...list);
-            }
-          }
-        } else {
-          postings = isRoot
-            ? this.skeletonIndex.get(token) || []
-            : matchBy === 'exact'
-            ? this.words.filter(w => w.originalWord === token).map(w => ({ verseId: w.verseId, wordIndex: w.wordIndex }))
-            : matchBy === 'spelling'
-            ? this.normalizedIndex.get(token) || []
-            : this.phoneticIndex.get(token) || [];
-        }
+        const { candidates, isCapped } = this.findCandidateDistinctWords(token, isRoot, matchBy, wordMatch);
+        if (isCapped) isResultsCapped = true;
 
-        for (const p of postings) {
-          if (!candidateIds.has(p.verseId)) continue;
-          let list = positionsMap.get(p.verseId);
-          if (!list) {
-            list = [];
-            positionsMap.set(p.verseId, list);
+        for (const cand of candidates) {
+          const postings = getPostings(cand.targetWord);
+          for (const p of postings) {
+            if (!candidateIds.has(p.verseId)) continue;
+            recordMatch(p.verseId, p.wordIndex, cand.kind);
           }
-          if (!list.includes(p.wordIndex)) list.push(p.wordIndex);
-          if (!matchLevelsMap.has(p.verseId)) matchLevelsMap.set(p.verseId, 'phonetic');
         }
       }
     } else {
@@ -357,67 +481,89 @@ export class LocalQuranSearchEngine {
         ? searchTokens[0].split(' ').filter(Boolean)
         : searchTokens;
 
-      if (tokenList.length === 0) {
-        // Fallback
-      } else {
-        // For each token, gather verseIds containing it
-        const tokenPostingsMap: SearchPosting[][] = [];
-        for (const token of tokenList) {
-          const postings = isRoot
-            ? this.skeletonIndex.get(token) || []
-            : matchBy === 'exact'
-            ? this.words.filter(w => w.originalWord === token).map(w => ({ verseId: w.verseId, wordIndex: w.wordIndex }))
-            : matchBy === 'spelling'
-            ? this.normalizedIndex.get(token) || []
-            : this.phoneticIndex.get(token) || [];
-          tokenPostingsMap.push(postings.filter(p => candidateIds.has(p.verseId)));
+      if (tokenList.length === 1) {
+        // Single word search
+        const { candidates, isCapped } = this.findCandidateDistinctWords(tokenList[0], isRoot, matchBy, wordMatch);
+        if (isCapped) isResultsCapped = true;
+
+        for (const cand of candidates) {
+          const postings = getPostings(cand.targetWord);
+          for (const p of postings) {
+            if (!candidateIds.has(p.verseId)) continue;
+            recordMatch(p.verseId, p.wordIndex, cand.kind);
+          }
+        }
+      } else if (tokenList.length > 1) {
+        // Multi-word phrase or all-words
+        interface TokenPostingWithKind {
+          verseId: number;
+          wordIndex: number;
+          kind: MatchKind;
         }
 
-        if (tokenPostingsMap.length > 0) {
-          // Verses containing ALL tokens
-          const verseOccurrences = new Map<number, SearchPosting[][]>();
-          for (let i = 0; i < tokenPostingsMap.length; i++) {
-            for (const p of tokenPostingsMap[i]) {
-              let arr = verseOccurrences.get(p.verseId);
-              if (!arr) {
-                arr = Array.from({ length: tokenPostingsMap.length }, () => []);
-                verseOccurrences.set(p.verseId, arr);
+        const tokenPostingsMap: TokenPostingWithKind[][] = [];
+        for (const token of tokenList) {
+          const { candidates, isCapped } = this.findCandidateDistinctWords(token, isRoot, matchBy, wordMatch);
+          if (isCapped) isResultsCapped = true;
+
+          const postingsWithKind: TokenPostingWithKind[] = [];
+          for (const cand of candidates) {
+            const postings = getPostings(cand.targetWord);
+            for (const p of postings) {
+              if (candidateIds.has(p.verseId)) {
+                postingsWithKind.push({
+                  verseId: p.verseId,
+                  wordIndex: p.wordIndex,
+                  kind: cand.kind,
+                });
               }
-              arr[i].push(p);
             }
           }
+          tokenPostingsMap.push(postingsWithKind);
+        }
 
-          for (const [verseId, tokenMatches] of verseOccurrences.entries()) {
-            if (tokenMatches.every(list => list.length > 0)) {
-              if (isPhrase && tokenList.length > 1) {
-                // Must be strictly consecutive: pos_i+1 == pos_i + 1
-                const validConsecutivePositions: number[] = [];
-                for (const first of tokenMatches[0]) {
-                  let matchesSequence = true;
-                  const seq = [first.wordIndex];
-                  for (let step = 1; step < tokenList.length; step++) {
-                    const expectedPos = first.wordIndex + step;
-                    if (tokenMatches[step].some(p => p.wordIndex === expectedPos)) {
-                      seq.push(expectedPos);
-                    } else {
-                      matchesSequence = false;
-                      break;
-                    }
-                  }
-                  if (matchesSequence) {
-                    validConsecutivePositions.push(...seq);
+        // Group by verseId
+        const verseOccurrences = new Map<number, TokenPostingWithKind[][]>();
+        for (let i = 0; i < tokenPostingsMap.length; i++) {
+          for (const p of tokenPostingsMap[i]) {
+            let arr = verseOccurrences.get(p.verseId);
+            if (!arr) {
+              arr = Array.from({ length: tokenPostingsMap.length }, () => []);
+              verseOccurrences.set(p.verseId, arr);
+            }
+            arr[i].push(p);
+          }
+        }
+
+        for (const [verseId, tokenMatches] of verseOccurrences.entries()) {
+          if (tokenMatches.every(list => list.length > 0)) {
+            if (isPhrase) {
+              // Consecutive sequence: pos_i+1 == pos_i + 1
+              for (const first of tokenMatches[0]) {
+                let matchesSequence = true;
+                const seq = [first];
+                for (let step = 1; step < tokenList.length; step++) {
+                  const expectedPos = first.wordIndex + step;
+                  const match = tokenMatches[step].find(p => p.wordIndex === expectedPos);
+                  if (match) {
+                    seq.push(match);
+                  } else {
+                    matchesSequence = false;
+                    break;
                   }
                 }
-
-                if (validConsecutivePositions.length > 0) {
-                  positionsMap.set(verseId, Array.from(new Set(validConsecutivePositions)));
-                  matchLevelsMap.set(verseId, 'phonetic');
+                if (matchesSequence) {
+                  for (const m of seq) {
+                    recordMatch(verseId, m.wordIndex, m.kind);
+                  }
                 }
-              } else {
-                // All words
-                const allPositions = tokenMatches.flatMap(list => list.map(p => p.wordIndex));
-                positionsMap.set(verseId, Array.from(new Set(allPositions)));
-                matchLevelsMap.set(verseId, 'phonetic');
+              }
+            } else {
+              // 'all' mode: all tokens present anywhere
+              for (const list of tokenMatches) {
+                for (const m of list) {
+                  recordMatch(verseId, m.wordIndex, m.kind);
+                }
               }
             }
           }
@@ -429,6 +575,8 @@ export class LocalQuranSearchEngine {
     const matchedVerseIds = Array.from(positionsMap.keys());
     let results: VerseSearchResult[] = [];
     let totalWordOccurrences = 0;
+    let exactMatchesCount = 0;
+    let partialMatchesCount = 0;
 
     for (const vId of matchedVerseIds) {
       const verse = this.verseMap.get(vId)!;
@@ -437,8 +585,18 @@ export class LocalQuranSearchEngine {
       const matchCount = positions.length;
       totalWordOccurrences += matchCount;
 
-      const vWords = this.verseWordsMap.get(vId) || [];
-      const relevanceScore = vWords.length > 0 ? (matchCount / vWords.length) * 100.0 : 0;
+      const kinds = wordKindsMap.get(vId) || {};
+      const bestKind = verseBestKind.get(vId) || 'contains';
+
+      if (bestKind === 'exact') {
+        exactMatchesCount++;
+      } else {
+        partialMatchesCount++;
+      }
+
+      const exactCount = verseExactCount.get(vId) || 0;
+      const kindScore = bestKind === 'exact' ? 30000 : bestKind === 'startsWith' ? 20000 : 10000;
+      const relevanceScore = kindScore + (exactCount * 1000) + (matchCount * 100);
 
       results.push({
         id: verse.id,
@@ -451,9 +609,11 @@ export class LocalQuranSearchEngine {
         normalizedText: verse.normalizedText,
         matchedWordIndexes: positions.sort((a, b) => a - b),
         matchCount,
-        relevanceScore: Math.round(relevanceScore * 10) / 10,
+        relevanceScore,
         isDirectReference: false,
         matchLevel: (matchLevelsMap.get(vId) as 'phonetic' | 'spelling' | 'exact') || 'phonetic',
+        matchedWordKinds: kinds,
+        bestMatchKind: bestKind,
       });
     }
 
@@ -506,6 +666,9 @@ export class LocalQuranSearchEngine {
       executionTimeMs,
       facets,
       directReferenceFound: false,
+      exactMatchesCount,
+      partialMatchesCount,
+      searchHint: isResultsCapped ? 'نتائج كثيرة، أضف حرفاً لتضييق البحث.' : undefined,
     };
   }
 

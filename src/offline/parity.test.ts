@@ -37,6 +37,7 @@ describe('Local Quran Search Parity & Accuracy Suite', () => {
         q: g.q,
         mode: g.mode,
         matchBy: g.matchBy,
+        wordMatch: g.wordMatch || 'whole',
         pageSize: 20,
       });
 
@@ -109,5 +110,130 @@ describe('Local Quran Search Parity & Accuracy Suite', () => {
 
     expect(normalizedMatches / tested).toBeGreaterThanOrEqual(0.999);
     expect(phoneticMatches / tested).toBeGreaterThanOrEqual(0.98);
+  });
+
+  describe('Smart Closeness Search & Ranking Suite', () => {
+    it('smart search for "العالم" returns "العالمين" (1:2), ordered exact first then startsWith then contains', () => {
+      const res = searchEngine.search({
+        q: 'العالم',
+        wordMatch: 'smart',
+        sort: 'relevance',
+        pageSize: 50,
+      });
+
+      expect(res.totalCount).toBeGreaterThan(0);
+      // Fatiha verse 2 (id 2) has "العالمين"
+      const fatiha2 = res.items.find(i => i.id === 2);
+      expect(fatiha2).toBeDefined();
+      expect(fatiha2?.bestMatchKind).toBe('startsWith');
+
+      // First items should be exact matches if any exist
+      if (res.items.some(i => i.bestMatchKind === 'exact')) {
+        expect(res.items[0].bestMatchKind).toBe('exact');
+      }
+
+      // Exact matches count + partial matches count equals total
+      expect(res.exactMatchesCount! + res.partialMatchesCount!).toBe(res.totalCount);
+    });
+
+    it('smart search for "استهز" matches "يستهزئون" / "مستهزئون"', () => {
+      const res = searchEngine.search({
+        q: 'استهز',
+        wordMatch: 'smart',
+        sort: 'relevance',
+        pageSize: 30,
+      });
+
+      expect(res.totalCount).toBeGreaterThan(0);
+      // 2:14 or 2:15 has مستهزءون / الله يستهزئ بهم
+      const found = res.items.some(i => i.uthmaniText.includes('يَسۡتَهۡزِ') || i.uthmaniText.includes('مُسۡتَهۡزِ'));
+      expect(found).toBe(true);
+      expect(res.items[0].bestMatchKind).toBeDefined();
+    });
+
+    it('smart search for "نعم" returns exact "نعم" before "نعمة" and "أنعمت" last/partial', () => {
+      const res = searchEngine.search({
+        q: 'نعم',
+        wordMatch: 'smart',
+        sort: 'relevance',
+        pageSize: 50,
+      });
+
+      expect(res.totalCount).toBeGreaterThan(0);
+      const firstExactIdx = res.items.findIndex(i => i.bestMatchKind === 'exact');
+      const firstPartialIdx = res.items.findIndex(i => i.bestMatchKind !== 'exact');
+
+      if (firstExactIdx !== -1 && firstPartialIdx !== -1) {
+        expect(firstExactIdx).toBeLessThan(firstPartialIdx);
+      }
+    });
+
+    it('whole word mode excludes "أنعمت" when searching for "نعم"', () => {
+      const resWhole = searchEngine.search({
+        q: 'نعم',
+        wordMatch: 'whole',
+        pageSize: 50,
+      });
+
+      // In whole word mode, verse 1:7 (أنعمت عليهم) must NOT match "نعم"
+      const fatiha7 = resWhole.items.find(i => i.id === 7);
+      expect(fatiha7).toBeUndefined();
+    });
+
+    it('single character query in smart mode returns 0 items and search hint', () => {
+      const res = searchEngine.search({
+        q: 'م',
+        wordMatch: 'smart',
+      });
+
+      expect(res.totalCount).toBe(0);
+      expect(res.items).toHaveLength(0);
+      expect(res.searchHint).toBe('يرجى إدخال حرفين على الأقل للبحث الذكي أو الجزئي.');
+    });
+
+    it('phrase mode with smart words preserves strictly consecutive order', () => {
+      const res = searchEngine.search({
+        q: 'رب العالمين',
+        mode: 'phrase',
+        wordMatch: 'smart',
+      });
+
+      expect(res.totalCount).toBeGreaterThan(0);
+      for (const item of res.items) {
+        const positions = item.matchedWordIndexes || [];
+        expect(positions.length).toBeGreaterThanOrEqual(2);
+        // At least one consecutive pair
+        let hasConsecutivePair = false;
+        for (let i = 0; i < positions.length - 1; i++) {
+          if (positions[i + 1] === positions[i] + 1) {
+            hasConsecutivePair = true;
+            break;
+          }
+        }
+        expect(hasConsecutivePair).toBe(true);
+      }
+    });
+
+    it('pagination has no duplicate verses across consecutive pages', () => {
+      const page1 = searchEngine.search({
+        q: 'العالم',
+        wordMatch: 'smart',
+        sort: 'relevance',
+        page: 1,
+        pageSize: 10,
+      });
+
+      const page2 = searchEngine.search({
+        q: 'العالم',
+        wordMatch: 'smart',
+        sort: 'relevance',
+        page: 2,
+        pageSize: 10,
+      });
+
+      const idsPage1 = new Set(page1.items.map(i => i.id));
+      const overlap = page2.items.filter(i => idsPage1.has(i.id));
+      expect(overlap).toHaveLength(0);
+    });
   });
 });

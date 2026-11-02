@@ -36,6 +36,7 @@ import {
   ChevronLeft,
   ChevronDown,
   Info,
+  ArrowUpDown,
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useDataset } from '@/context/DatasetContext';
@@ -50,15 +51,15 @@ interface StoredSearchOptions {
   mode: SearchMode;
   matchBy: MatchBasis;
   diacritics?: boolean;
-  wordMatch: 'exact' | 'partial';
+  wordMatch: 'smart' | 'whole' | 'partial';
   sort: SortOption;
 }
 
 const defaultOptions: StoredSearchOptions = {
   mode: 'phrase',
   matchBy: 'phonetic',
-  wordMatch: 'exact',
-  sort: 'mushaf',
+  wordMatch: 'smart',
+  sort: 'relevance',
 };
 
 export const QuranSearchPage: React.FC = () => {
@@ -78,8 +79,12 @@ export const QuranSearchPage: React.FC = () => {
   const modeParam = (searchParams.get('mode') as SearchMode) || 'phrase';
   const matchByParam = (searchParams.get('matchBy') as MatchBasis) ||
     (searchParams.get('diacritics') === 'true' ? 'exact' : 'phonetic');
-  const wordMatchParam = (searchParams.get('wordMatch') as 'exact' | 'partial') || 'exact';
-  const sortParam = (searchParams.get('sort') as SortOption) || 'mushaf';
+  const rawWordMatch = searchParams.get('wordMatch');
+  const wordMatchParam: 'smart' | 'whole' | 'partial' =
+    rawWordMatch === 'exact' ? 'whole' :
+    (rawWordMatch === 'whole' || rawWordMatch === 'partial' || rawWordMatch === 'smart') ? rawWordMatch : 'smart';
+  const rawSort = searchParams.get('sort');
+  const sortParam: SortOption = (rawSort as SortOption) || (wordMatchParam === 'smart' ? 'relevance' : 'mushaf');
   const pageParam = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
 
   // Local states
@@ -88,7 +93,7 @@ export const QuranSearchPage: React.FC = () => {
   const [selectedJuz, setSelectedJuz] = useState<number | undefined>(juzParam);
   const [searchMode, setSearchMode] = useState<SearchMode>(modeParam);
   const [matchBy, setMatchBy] = useState<MatchBasis>(matchByParam);
-  const [wordMatch, setWordMatch] = useState<'exact' | 'partial'>(wordMatchParam);
+  const [wordMatch, setWordMatch] = useState<'smart' | 'whole' | 'partial'>(wordMatchParam);
   const [sortOption, setSortOption] = useState<SortOption>(sortParam);
   const [page, setPage] = useState(pageParam);
 
@@ -262,7 +267,7 @@ export const QuranSearchPage: React.FC = () => {
         juz: number | undefined;
         mode: SearchMode;
         matchBy: MatchBasis;
-        wordMatch: 'exact' | 'partial';
+        wordMatch: 'smart' | 'whole' | 'partial';
         sort: SortOption;
         page: number;
       }>,
@@ -283,8 +288,10 @@ export const QuranSearchPage: React.FC = () => {
       if (juz) params.set('juz', juz.toString());
       if (mode && mode !== 'phrase') params.set('mode', mode);
       if (mb && mb !== 'phonetic') params.set('matchBy', mb);
-      if (wm && wm !== 'exact') params.set('wordMatch', wm);
-      if (s && s !== 'mushaf') params.set('sort', s);
+      if (wm && wm !== 'smart') params.set('wordMatch', wm);
+      if (s && ((wm === 'smart' && s !== 'relevance') || (wm !== 'smart' && s !== 'mushaf'))) {
+        params.set('sort', s);
+      }
       if (p > 1) params.set('page', p.toString());
 
       setSearchParams(params, { replace });
@@ -388,14 +395,14 @@ export const QuranSearchPage: React.FC = () => {
   const handleResetOptions = () => {
     setSearchMode('phrase');
     setMatchBy('phonetic');
-    setWordMatch('exact');
-    setSortOption('mushaf');
+    setWordMatch('smart');
+    setSortOption('relevance');
     setSelectedJuz(undefined);
     updateUrl({
       mode: 'phrase',
       matchBy: 'phonetic',
-      wordMatch: 'exact',
-      sort: 'mushaf',
+      wordMatch: 'smart',
+      sort: 'relevance',
       juz: undefined,
       page: 1,
     });
@@ -609,13 +616,13 @@ export const QuranSearchPage: React.FC = () => {
               onClick={() => setIsOptionsOpen(!isOptionsOpen)}
               aria-label={t('خيارات البحث والتصفية', 'Search Options and Filters')}
               className={`md:hidden h-11 w-11 rounded-lg border text-sm font-medium flex items-center justify-center transition shrink-0 relative ${
-                isOptionsOpen || selectedSurahId || searchMode !== 'phrase' || matchBy !== 'phonetic' || wordMatch !== 'exact' || selectedJuz
+                isOptionsOpen || selectedSurahId || searchMode !== 'phrase' || matchBy !== 'phonetic' || wordMatch !== 'smart' || selectedJuz
                   ? 'bg-primary-tint text-primary border-primary/50'
                   : 'bg-background hover:bg-surface border-border text-text-secondary hover:text-text-primary'
               }`}
             >
               <SlidersHorizontal className="w-5 h-5" />
-              {(selectedSurahId || searchMode !== 'phrase' || matchBy !== 'phonetic' || wordMatch !== 'exact' || selectedJuz) && (
+              {(selectedSurahId || searchMode !== 'phrase' || matchBy !== 'phonetic' || wordMatch !== 'smart' || selectedJuz) && (
                 <span className="w-2 h-2 rounded-full bg-accent absolute top-2 end-2" />
               )}
             </button>
@@ -646,14 +653,14 @@ export const QuranSearchPage: React.FC = () => {
             type="button"
             onClick={() => setIsOptionsOpen(!isOptionsOpen)}
             className={`hidden md:flex h-[52px] px-4 rounded-lg border text-sm font-medium items-center justify-center gap-2 transition shrink-0 ${
-              isOptionsOpen || searchMode !== 'phrase' || matchBy !== 'phonetic' || wordMatch !== 'exact' || selectedJuz
+              isOptionsOpen || searchMode !== 'phrase' || matchBy !== 'phonetic' || wordMatch !== 'smart' || selectedJuz
                 ? 'bg-primary-tint text-primary border-primary/50'
                 : 'bg-background hover:bg-surface border-border text-text-secondary hover:text-text-primary'
             }`}
           >
             <SlidersHorizontal className="w-4 h-4" />
             <span>{t('خيارات متقدمة', 'Advanced Options')}</span>
-            {(searchMode !== 'phrase' || matchBy !== 'phonetic' || wordMatch !== 'exact' || selectedJuz) && (
+            {(searchMode !== 'phrase' || matchBy !== 'phonetic' || wordMatch !== 'smart' || selectedJuz) && (
               <span className="w-2 h-2 rounded-full bg-accent" />
             )}
           </button>
@@ -675,7 +682,7 @@ export const QuranSearchPage: React.FC = () => {
         )}
 
         {/* Active Filters Chips Bar (Scrollable horizontally on mobile, no wrap) */}
-        {(selectedSurahId || selectedJuz || searchMode !== 'phrase' || matchBy !== 'phonetic' || wordMatch === 'partial') && (
+        {(selectedSurahId || selectedJuz || searchMode !== 'phrase' || matchBy !== 'phonetic' || wordMatch !== 'smart') && (
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none">
             <span className="text-[11px] text-text-secondary shrink-0 font-medium pe-1">
               {t('تصفية نشطة:', 'Active:')}
@@ -749,17 +756,32 @@ export const QuranSearchPage: React.FC = () => {
               </button>
             )}
 
+            {/* Whole Word Match Chip */}
+            {wordMatch === 'whole' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setWordMatch('smart');
+                  updateUrl({ wordMatch: 'smart', page: 1 });
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface text-text-secondary font-medium border border-border shrink-0 hover:border-primary/40 transition"
+              >
+                <span>{t('كلمة كاملة', 'Whole word')}</span>
+                <X className="w-3 h-3 text-text-secondary" />
+              </button>
+            )}
+
             {/* Partial Word Match Chip */}
             {wordMatch === 'partial' && (
               <button
                 type="button"
                 onClick={() => {
-                  setWordMatch('exact');
-                  updateUrl({ wordMatch: 'exact', page: 1 });
+                  setWordMatch('smart');
+                  updateUrl({ wordMatch: 'smart', page: 1 });
                 }}
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface text-text-secondary font-medium border border-border shrink-0 hover:border-primary/40 transition"
               >
-                <span>{t('تطابق جزئي', 'Partial match')}</span>
+                <span>{t('أي جزء', 'Any substring')}</span>
                 <X className="w-3 h-3 text-text-secondary" />
               </button>
             )}
@@ -929,30 +951,66 @@ export const QuranSearchPage: React.FC = () => {
                   }}
                   className="w-full h-10 px-3 text-xs bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:border-primary"
                 >
-                  <option value="mushaf">{t('ترتيب المصحف الشريف (الافتراضي)', 'Mushaf Order')}</option>
-                  <option value="relevance">{t('الأكثر تطابقاً وتكراراً للفظ', 'Relevance / Match Count')}</option>
+                  <option value="relevance">{t('الأقرب أولاً (افتراضي للبحث الذكي)', 'Closest First (Default for Smart)')}</option>
+                  <option value="mushaf">{t('ترتيب المصحف الشريف', 'Mushaf Order')}</option>
                   <option value="surah">{t('حسب السور', 'By Surah')}</option>
                   <option value="ayahLength">{t('طول الآية', 'Verse Length')}</option>
                 </select>
               </div>
 
-              {/* Word Match Partial vs Whole Switch */}
-              <div className="space-y-2 pt-1 flex items-center">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={wordMatch === 'partial'}
-                    onChange={e => {
-                      const wm = e.target.checked ? 'partial' : 'exact';
-                      setWordMatch(wm);
-                      updateUrl({ wordMatch: wm, page: 1 });
-                    }}
-                    className="w-4 h-4 rounded text-primary focus:ring-primary border-border cursor-pointer accent-primary"
-                  />
-                  <span className="text-xs text-text-primary font-medium">
-                    {t('السماح بالمطابقة الجزئية للكلمات', 'Allow partial word matching')}
-                  </span>
+              {/* Word Match 3-Way Segmented Control */}
+              <div className="space-y-1.5 pt-1">
+                <label className="text-xs font-semibold text-text-secondary block">
+                  {t('طريقة مطابقة الكلمات', 'Word Matching Mode')}
                 </label>
+                <div className="grid grid-cols-3 gap-1 p-1 bg-surface-muted dark:bg-surface-elevated/40 rounded-xl border border-border">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWordMatch('smart');
+                      setSortOption('relevance');
+                      updateUrl({ wordMatch: 'smart', sort: 'relevance', page: 1 });
+                    }}
+                    className={`px-2 py-2 rounded-lg text-xs font-medium transition text-center ${
+                      wordMatch === 'smart'
+                        ? 'bg-primary text-white shadow-2xs font-semibold'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-surface'
+                    }`}
+                    title={t('مطابقة ذكية ترتب النتائج بحسب درجة القرب (التطابق التام أولاً)', 'Smart matching ranked by closeness')}
+                  >
+                    {t('الأقرب أولاً (افتراضي)', 'Closest (Default)')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWordMatch('whole');
+                      updateUrl({ wordMatch: 'whole', page: 1 });
+                    }}
+                    className={`px-2 py-2 rounded-lg text-xs font-medium transition text-center ${
+                      wordMatch === 'whole'
+                        ? 'bg-primary text-white shadow-2xs font-semibold'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-surface'
+                    }`}
+                    title={t('مطابقة الكلمة بكاملها فقط بدون زوائد أو تصريفات', 'Whole word match only')}
+                  >
+                    {t('كلمة كاملة', 'Whole Word')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWordMatch('partial');
+                      updateUrl({ wordMatch: 'partial', page: 1 });
+                    }}
+                    className={`px-2 py-2 rounded-lg text-xs font-medium transition text-center ${
+                      wordMatch === 'partial'
+                        ? 'bg-primary text-white shadow-2xs font-semibold'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-surface'
+                    }`}
+                    title={t('أي تطابق جزئي لأي مقطع من الكلمة', 'Any substring match')}
+                  >
+                    {t('أي جزء', 'Any Substring')}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1158,6 +1216,7 @@ export const QuranSearchPage: React.FC = () => {
         <WordOccurrencesView
           query={queryParam}
           mode={searchMode}
+          wordMatch={wordMatch}
           onSelectWord={word => {
             setSearchInput(word);
             setActiveTab('verses');
@@ -1169,16 +1228,31 @@ export const QuranSearchPage: React.FC = () => {
       {/* TAB CONTENT: Verses View (Active Search / Browse Only) */}
       {isSearchActive && activeTab === 'verses' && (
         <>
+          {/* Capped Results Hint or Length Warning Banner */}
+          {searchResponse?.searchHint && (
+            <div className="mb-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-2">
+              <Info className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <span>{searchResponse.searchHint}</span>
+            </div>
+          )}
+
           {/* Results Header: Count & Bulk Selection Bar - Compact single row on mobile */}
           <div className="flex items-center justify-between gap-2 text-xs sm:text-sm text-text-secondary px-1 py-1">
-            <div className="min-w-0 truncate">
+            <div className="min-w-0 flex items-center gap-2 flex-wrap">
               {isLoading ? (
                 <span className="truncate">{t('جارٍ جلب الآيات من المصحف الشريف...', 'Loading verses...')}</span>
               ) : searchResponse ? (
-                <span className="font-medium text-text-primary">
-                  {t(
-                    `تم العثور على ${isRtl ? toArabicDigits(searchResponse.totalCount) : searchResponse.totalCount} آية`,
-                    `Found ${searchResponse.totalCount} verses`
+                <span className="font-medium text-text-primary flex items-center gap-1.5 flex-wrap">
+                  <span>
+                    {t(
+                      `تم العثور على ${isRtl ? toArabicDigits(searchResponse.totalCount) : searchResponse.totalCount} آية`,
+                      `Found ${searchResponse.totalCount} verses`
+                    )}
+                  </span>
+                  {searchResponse.exactMatchesCount != null && searchResponse.partialMatchesCount != null && searchResponse.exactMatchesCount > 0 && searchResponse.partialMatchesCount > 0 && (
+                    <span className="text-text-secondary text-xs font-normal">
+                      ({isRtl ? toArabicDigits(searchResponse.exactMatchesCount) : searchResponse.exactMatchesCount} {t('تطابق تام', 'exact')}، {isRtl ? toArabicDigits(searchResponse.partialMatchesCount) : searchResponse.partialMatchesCount} {t('تطابق جزئي', 'partial')})
+                    </span>
                   )}
                   {searchResponse.totalWordOccurrences > 0 && (
                     <span className="hidden sm:inline text-text-secondary font-normal">
@@ -1197,6 +1271,23 @@ export const QuranSearchPage: React.FC = () => {
                   )}
                 </span>
               ) : null}
+
+              {/* Quick 1-click toggle between Closest First (relevance) and Mushaf order */}
+              {searchResponse && searchResponse.totalCount > 1 && wordMatch === 'smart' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextSort = sortOption === 'relevance' ? 'mushaf' : 'relevance';
+                    setSortOption(nextSort);
+                    updateUrl({ sort: nextSort, page: 1 });
+                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border border-border bg-surface hover:border-primary/50 text-text-primary transition shrink-0"
+                  title={sortOption === 'relevance' ? t('التبديل إلى ترتيب المصحف الشريف', 'Switch to Mushaf order') : t('التبديل إلى ترتيب الأقرب أولاً', 'Switch to closest-first order')}
+                >
+                  <ArrowUpDown className="w-3 h-3 text-primary" />
+                  <span>{sortOption === 'relevance' ? t('الأقرب أولاً', 'Closest First') : t('ترتيب المصحف', 'Mushaf Order')}</span>
+                </button>
+              )}
             </div>
 
             {/* Bulk Selection Actions: Compact dropdown on mobile, inline on desktop */}
@@ -1422,16 +1513,16 @@ export const QuranSearchPage: React.FC = () => {
                     setSelectedJuz(undefined);
                     setSearchMode('phrase');
                     setMatchBy('phonetic');
-                    setWordMatch('exact');
-                    setSortOption('mushaf');
+                    setWordMatch('smart');
+                    setSortOption('relevance');
                     updateUrl({
                       q: '',
                       surah: undefined,
                       juz: undefined,
                       mode: 'phrase',
                       matchBy: 'phonetic',
-                      wordMatch: 'exact',
-                      sort: 'mushaf',
+                      wordMatch: 'smart',
+                      sort: 'relevance',
                       page: 1,
                     });
                   }}

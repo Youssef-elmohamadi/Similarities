@@ -65,6 +65,7 @@ export const VerseCard: React.FC<VerseCardProps> = ({
   const renderVerseContent = () => {
     const rawWords = tokenizeQuranText(verse.uthmaniText);
     const ornament = formatAyahOrnament(verse.ayahNumber);
+    const matchedKinds = searchResult.matchedWordKinds || {};
 
     if (matchedIndexes.length > 0) {
       return (
@@ -73,17 +74,29 @@ export const VerseCard: React.FC<VerseCardProps> = ({
             const wordPosition = idx + 1; // 1-based index
             const isMatch = matchedIndexes.includes(wordPosition);
 
-            return isMatch ? (
+            if (!isMatch) {
+              return (
+                <span key={idx} className="mx-0.5 inline-block">
+                  {word}
+                </span>
+              );
+            }
+
+            const kind = matchedKinds[wordPosition];
+            const isExact = kind === 'exact';
+
+            return (
               <mark
                 key={idx}
-                className="bg-[#F6EEDC] text-text-primary px-1 py-0.5 rounded border-b-2 border-primary/60 font-quran inline-block mx-0.5 shadow-2xs"
+                className={
+                  isExact
+                    ? "bg-amber-200/90 dark:bg-amber-900/60 text-text-primary px-1.5 py-0.5 rounded border-b-2 border-amber-600 dark:border-amber-400 font-semibold inline-block mx-0.5 shadow-2xs"
+                    : "bg-[#F6EEDC] dark:bg-amber-950/40 text-text-primary px-1 py-0.5 rounded border-b border-primary/50 inline-block mx-0.5 shadow-2xs"
+                }
+                title={isExact ? t('تطابق تام', 'Exact match') : t('تطابق جزئي', 'Partial match')}
               >
                 {word}
               </mark>
-            ) : (
-              <span key={idx} className="mx-0.5 inline-block">
-                {word}
-              </span>
             );
           })}
           <span className="ayah-number-badge text-primary font-bold ms-1 select-none">
@@ -156,13 +169,25 @@ export const VerseCard: React.FC<VerseCardProps> = ({
             </Badge>
           )}
 
-          {searchResult.matchLevel === 'phonetic' && (
+          {searchResult.bestMatchKind && (
+            searchResult.bestMatchKind === 'exact' ? (
+              <span className="text-[11px] font-medium text-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
+                {t('تطابق تام', 'Exact match')}
+              </span>
+            ) : (
+              <span className="text-[11px] font-medium text-amber-800 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-800 flex items-center gap-1">
+                {t('تطابق جزئي', 'Partial match')}
+              </span>
+            )
+          )}
+
+          {searchResult.matchLevel === 'phonetic' && !searchResult.bestMatchKind && (
             <span className="text-[11px] font-medium text-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
               {t('تطابق لفظي', 'Phonetic match')}
             </span>
           )}
 
-          {searchResult.matchLevel === 'exact' && (
+          {searchResult.matchLevel === 'exact' && !searchResult.bestMatchKind && (
             <span className="text-[11px] font-medium text-primary bg-primary-tint/80 px-2 py-0.5 rounded-full border border-primary/30 flex items-center gap-1">
               {t('تطابق بالتشكيل', 'Exact diacritics')}
             </span>

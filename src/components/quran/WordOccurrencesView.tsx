@@ -10,23 +10,25 @@ import { Skeleton } from '@/components/common/Skeleton';
 export interface WordOccurrencesViewProps {
   query: string;
   mode: string;
+  wordMatch?: string;
   onSelectWord: (word: string) => void;
 }
 
 export const WordOccurrencesView: React.FC<WordOccurrencesViewProps> = ({
   query,
   mode,
+  wordMatch = 'smart',
   onSelectWord,
 }) => {
   const { t, direction } = useLanguage();
   const isRtl = direction === 'rtl';
 
   const { data: occurrences, isLoading, error } = useQuery<WordOccurrenceItem[]>({
-    queryKey: ['wordOccurrences', query, mode],
+    queryKey: ['wordOccurrences', query, mode, wordMatch],
     queryFn: async () => {
       if (!query.trim()) return [];
       const res = await api.get<WordOccurrenceItem[]>(
-        `/quran/words/occurrences?q=${encodeURIComponent(query.trim())}&mode=${mode}`
+        `/quran/words/occurrences?q=${encodeURIComponent(query.trim())}&mode=${mode}&wordMatch=${wordMatch}`
       );
       return res.data;
     },

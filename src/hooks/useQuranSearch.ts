@@ -10,7 +10,7 @@ export interface QuranSearchParams {
   juz?: number;
   mode?: SearchMode;
   matchBy?: MatchBasis;
-  wordMatch?: 'exact' | 'partial';
+  wordMatch?: 'smart' | 'whole' | 'partial' | 'exact';
   sort?: SortOption;
   page?: number;
   pageSize?: number;
@@ -28,6 +28,8 @@ export function useQuranSearch(params: QuranSearchParams) {
   const isSearchActive = (isQueryExecutable || isBrowseMode) && (params.enabled !== false);
 
   const isLocalSource = isOfflineReady;
+  const activeWordMatch = params.wordMatch || 'smart';
+  const activeSort = params.sort || (activeWordMatch === 'smart' ? 'relevance' : 'mushaf');
 
   return useQuery<QuranSearchResponse>({
     queryKey: [
@@ -38,8 +40,8 @@ export function useQuranSearch(params: QuranSearchParams) {
       params.juz,
       params.mode || 'phrase',
       params.matchBy || 'phonetic',
-      params.wordMatch || 'exact',
-      params.sort || 'mushaf',
+      activeWordMatch,
+      activeSort,
       params.page || 1,
       params.pageSize || 20,
     ],
@@ -53,8 +55,8 @@ export function useQuranSearch(params: QuranSearchParams) {
             juz: params.juz,
             mode: params.mode,
             matchBy: params.matchBy,
-            wordMatch: params.wordMatch,
-            sort: params.sort,
+            wordMatch: activeWordMatch,
+            sort: activeSort,
             page: params.page,
             pageSize: params.pageSize || 20,
           });
@@ -71,8 +73,8 @@ export function useQuranSearch(params: QuranSearchParams) {
       if (params.juz) searchParams.append('juz', params.juz.toString());
       if (params.mode && params.mode !== 'phrase') searchParams.append('mode', params.mode);
       if (params.matchBy && params.matchBy !== 'phonetic') searchParams.append('matchBy', params.matchBy);
-      if (params.wordMatch === 'partial') searchParams.append('wordMatch', 'partial');
-      if (params.sort && params.sort !== 'mushaf') searchParams.append('sort', params.sort);
+      if (activeWordMatch !== 'smart') searchParams.append('wordMatch', activeWordMatch);
+      if (activeSort !== 'mushaf') searchParams.append('sort', activeSort);
       searchParams.append('page', (params.page || 1).toString());
       searchParams.append('pageSize', (params.pageSize || 20).toString());
 

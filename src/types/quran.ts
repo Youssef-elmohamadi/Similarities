@@ -35,6 +35,8 @@ export interface VerseSearchResult {
   isDirectReference?: boolean;
   matchLevel?: 'phonetic' | 'spelling' | 'exact';
   highlightedSnippet?: string;
+  matchedWordKinds?: Record<number, 'exact' | 'startsWith' | 'contains'>;
+  bestMatchKind?: 'exact' | 'startsWith' | 'contains';
 }
 
 export interface SurahFacet {
@@ -57,6 +59,9 @@ export interface QuranSearchResponse {
   executionTimeMs: number;
   facets: SurahFacet[];
   directReferenceFound?: boolean;
+  exactMatchesCount?: number;
+  partialMatchesCount?: number;
+  searchHint?: string;
 }
 
 export interface VerseContext {
@@ -84,7 +89,7 @@ export interface QuranSearchParams {
   mode?: SearchMode;
   matchBy?: MatchBasis;
   diacritics?: boolean;
-  wordMatch?: 'exact' | 'partial';
+  wordMatch?: 'smart' | 'whole' | 'partial' | 'exact';
   sort?: SortOption;
   page?: number;
   pageSize?: number;
