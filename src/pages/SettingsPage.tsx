@@ -1,0 +1,170 @@
+import React from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
+import { usePwa } from '@/context/PwaContext';
+import { Card } from '@/components/common/Card';
+import { Button } from '@/components/common/Button';
+import { Badge } from '@/components/common/Badge';
+import { PageHeader } from '@/components/common/PageHeader';
+import { User, Globe, ShieldCheck, Database, LogOut, Smartphone, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+export const SettingsPage: React.FC = () => {
+  const { user, logout } = useAuth();
+  const { language, toggleLanguage, t } = useLanguage();
+  const { isInstallable, isIOS, installApp } = usePwa();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-6 pb-20 text-start animate-fade-in">
+      <PageHeader
+        title={t('الملف الشخصي والإعدادات', 'Profile & Settings')}
+        description={t(
+          'بيانات الحساب وتفضيلات المنصة وضمانات الخصوصية التامة ومصدر البيانات القرآنية.',
+          'Account details, interface preferences, privacy guarantees, and Quranic data source.'
+        )}
+      />
+
+      {/* PWA App Installation Card */}
+      {(isInstallable || isIOS) && (
+        <Card className="space-y-3 border-primary/40 bg-primary-tint/20">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-base text-text-primary flex items-center gap-2">
+              <Smartphone className="w-5 h-5 text-primary" />
+              <span>{t('تثبيت التطبيق على جهازك', 'Install App on Your Device')}</span>
+            </h2>
+            <Button size="sm" variant="primary" onClick={installApp} className="flex items-center gap-1.5">
+              <Smartphone className="w-4 h-4" />
+              <span>{t('ثبّت التطبيق', 'Install App')}</span>
+            </Button>
+          </div>
+          <p className="text-sm text-text-secondary leading-relaxed">
+            {t(
+              'يمكنك تثبيت منصة متشابهات القرآن كتطبيق متكامل وسريع على هاتفك أو حاسوبك، للعمل والبحث في المصحف بدون الحاجة لإنترنت.',
+              'Install Quran Similarities as a standalone app on your phone or PC for fast, offline Quran search anytime.'
+            )}
+          </p>
+        </Card>
+      )}
+
+      {/* User Info Card */}
+      <Card className="space-y-4">
+        <h2 className="font-semibold text-base text-text-primary flex items-center gap-2">
+          <User className="w-5 h-5 text-primary" />
+          <span>{t('معلومات المستخدم', 'User Information')}</span>
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
+          <div className="p-4 rounded-xl bg-background border border-border">
+            <span className="text-text-secondary block mb-1 text-xs">{t('الاسم الكامل', 'Full Name')}</span>
+            <span className="font-semibold text-text-primary text-base">
+              <bdi>{user?.fullName}</bdi>
+            </span>
+          </div>
+
+          <div className="p-4 rounded-xl bg-background border border-border">
+            <span className="text-text-secondary block mb-1 text-xs">{t('البريد الإلكتروني', 'Email')}</span>
+            <span className="font-semibold text-text-primary text-base" dir="ltr">
+              {user?.email}
+            </span>
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            icon={<LogOut className="w-4 h-4 text-danger" />}
+            className="text-danger hover:bg-danger-subtle hover:text-danger min-h-[40px]"
+          >
+            {t('تسجيل الخروج من الحساب', 'Sign Out')}
+          </Button>
+        </div>
+      </Card>
+
+      {/* Language Preference Card */}
+      <Card className="space-y-4">
+        <h2 className="font-semibold text-base text-text-primary flex items-center gap-2">
+          <Globe className="w-5 h-5 text-primary" />
+          <span>{t('لغة واجهة التطبيق', 'Interface Language')}</span>
+        </h2>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-background border border-border">
+          <div>
+            <p className="text-sm font-semibold text-text-primary">
+              {language === 'ar' ? 'العربية (افتراضي)' : 'English'}
+            </p>
+            <p className="text-xs text-text-secondary mt-0.5">
+              {language === 'ar'
+                ? 'واجهة عربية من اليمين إلى اليسار (RTL)'
+                : 'English Left-to-Right interface (LTR)'}
+            </p>
+          </div>
+
+          <Button size="sm" variant="outline" onClick={toggleLanguage} className="min-h-[40px]">
+            {language === 'ar' ? 'Switch to English' : 'التحويل للعربية'}
+          </Button>
+        </div>
+      </Card>
+
+      {/* Privacy & Data Isolation */}
+      <Card className="space-y-3">
+        <h2 className="font-semibold text-base text-text-primary flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 text-primary" />
+          <span>{t('الخصوصية وعزل البيانات', 'Privacy & Data Security')}</span>
+        </h2>
+
+        <p className="text-sm text-text-secondary leading-relaxed">
+          {t(
+            'جميع مجموعات المتشابهات والمقارنات وروابط الحفظ والملاحظات المسجلة بحسابك خاصة تماماً ومحمية على مستوى الخادم وقاعدة البيانات، ولا يمكن لأي مستخدم آخر الوصول إليها أو الاطلاع عليها.',
+            'All your collections, comparisons, notes, and links are completely private and enforced at the server and database level.'
+          )}
+        </p>
+
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Badge variant="primary">
+            {t('حساب مستقل ومحمي', 'Private & Isolated Account')}
+          </Badge>
+          <Badge variant="charcoal">
+            {t('خالٍ من الإعلانات والتتبع', 'No Ads or Tracking')}
+          </Badge>
+          <Badge variant="accent">
+            {t('توثيق بشري بدون توليد آلي', 'Human-Centered Memorization')}
+          </Badge>
+        </div>
+      </Card>
+
+      {/* Quran Data Source & Tanzil Attribution */}
+      <Card className="space-y-3">
+        <h2 className="font-semibold text-base text-text-primary flex items-center gap-2">
+          <Database className="w-5 h-5 text-primary" />
+          <span>{t('مصدر النص القرآني', 'Quran Text Source')}</span>
+        </h2>
+
+        <p className="text-sm text-text-secondary leading-relaxed">
+          {t(
+            'يعتمد التطبيق النص القرآني المعتمد والمضبوط بالرسم العثماني من مشروع تنزيل (Tanzil Project)، ويشمل كامل السور (114 سورة) والآيات (6236 آية) برسم مصحف المدينة النبوية.',
+            'The application uses the authentic Medina Uthmani Quranic text from the Tanzil Project, encompassing all 114 Surahs and 6,236 Ayahs with full diacritics.'
+          )}
+        </p>
+
+        <div className="pt-1">
+          <a
+            href="https://tanzil.net"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
+          >
+            <span>tanzil.net - The Tanzil Project</span>
+          </a>
+        </div>
+      </Card>
+    </div>
+  );
+};

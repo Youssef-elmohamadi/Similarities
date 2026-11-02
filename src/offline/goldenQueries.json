@@ -1,0 +1,7816 @@
+[
+  {
+    "q": "الرحمن",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 45,
+    "totalWordOccurrences": 45,
+    "topVerseIds": [
+      1,
+      3,
+      170,
+      2139,
+      2295
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        1
+      ],
+      [
+        8
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "q": "الرحمن",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 45,
+    "totalWordOccurrences": 45,
+    "topVerseIds": [
+      1,
+      3,
+      170,
+      2139,
+      2295
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        1
+      ],
+      [
+        8
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "q": "يسيرو",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 7,
+    "totalWordOccurrences": 7,
+    "topVerseIds": [
+      1705,
+      2641,
+      3418,
+      3704,
+      4154
+    ],
+    "topMatchedIndexes": [
+      [
+        13
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "يسيروا",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 7,
+    "totalWordOccurrences": 7,
+    "topVerseIds": [
+      1705,
+      2641,
+      3418,
+      3704,
+      4154
+    ],
+    "topMatchedIndexes": [
+      [
+        13
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "2:255",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 1,
+    "totalWordOccurrences": 50,
+    "topVerseIds": [
+      262
+    ],
+    "topMatchedIndexes": [
+      [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50
+      ]
+    ]
+  },
+  {
+    "q": "1:1",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 1,
+    "totalWordOccurrences": 4,
+    "topVerseIds": [
+      1
+    ],
+    "topMatchedIndexes": [
+      [
+        1,
+        2,
+        3,
+        4
+      ]
+    ]
+  },
+  {
+    "q": "6:10",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 1,
+    "totalWordOccurrences": 13,
+    "topVerseIds": [
+      799
+    ],
+    "topMatchedIndexes": [
+      [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ]
+    ]
+  },
+  {
+    "q": "استهزئ",
+    "mode": "root",
+    "matchBy": "phonetic",
+    "totalCount": 3,
+    "totalWordOccurrences": 3,
+    "topVerseIds": [
+      799,
+      1739,
+      2524
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "يستهزءون",
+    "mode": "root",
+    "matchBy": "phonetic",
+    "totalCount": 14,
+    "totalWordOccurrences": 14,
+    "topVerseIds": [
+      794,
+      799,
+      1481,
+      1813,
+      1935
+    ],
+    "topMatchedIndexes": [
+      [
+        12
+      ],
+      [
+        13
+      ],
+      [
+        22
+      ],
+      [
+        8
+      ],
+      [
+        10
+      ]
+    ]
+  },
+  {
+    "q": "من قبلك",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 28,
+    "totalWordOccurrences": 56,
+    "topVerseIds": [
+      11,
+      477,
+      553,
+      655,
+      799
+    ],
+    "topMatchedIndexes": [
+      [
+        8,
+        9
+      ],
+      [
+        6,
+        7
+      ],
+      [
+        13,
+        14
+      ],
+      [
+        13,
+        14
+      ],
+      [
+        4,
+        5
+      ]
+    ]
+  },
+  {
+    "q": "الله -العالمين",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 1548,
+    "totalWordOccurrences": 2126,
+    "topVerseIds": [
+      1,
+      14,
+      16,
+      17,
+      22
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        5
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "q": "\"جنات تجري\"",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 27,
+    "totalWordOccurrences": 54,
+    "topVerseIds": [
+      32,
+      308,
+      488,
+      491,
+      506
+    ],
+    "topMatchedIndexes": [
+      [
+        8,
+        9
+      ],
+      [
+        11,
+        12
+      ],
+      [
+        31,
+        32
+      ],
+      [
+        6,
+        7
+      ],
+      [
+        9,
+        10
+      ]
+    ]
+  },
+  {
+    "q": "صلاة",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 2,
+    "totalWordOccurrences": 3,
+    "topVerseIds": [
+      2849,
+      5354
+    ],
+    "topMatchedIndexes": [
+      [
+        17,
+        26
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "صلوة",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 2,
+    "totalWordOccurrences": 3,
+    "topVerseIds": [
+      2849,
+      5354
+    ],
+    "topMatchedIndexes": [
+      [
+        17,
+        26
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "زكاة",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 2,
+    "totalWordOccurrences": 2,
+    "topVerseIds": [
+      2221,
+      3448
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        16
+      ]
+    ]
+  },
+  {
+    "q": "امنوا",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 254,
+    "totalWordOccurrences": 263,
+    "topVerseIds": [
+      16,
+      20,
+      21,
+      32,
+      33
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        4
+      ],
+      [
+        4
+      ],
+      [
+        3
+      ],
+      [
+        15
+      ]
+    ]
+  },
+  {
+    "q": "آمنوا",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 254,
+    "totalWordOccurrences": 263,
+    "topVerseIds": [
+      16,
+      20,
+      21,
+      32,
+      33
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        4
+      ],
+      [
+        4
+      ],
+      [
+        3
+      ],
+      [
+        15
+      ]
+    ]
+  },
+  {
+    "q": "داود",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 13,
+    "totalWordOccurrences": 13,
+    "topVerseIds": [
+      258,
+      656,
+      747,
+      873,
+      2084
+    ],
+    "topMatchedIndexes": [
+      [
+        5
+      ],
+      [
+        25
+      ],
+      [
+        9
+      ],
+      [
+        13
+      ],
+      [
+        14
+      ]
+    ]
+  },
+  {
+    "q": "ذلك",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 270,
+    "totalWordOccurrences": 280,
+    "topVerseIds": [
+      9,
+      59,
+      68,
+      71,
+      75
+    ],
+    "topMatchedIndexes": [
+      [
+        1
+      ],
+      [
+        6
+      ],
+      [
+        45,
+        55
+      ],
+      [
+        5
+      ],
+      [
+        20
+      ]
+    ]
+  },
+  {
+    "q": "هذا",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 182,
+    "totalWordOccurrences": 190,
+    "topVerseIds": [
+      32,
+      86,
+      133,
+      330,
+      344
+    ],
+    "topMatchedIndexes": [
+      [
+        20
+      ],
+      [
+        8
+      ],
+      [
+        6
+      ],
+      [
+        22
+      ],
+      [
+        6
+      ]
+    ]
+  },
+  {
+    "q": "لكن",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 7,
+    "totalWordOccurrences": 7,
+    "topVerseIds": [
+      491,
+      655,
+      659,
+      1323,
+      2178
+    ],
+    "topMatchedIndexes": [
+      [
+        1
+      ],
+      [
+        1
+      ],
+      [
+        1
+      ],
+      [
+        1
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "q": "اولئك",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "موسى",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 75,
+    "totalWordOccurrences": 77,
+    "topVerseIds": [
+      60,
+      61,
+      67,
+      74,
+      94
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        3
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "عيسى",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 12,
+    "totalWordOccurrences": 12,
+    "topVerseIds": [
+      94,
+      260,
+      338,
+      345,
+      352
+    ],
+    "topMatchedIndexes": [
+      [
+        10
+      ],
+      [
+        16
+      ],
+      [
+        12
+      ],
+      [
+        4
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "فرعون",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 59,
+    "totalWordOccurrences": 65,
+    "topVerseIds": [
+      56,
+      57,
+      304,
+      1057,
+      1063
+    ],
+    "topMatchedIndexes": [
+      [
+        5
+      ],
+      [
+        8
+      ],
+      [
+        3
+      ],
+      [
+        8
+      ],
+      [
+        5
+      ]
+    ]
+  },
+  {
+    "q": "ابراهيم",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 52,
+    "totalWordOccurrences": 58,
+    "topVerseIds": [
+      131,
+      132,
+      133,
+      134,
+      137
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        10,
+        14
+      ],
+      [
+        3
+      ],
+      [
+        3
+      ],
+      [
+        5
+      ]
+    ]
+  },
+  {
+    "q": "اسماعيل",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 3,
+    "totalWordOccurrences": 3,
+    "topVerseIds": [
+      1789,
+      2304,
+      4018
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        4
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "اسحاق",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 6,
+    "totalWordOccurrences": 6,
+    "topVerseIds": [
+      873,
+      1544,
+      2299,
+      2555,
+      3367
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        8
+      ],
+      [
+        10
+      ],
+      [
+        3
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "يعقوب",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 5,
+    "totalWordOccurrences": 5,
+    "topVerseIds": [
+      140,
+      1544,
+      1602,
+      1664,
+      2256
+    ],
+    "topMatchedIndexes": [
+      [
+        6
+      ],
+      [
+        9
+      ],
+      [
+        13
+      ],
+      [
+        19
+      ],
+      [
+        5
+      ]
+    ]
+  },
+  {
+    "q": "يوسف",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 20,
+    "totalWordOccurrences": 21,
+    "topVerseIds": [
+      1600,
+      1603,
+      1605,
+      1606,
+      1607
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        5
+      ],
+      [
+        2
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "q": "الله",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 1567,
+    "totalWordOccurrences": 2155,
+    "topVerseIds": [
+      1,
+      14,
+      16,
+      17,
+      22
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        5
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "q": "الله",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 1567,
+    "totalWordOccurrences": 2155,
+    "topVerseIds": [
+      1,
+      14,
+      16,
+      17,
+      22
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        5
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "q": "الله",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 1567,
+    "totalWordOccurrences": 2155,
+    "topVerseIds": [
+      1,
+      14,
+      16,
+      17,
+      22
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        5
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "q": "الله",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 1567,
+    "totalWordOccurrences": 2155,
+    "topVerseIds": [
+      1,
+      14,
+      16,
+      17,
+      22
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        5
+      ],
+      [
+        1
+      ]
+    ]
+  },
+  {
+    "q": "الله",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الرحمن",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 45,
+    "totalWordOccurrences": 45,
+    "topVerseIds": [
+      1,
+      3,
+      170,
+      2139,
+      2295
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        1
+      ],
+      [
+        8
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "q": "الرحمن",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 45,
+    "totalWordOccurrences": 45,
+    "topVerseIds": [
+      1,
+      3,
+      170,
+      2139,
+      2295
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        1
+      ],
+      [
+        8
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "q": "الرحمن",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 45,
+    "totalWordOccurrences": 45,
+    "topVerseIds": [
+      1,
+      3,
+      170,
+      2139,
+      2295
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        1
+      ],
+      [
+        8
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "q": "الرحمن",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 45,
+    "totalWordOccurrences": 45,
+    "topVerseIds": [
+      1,
+      3,
+      170,
+      2139,
+      2295
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        1
+      ],
+      [
+        8
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "q": "الرحمن",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الرحيم",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 34,
+    "totalWordOccurrences": 34,
+    "topVerseIds": [
+      1,
+      3,
+      44,
+      61,
+      135
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        2
+      ],
+      [
+        11
+      ],
+      [
+        26
+      ],
+      [
+        17
+      ]
+    ]
+  },
+  {
+    "q": "الرحيم",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 34,
+    "totalWordOccurrences": 34,
+    "topVerseIds": [
+      1,
+      3,
+      44,
+      61,
+      135
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        2
+      ],
+      [
+        11
+      ],
+      [
+        26
+      ],
+      [
+        17
+      ]
+    ]
+  },
+  {
+    "q": "الرحيم",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 34,
+    "totalWordOccurrences": 34,
+    "topVerseIds": [
+      1,
+      3,
+      44,
+      61,
+      135
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        2
+      ],
+      [
+        11
+      ],
+      [
+        26
+      ],
+      [
+        17
+      ]
+    ]
+  },
+  {
+    "q": "الرحيم",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 34,
+    "totalWordOccurrences": 34,
+    "topVerseIds": [
+      1,
+      3,
+      44,
+      61,
+      135
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        2
+      ],
+      [
+        11
+      ],
+      [
+        26
+      ],
+      [
+        17
+      ]
+    ]
+  },
+  {
+    "q": "الرحيم",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "رب",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 124,
+    "totalWordOccurrences": 128,
+    "topVerseIds": [
+      2,
+      133,
+      267,
+      328,
+      329
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "رب",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 124,
+    "totalWordOccurrences": 128,
+    "topVerseIds": [
+      2,
+      133,
+      267,
+      328,
+      329
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "رب",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 124,
+    "totalWordOccurrences": 128,
+    "topVerseIds": [
+      2,
+      133,
+      267,
+      328,
+      329
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "رب",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 124,
+    "totalWordOccurrences": 128,
+    "topVerseIds": [
+      2,
+      133,
+      267,
+      328,
+      329
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "رب",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "العالمين",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 61,
+    "totalWordOccurrences": 61,
+    "topVerseIds": [
+      2,
+      54,
+      129,
+      138,
+      258
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        11
+      ],
+      [
+        11
+      ],
+      [
+        9
+      ],
+      [
+        27
+      ]
+    ]
+  },
+  {
+    "q": "العالمين",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 61,
+    "totalWordOccurrences": 61,
+    "topVerseIds": [
+      2,
+      54,
+      129,
+      138,
+      258
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        11
+      ],
+      [
+        11
+      ],
+      [
+        9
+      ],
+      [
+        27
+      ]
+    ]
+  },
+  {
+    "q": "العالمين",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 61,
+    "totalWordOccurrences": 61,
+    "topVerseIds": [
+      2,
+      54,
+      129,
+      138,
+      258
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        11
+      ],
+      [
+        11
+      ],
+      [
+        9
+      ],
+      [
+        27
+      ]
+    ]
+  },
+  {
+    "q": "العالمين",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 61,
+    "totalWordOccurrences": 61,
+    "topVerseIds": [
+      2,
+      54,
+      129,
+      138,
+      258
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        11
+      ],
+      [
+        11
+      ],
+      [
+        9
+      ],
+      [
+        27
+      ]
+    ]
+  },
+  {
+    "q": "العالمين",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الصراط",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 6,
+    "totalWordOccurrences": 6,
+    "topVerseIds": [
+      6,
+      2483,
+      2747,
+      3771,
+      3906
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        8
+      ],
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الصراط",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 6,
+    "totalWordOccurrences": 6,
+    "topVerseIds": [
+      6,
+      2483,
+      2747,
+      3771,
+      3906
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        8
+      ],
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الصراط",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 6,
+    "totalWordOccurrences": 6,
+    "topVerseIds": [
+      6,
+      2483,
+      2747,
+      3771,
+      3906
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        8
+      ],
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الصراط",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 6,
+    "totalWordOccurrences": 6,
+    "topVerseIds": [
+      6,
+      2483,
+      2747,
+      3771,
+      3906
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        8
+      ],
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الصراط",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "المستقيم",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 5,
+    "totalWordOccurrences": 5,
+    "topVerseIds": [
+      6,
+      970,
+      2064,
+      3114,
+      3906
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        3
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "المستقيم",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 5,
+    "totalWordOccurrences": 5,
+    "topVerseIds": [
+      6,
+      970,
+      2064,
+      3114,
+      3906
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        3
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "المستقيم",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 5,
+    "totalWordOccurrences": 5,
+    "topVerseIds": [
+      6,
+      970,
+      2064,
+      3114,
+      3906
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        3
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "المستقيم",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 5,
+    "totalWordOccurrences": 5,
+    "topVerseIds": [
+      6,
+      970,
+      2064,
+      3114,
+      3906
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        3
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "المستقيم",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الذين",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 738,
+    "totalWordOccurrences": 811,
+    "topVerseIds": [
+      7,
+      10,
+      13,
+      21,
+      23
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        3
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الذين",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 738,
+    "totalWordOccurrences": 811,
+    "topVerseIds": [
+      7,
+      10,
+      13,
+      21,
+      23
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        3
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الذين",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 738,
+    "totalWordOccurrences": 811,
+    "topVerseIds": [
+      7,
+      10,
+      13,
+      21,
+      23
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        3
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الذين",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 738,
+    "totalWordOccurrences": 811,
+    "topVerseIds": [
+      7,
+      10,
+      13,
+      21,
+      23
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        3
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الذين",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "انعمت",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 7,
+    "totalWordOccurrences": 7,
+    "topVerseIds": [
+      7,
+      47,
+      54,
+      129,
+      3178
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        6
+      ],
+      [
+        6
+      ],
+      [
+        6
+      ],
+      [
+        12
+      ]
+    ]
+  },
+  {
+    "q": "انعمت",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 7,
+    "totalWordOccurrences": 7,
+    "topVerseIds": [
+      7,
+      47,
+      54,
+      129,
+      3178
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        6
+      ],
+      [
+        6
+      ],
+      [
+        6
+      ],
+      [
+        12
+      ]
+    ]
+  },
+  {
+    "q": "انعمت",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 7,
+    "totalWordOccurrences": 7,
+    "topVerseIds": [
+      7,
+      47,
+      54,
+      129,
+      3178
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        6
+      ],
+      [
+        6
+      ],
+      [
+        6
+      ],
+      [
+        12
+      ]
+    ]
+  },
+  {
+    "q": "انعمت",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 7,
+    "totalWordOccurrences": 7,
+    "topVerseIds": [
+      7,
+      47,
+      54,
+      129,
+      3178
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        6
+      ],
+      [
+        6
+      ],
+      [
+        6
+      ],
+      [
+        12
+      ]
+    ]
+  },
+  {
+    "q": "انعمت",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "عليهم",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 199,
+    "totalWordOccurrences": 214,
+    "topVerseIds": [
+      7,
+      13,
+      27,
+      45,
+      68
+    ],
+    "topMatchedIndexes": [
+      [
+        4,
+        7
+      ],
+      [
+        5
+      ],
+      [
+        12
+      ],
+      [
+        14
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "عليهم",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 199,
+    "totalWordOccurrences": 214,
+    "topVerseIds": [
+      7,
+      13,
+      27,
+      45,
+      68
+    ],
+    "topMatchedIndexes": [
+      [
+        4,
+        7
+      ],
+      [
+        5
+      ],
+      [
+        12
+      ],
+      [
+        14
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "عليهم",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 199,
+    "totalWordOccurrences": 214,
+    "topVerseIds": [
+      7,
+      13,
+      27,
+      45,
+      68
+    ],
+    "topMatchedIndexes": [
+      [
+        4,
+        7
+      ],
+      [
+        5
+      ],
+      [
+        12
+      ],
+      [
+        14
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "عليهم",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 199,
+    "totalWordOccurrences": 214,
+    "topVerseIds": [
+      7,
+      13,
+      27,
+      45,
+      68
+    ],
+    "topMatchedIndexes": [
+      [
+        4,
+        7
+      ],
+      [
+        5
+      ],
+      [
+        12
+      ],
+      [
+        14
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "عليهم",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "المؤمنين",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 76,
+    "totalWordOccurrences": 78,
+    "topVerseIds": [
+      230,
+      321,
+      361,
+      414,
+      445
+    ],
+    "topMatchedIndexes": [
+      [
+        16
+      ],
+      [
+        8
+      ],
+      [
+        13
+      ],
+      [
+        6
+      ],
+      [
+        40
+      ]
+    ]
+  },
+  {
+    "q": "المؤمنين",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 76,
+    "totalWordOccurrences": 78,
+    "topVerseIds": [
+      230,
+      321,
+      361,
+      414,
+      445
+    ],
+    "topMatchedIndexes": [
+      [
+        16
+      ],
+      [
+        8
+      ],
+      [
+        13
+      ],
+      [
+        6
+      ],
+      [
+        40
+      ]
+    ]
+  },
+  {
+    "q": "المؤمنين",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 76,
+    "totalWordOccurrences": 78,
+    "topVerseIds": [
+      230,
+      321,
+      361,
+      414,
+      445
+    ],
+    "topMatchedIndexes": [
+      [
+        16
+      ],
+      [
+        8
+      ],
+      [
+        13
+      ],
+      [
+        6
+      ],
+      [
+        40
+      ]
+    ]
+  },
+  {
+    "q": "المؤمنين",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 76,
+    "totalWordOccurrences": 78,
+    "topVerseIds": [
+      230,
+      321,
+      361,
+      414,
+      445
+    ],
+    "topMatchedIndexes": [
+      [
+        16
+      ],
+      [
+        8
+      ],
+      [
+        13
+      ],
+      [
+        6
+      ],
+      [
+        40
+      ]
+    ]
+  },
+  {
+    "q": "المؤمنين",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الكافرين",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 51,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      41,
+      96,
+      198,
+      257,
+      271
+    ],
+    "topMatchedIndexes": [
+      [
+        13
+      ],
+      [
+        26
+      ],
+      [
+        25
+      ],
+      [
+        15
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "الكافرين",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 51,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      41,
+      96,
+      198,
+      257,
+      271
+    ],
+    "topMatchedIndexes": [
+      [
+        13
+      ],
+      [
+        26
+      ],
+      [
+        25
+      ],
+      [
+        15
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "الكافرين",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 51,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      41,
+      96,
+      198,
+      257,
+      271
+    ],
+    "topMatchedIndexes": [
+      [
+        13
+      ],
+      [
+        26
+      ],
+      [
+        25
+      ],
+      [
+        15
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "الكافرين",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 51,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      41,
+      96,
+      198,
+      257,
+      271
+    ],
+    "topMatchedIndexes": [
+      [
+        13
+      ],
+      [
+        26
+      ],
+      [
+        25
+      ],
+      [
+        15
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "الكافرين",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "السموات",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "السموات",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "السموات",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "السموات",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "السموات",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الارض",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 275,
+    "totalWordOccurrences": 287,
+    "topVerseIds": [
+      18,
+      29,
+      34,
+      36,
+      37
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        17
+      ],
+      [
+        7
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "q": "الارض",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 275,
+    "totalWordOccurrences": 287,
+    "topVerseIds": [
+      18,
+      29,
+      34,
+      36,
+      37
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        17
+      ],
+      [
+        7
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "q": "الارض",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 275,
+    "totalWordOccurrences": 287,
+    "topVerseIds": [
+      18,
+      29,
+      34,
+      36,
+      37
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        17
+      ],
+      [
+        7
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "q": "الارض",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 275,
+    "totalWordOccurrences": 287,
+    "topVerseIds": [
+      18,
+      29,
+      34,
+      36,
+      37
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        17
+      ],
+      [
+        7
+      ],
+      [
+        8
+      ]
+    ]
+  },
+  {
+    "q": "الارض",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الشمس",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 20,
+    "totalWordOccurrences": 20,
+    "topVerseIds": [
+      867,
+      1369,
+      1709,
+      1783,
+      2107
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        13
+      ],
+      [
+        3
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "الشمس",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 20,
+    "totalWordOccurrences": 20,
+    "topVerseIds": [
+      867,
+      1369,
+      1709,
+      1783,
+      2107
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        13
+      ],
+      [
+        3
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "الشمس",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 20,
+    "totalWordOccurrences": 20,
+    "topVerseIds": [
+      867,
+      1369,
+      1709,
+      1783,
+      2107
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        13
+      ],
+      [
+        3
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "الشمس",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 20,
+    "totalWordOccurrences": 20,
+    "topVerseIds": [
+      867,
+      1369,
+      1709,
+      1783,
+      2107
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        13
+      ],
+      [
+        3
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "الشمس",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "القمر",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 5,
+    "totalWordOccurrences": 5,
+    "topVerseIds": [
+      866,
+      3745,
+      4847,
+      5435,
+      5559
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "القمر",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 5,
+    "totalWordOccurrences": 5,
+    "topVerseIds": [
+      866,
+      3745,
+      4847,
+      5435,
+      5559
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "القمر",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 5,
+    "totalWordOccurrences": 5,
+    "topVerseIds": [
+      866,
+      3745,
+      4847,
+      5435,
+      5559
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "القمر",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 5,
+    "totalWordOccurrences": 5,
+    "topVerseIds": [
+      866,
+      3745,
+      4847,
+      5435,
+      5559
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        2
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "القمر",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الليل",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الليل",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الليل",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الليل",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الليل",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "النهار",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 19,
+    "totalWordOccurrences": 25,
+    "topVerseIds": [
+      320,
+      365,
+      1008,
+      1409,
+      1587
+    ],
+    "topMatchedIndexes": [
+      [
+        4,
+        6
+      ],
+      [
+        13
+      ],
+      [
+        17
+      ],
+      [
+        9
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "النهار",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 19,
+    "totalWordOccurrences": 25,
+    "topVerseIds": [
+      320,
+      365,
+      1008,
+      1409,
+      1587
+    ],
+    "topMatchedIndexes": [
+      [
+        4,
+        6
+      ],
+      [
+        13
+      ],
+      [
+        17
+      ],
+      [
+        9
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "النهار",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 19,
+    "totalWordOccurrences": 25,
+    "topVerseIds": [
+      320,
+      365,
+      1008,
+      1409,
+      1587
+    ],
+    "topMatchedIndexes": [
+      [
+        4,
+        6
+      ],
+      [
+        13
+      ],
+      [
+        17
+      ],
+      [
+        9
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "النهار",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 19,
+    "totalWordOccurrences": 25,
+    "topVerseIds": [
+      320,
+      365,
+      1008,
+      1409,
+      1587
+    ],
+    "topMatchedIndexes": [
+      [
+        4,
+        6
+      ],
+      [
+        13
+      ],
+      [
+        17
+      ],
+      [
+        9
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "النهار",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "النار",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 99,
+    "totalWordOccurrences": 102,
+    "topVerseIds": [
+      31,
+      46,
+      87,
+      88,
+      133
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        10
+      ],
+      [
+        28
+      ]
+    ]
+  },
+  {
+    "q": "النار",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 99,
+    "totalWordOccurrences": 102,
+    "topVerseIds": [
+      31,
+      46,
+      87,
+      88,
+      133
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        10
+      ],
+      [
+        28
+      ]
+    ]
+  },
+  {
+    "q": "النار",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 99,
+    "totalWordOccurrences": 102,
+    "topVerseIds": [
+      31,
+      46,
+      87,
+      88,
+      133
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        10
+      ],
+      [
+        28
+      ]
+    ]
+  },
+  {
+    "q": "النار",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 99,
+    "totalWordOccurrences": 102,
+    "topVerseIds": [
+      31,
+      46,
+      87,
+      88,
+      133
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        10
+      ],
+      [
+        28
+      ]
+    ]
+  },
+  {
+    "q": "النار",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الجنه",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 54,
+    "totalWordOccurrences": 56,
+    "topVerseIds": [
+      42,
+      89,
+      118,
+      221,
+      228
+    ],
+    "topMatchedIndexes": [
+      [
+        6
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        32
+      ]
+    ]
+  },
+  {
+    "q": "الجنه",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 54,
+    "totalWordOccurrences": 56,
+    "topVerseIds": [
+      42,
+      89,
+      118,
+      221,
+      228
+    ],
+    "topMatchedIndexes": [
+      [
+        6
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        32
+      ]
+    ]
+  },
+  {
+    "q": "الجنه",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 54,
+    "totalWordOccurrences": 56,
+    "topVerseIds": [
+      42,
+      89,
+      118,
+      221,
+      228
+    ],
+    "topMatchedIndexes": [
+      [
+        6
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        32
+      ]
+    ]
+  },
+  {
+    "q": "الجنه",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 54,
+    "totalWordOccurrences": 56,
+    "topVerseIds": [
+      42,
+      89,
+      118,
+      221,
+      228
+    ],
+    "topMatchedIndexes": [
+      [
+        6
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        32
+      ]
+    ]
+  },
+  {
+    "q": "الجنه",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الكتاب",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 151,
+    "totalWordOccurrences": 163,
+    "topVerseIds": [
+      9,
+      51,
+      60,
+      85,
+      86
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        9
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "الكتاب",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 151,
+    "totalWordOccurrences": 163,
+    "topVerseIds": [
+      9,
+      51,
+      60,
+      85,
+      86
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        9
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "الكتاب",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 151,
+    "totalWordOccurrences": 163,
+    "topVerseIds": [
+      9,
+      51,
+      60,
+      85,
+      86
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        9
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "الكتاب",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 151,
+    "totalWordOccurrences": 163,
+    "topVerseIds": [
+      9,
+      51,
+      60,
+      85,
+      86
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        9
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "الكتاب",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الحق",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 103,
+    "totalWordOccurrences": 109,
+    "topVerseIds": [
+      33,
+      49,
+      68,
+      98,
+      116
+    ],
+    "topMatchedIndexes": [
+      [
+        18
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        54
+      ],
+      [
+        17
+      ],
+      [
+        21
+      ]
+    ]
+  },
+  {
+    "q": "الحق",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 103,
+    "totalWordOccurrences": 109,
+    "topVerseIds": [
+      33,
+      49,
+      68,
+      98,
+      116
+    ],
+    "topMatchedIndexes": [
+      [
+        18
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        54
+      ],
+      [
+        17
+      ],
+      [
+        21
+      ]
+    ]
+  },
+  {
+    "q": "الحق",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 103,
+    "totalWordOccurrences": 109,
+    "topVerseIds": [
+      33,
+      49,
+      68,
+      98,
+      116
+    ],
+    "topMatchedIndexes": [
+      [
+        18
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        54
+      ],
+      [
+        17
+      ],
+      [
+        21
+      ]
+    ]
+  },
+  {
+    "q": "الحق",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 103,
+    "totalWordOccurrences": 109,
+    "topVerseIds": [
+      33,
+      49,
+      68,
+      98,
+      116
+    ],
+    "topMatchedIndexes": [
+      [
+        18
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        54
+      ],
+      [
+        17
+      ],
+      [
+        21
+      ]
+    ]
+  },
+  {
+    "q": "الحق",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "القران",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 43,
+    "totalWordOccurrences": 43,
+    "topVerseIds": [
+      192,
+      575,
+      770,
+      808,
+      1158
+    ],
+    "topMatchedIndexes": [
+      [
+        6
+      ],
+      [
+        3
+      ],
+      [
+        17
+      ],
+      [
+        14
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "القران",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 43,
+    "totalWordOccurrences": 43,
+    "topVerseIds": [
+      192,
+      575,
+      770,
+      808,
+      1158
+    ],
+    "topMatchedIndexes": [
+      [
+        6
+      ],
+      [
+        3
+      ],
+      [
+        17
+      ],
+      [
+        14
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "القران",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 43,
+    "totalWordOccurrences": 43,
+    "topVerseIds": [
+      192,
+      575,
+      770,
+      808,
+      1158
+    ],
+    "topMatchedIndexes": [
+      [
+        6
+      ],
+      [
+        3
+      ],
+      [
+        17
+      ],
+      [
+        14
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "القران",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 43,
+    "totalWordOccurrences": 43,
+    "topVerseIds": [
+      192,
+      575,
+      770,
+      808,
+      1158
+    ],
+    "topMatchedIndexes": [
+      [
+        6
+      ],
+      [
+        3
+      ],
+      [
+        17
+      ],
+      [
+        14
+      ],
+      [
+        3
+      ]
+    ]
+  },
+  {
+    "q": "القران",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "ايات",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 51,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      106,
+      238,
+      259,
+      300,
+      390
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        23
+      ],
+      [
+        2
+      ],
+      [
+        7
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "ايات",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 51,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      106,
+      238,
+      259,
+      300,
+      390
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        23
+      ],
+      [
+        2
+      ],
+      [
+        7
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "ايات",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 51,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      106,
+      238,
+      259,
+      300,
+      390
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        23
+      ],
+      [
+        2
+      ],
+      [
+        7
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "ايات",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 51,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      106,
+      238,
+      259,
+      300,
+      390
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        23
+      ],
+      [
+        2
+      ],
+      [
+        7
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "ايات",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "رسول",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 52,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      94,
+      108,
+      374,
+      437,
+      557
+    ],
+    "topMatchedIndexes": [
+      [
+        19
+      ],
+      [
+        3
+      ],
+      [
+        13
+      ],
+      [
+        4
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "رسول",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 52,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      94,
+      108,
+      374,
+      437,
+      557
+    ],
+    "topMatchedIndexes": [
+      [
+        19
+      ],
+      [
+        3
+      ],
+      [
+        13
+      ],
+      [
+        4
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "رسول",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 52,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      94,
+      108,
+      374,
+      437,
+      557
+    ],
+    "topMatchedIndexes": [
+      [
+        19
+      ],
+      [
+        3
+      ],
+      [
+        13
+      ],
+      [
+        4
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "رسول",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 52,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      94,
+      108,
+      374,
+      437,
+      557
+    ],
+    "topMatchedIndexes": [
+      [
+        19
+      ],
+      [
+        3
+      ],
+      [
+        13
+      ],
+      [
+        4
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "رسول",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "نبي",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 7,
+    "totalWordOccurrences": 7,
+    "topVerseIds": [
+      439,
+      901,
+      1048,
+      2647,
+      2886
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "نبي",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 7,
+    "totalWordOccurrences": 7,
+    "topVerseIds": [
+      439,
+      901,
+      1048,
+      2647,
+      2886
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "نبي",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 7,
+    "totalWordOccurrences": 7,
+    "topVerseIds": [
+      439,
+      901,
+      1048,
+      2647,
+      2886
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "نبي",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 7,
+    "totalWordOccurrences": 7,
+    "topVerseIds": [
+      439,
+      901,
+      1048,
+      2647,
+      2886
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        4
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ],
+      [
+        4
+      ]
+    ]
+  },
+  {
+    "q": "نبي",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الملائكه",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الملائكه",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الملائكه",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الملائكه",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الملائكه",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "يوم",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 211,
+    "totalWordOccurrences": 217,
+    "topVerseIds": [
+      4,
+      120,
+      181,
+      219,
+      261
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        26
+      ],
+      [
+        23
+      ],
+      [
+        13
+      ],
+      [
+        11
+      ]
+    ]
+  },
+  {
+    "q": "يوم",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 211,
+    "totalWordOccurrences": 217,
+    "topVerseIds": [
+      4,
+      120,
+      181,
+      219,
+      261
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        26
+      ],
+      [
+        23
+      ],
+      [
+        13
+      ],
+      [
+        11
+      ]
+    ]
+  },
+  {
+    "q": "يوم",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 211,
+    "totalWordOccurrences": 217,
+    "topVerseIds": [
+      4,
+      120,
+      181,
+      219,
+      261
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        26
+      ],
+      [
+        23
+      ],
+      [
+        13
+      ],
+      [
+        11
+      ]
+    ]
+  },
+  {
+    "q": "يوم",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 211,
+    "totalWordOccurrences": 217,
+    "topVerseIds": [
+      4,
+      120,
+      181,
+      219,
+      261
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        26
+      ],
+      [
+        23
+      ],
+      [
+        13
+      ],
+      [
+        11
+      ]
+    ]
+  },
+  {
+    "q": "يوم",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الدين",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 46,
+    "totalWordOccurrences": 47,
+    "topVerseIds": [
+      4,
+      139,
+      200,
+      263,
+      312
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        11
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الدين",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 46,
+    "totalWordOccurrences": 47,
+    "topVerseIds": [
+      4,
+      139,
+      200,
+      263,
+      312
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        11
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الدين",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 46,
+    "totalWordOccurrences": 47,
+    "topVerseIds": [
+      4,
+      139,
+      200,
+      263,
+      312
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        11
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الدين",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 46,
+    "totalWordOccurrences": 47,
+    "topVerseIds": [
+      4,
+      139,
+      200,
+      263,
+      312
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        11
+      ],
+      [
+        7
+      ],
+      [
+        4
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "الدين",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "الحساب",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 16,
+    "totalWordOccurrences": 16,
+    "topVerseIds": [
+      209,
+      312,
+      492,
+      673,
+      1725
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        26
+      ],
+      [
+        30
+      ],
+      [
+        31
+      ],
+      [
+        23
+      ]
+    ]
+  },
+  {
+    "q": "الحساب",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 16,
+    "totalWordOccurrences": 16,
+    "topVerseIds": [
+      209,
+      312,
+      492,
+      673,
+      1725
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        26
+      ],
+      [
+        30
+      ],
+      [
+        31
+      ],
+      [
+        23
+      ]
+    ]
+  },
+  {
+    "q": "الحساب",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 16,
+    "totalWordOccurrences": 16,
+    "topVerseIds": [
+      209,
+      312,
+      492,
+      673,
+      1725
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        26
+      ],
+      [
+        30
+      ],
+      [
+        31
+      ],
+      [
+        23
+      ]
+    ]
+  },
+  {
+    "q": "الحساب",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 16,
+    "totalWordOccurrences": 16,
+    "topVerseIds": [
+      209,
+      312,
+      492,
+      673,
+      1725
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        26
+      ],
+      [
+        30
+      ],
+      [
+        31
+      ],
+      [
+        23
+      ]
+    ]
+  },
+  {
+    "q": "الحساب",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "عذاب",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 145,
+    "totalWordOccurrences": 150,
+    "topVerseIds": [
+      14,
+      17,
+      97,
+      111,
+      121
+    ],
+    "topMatchedIndexes": [
+      [
+        11
+      ],
+      [
+        8
+      ],
+      [
+        26
+      ],
+      [
+        11
+      ],
+      [
+        29
+      ]
+    ]
+  },
+  {
+    "q": "عذاب",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 145,
+    "totalWordOccurrences": 150,
+    "topVerseIds": [
+      14,
+      17,
+      97,
+      111,
+      121
+    ],
+    "topMatchedIndexes": [
+      [
+        11
+      ],
+      [
+        8
+      ],
+      [
+        26
+      ],
+      [
+        11
+      ],
+      [
+        29
+      ]
+    ]
+  },
+  {
+    "q": "عذاب",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 145,
+    "totalWordOccurrences": 150,
+    "topVerseIds": [
+      14,
+      17,
+      97,
+      111,
+      121
+    ],
+    "topMatchedIndexes": [
+      [
+        11
+      ],
+      [
+        8
+      ],
+      [
+        26
+      ],
+      [
+        11
+      ],
+      [
+        29
+      ]
+    ]
+  },
+  {
+    "q": "عذاب",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 145,
+    "totalWordOccurrences": 150,
+    "topVerseIds": [
+      14,
+      17,
+      97,
+      111,
+      121
+    ],
+    "topMatchedIndexes": [
+      [
+        11
+      ],
+      [
+        8
+      ],
+      [
+        26
+      ],
+      [
+        11
+      ],
+      [
+        29
+      ]
+    ]
+  },
+  {
+    "q": "عذاب",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "اليم",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 59,
+    "totalWordOccurrences": 60,
+    "topVerseIds": [
+      17,
+      111,
+      181,
+      185,
+      314
+    ],
+    "topMatchedIndexes": [
+      [
+        9
+      ],
+      [
+        12
+      ],
+      [
+        29
+      ],
+      [
+        37
+      ],
+      [
+        18
+      ]
+    ]
+  },
+  {
+    "q": "اليم",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 59,
+    "totalWordOccurrences": 60,
+    "topVerseIds": [
+      17,
+      111,
+      181,
+      185,
+      314
+    ],
+    "topMatchedIndexes": [
+      [
+        9
+      ],
+      [
+        12
+      ],
+      [
+        29
+      ],
+      [
+        37
+      ],
+      [
+        18
+      ]
+    ]
+  },
+  {
+    "q": "اليم",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 59,
+    "totalWordOccurrences": 60,
+    "topVerseIds": [
+      17,
+      111,
+      181,
+      185,
+      314
+    ],
+    "topMatchedIndexes": [
+      [
+        9
+      ],
+      [
+        12
+      ],
+      [
+        29
+      ],
+      [
+        37
+      ],
+      [
+        18
+      ]
+    ]
+  },
+  {
+    "q": "اليم",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 59,
+    "totalWordOccurrences": 60,
+    "topVerseIds": [
+      17,
+      111,
+      181,
+      185,
+      314
+    ],
+    "topMatchedIndexes": [
+      [
+        9
+      ],
+      [
+        12
+      ],
+      [
+        29
+      ],
+      [
+        37
+      ],
+      [
+        18
+      ]
+    ]
+  },
+  {
+    "q": "اليم",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "عظيم",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 49,
+    "totalWordOccurrences": 49,
+    "topVerseIds": [
+      14,
+      56,
+      121,
+      398,
+      465
+    ],
+    "topMatchedIndexes": [
+      [
+        12
+      ],
+      [
+        18
+      ],
+      [
+        30
+      ],
+      [
+        14
+      ],
+      [
+        15
+      ]
+    ]
+  },
+  {
+    "q": "عظيم",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 49,
+    "totalWordOccurrences": 49,
+    "topVerseIds": [
+      14,
+      56,
+      121,
+      398,
+      465
+    ],
+    "topMatchedIndexes": [
+      [
+        12
+      ],
+      [
+        18
+      ],
+      [
+        30
+      ],
+      [
+        14
+      ],
+      [
+        15
+      ]
+    ]
+  },
+  {
+    "q": "عظيم",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 49,
+    "totalWordOccurrences": 49,
+    "topVerseIds": [
+      14,
+      56,
+      121,
+      398,
+      465
+    ],
+    "topMatchedIndexes": [
+      [
+        12
+      ],
+      [
+        18
+      ],
+      [
+        30
+      ],
+      [
+        14
+      ],
+      [
+        15
+      ]
+    ]
+  },
+  {
+    "q": "عظيم",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 49,
+    "totalWordOccurrences": 49,
+    "topVerseIds": [
+      14,
+      56,
+      121,
+      398,
+      465
+    ],
+    "topMatchedIndexes": [
+      [
+        12
+      ],
+      [
+        18
+      ],
+      [
+        30
+      ],
+      [
+        14
+      ],
+      [
+        15
+      ]
+    ]
+  },
+  {
+    "q": "عظيم",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "مهين",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 12,
+    "totalWordOccurrences": 12,
+    "topVerseIds": [
+      97,
+      471,
+      507,
+      2652,
+      3475
+    ],
+    "topMatchedIndexes": [
+      [
+        27
+      ],
+      [
+        17
+      ],
+      [
+        13
+      ],
+      [
+        8
+      ],
+      [
+        18
+      ]
+    ]
+  },
+  {
+    "q": "مهين",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 12,
+    "totalWordOccurrences": 12,
+    "topVerseIds": [
+      97,
+      471,
+      507,
+      2652,
+      3475
+    ],
+    "topMatchedIndexes": [
+      [
+        27
+      ],
+      [
+        17
+      ],
+      [
+        13
+      ],
+      [
+        8
+      ],
+      [
+        18
+      ]
+    ]
+  },
+  {
+    "q": "مهين",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 12,
+    "totalWordOccurrences": 12,
+    "topVerseIds": [
+      97,
+      471,
+      507,
+      2652,
+      3475
+    ],
+    "topMatchedIndexes": [
+      [
+        27
+      ],
+      [
+        17
+      ],
+      [
+        13
+      ],
+      [
+        8
+      ],
+      [
+        18
+      ]
+    ]
+  },
+  {
+    "q": "مهين",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 12,
+    "totalWordOccurrences": 12,
+    "topVerseIds": [
+      97,
+      471,
+      507,
+      2652,
+      3475
+    ],
+    "topMatchedIndexes": [
+      [
+        27
+      ],
+      [
+        17
+      ],
+      [
+        13
+      ],
+      [
+        8
+      ],
+      [
+        18
+      ]
+    ]
+  },
+  {
+    "q": "مهين",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "مغفره",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 17,
+    "totalWordOccurrences": 17,
+    "topVerseIds": [
+      275,
+      426,
+      429,
+      678,
+      1234
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        4
+      ],
+      [
+        3
+      ],
+      [
+        8
+      ],
+      [
+        16
+      ]
+    ]
+  },
+  {
+    "q": "مغفره",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 17,
+    "totalWordOccurrences": 17,
+    "topVerseIds": [
+      275,
+      426,
+      429,
+      678,
+      1234
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        4
+      ],
+      [
+        3
+      ],
+      [
+        8
+      ],
+      [
+        16
+      ]
+    ]
+  },
+  {
+    "q": "مغفره",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 17,
+    "totalWordOccurrences": 17,
+    "topVerseIds": [
+      275,
+      426,
+      429,
+      678,
+      1234
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        4
+      ],
+      [
+        3
+      ],
+      [
+        8
+      ],
+      [
+        16
+      ]
+    ]
+  },
+  {
+    "q": "مغفره",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 17,
+    "totalWordOccurrences": 17,
+    "topVerseIds": [
+      275,
+      426,
+      429,
+      678,
+      1234
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        4
+      ],
+      [
+        3
+      ],
+      [
+        8
+      ],
+      [
+        16
+      ]
+    ]
+  },
+  {
+    "q": "مغفره",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "اجر",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 32,
+    "totalWordOccurrences": 32,
+    "topVerseIds": [
+      429,
+      464,
+      465,
+      472,
+      1124
+    ],
+    "topMatchedIndexes": [
+      [
+        14
+      ],
+      [
+        11
+      ],
+      [
+        14
+      ],
+      [
+        35
+      ],
+      [
+        9
+      ]
+    ]
+  },
+  {
+    "q": "اجر",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 32,
+    "totalWordOccurrences": 32,
+    "topVerseIds": [
+      429,
+      464,
+      465,
+      472,
+      1124
+    ],
+    "topMatchedIndexes": [
+      [
+        14
+      ],
+      [
+        11
+      ],
+      [
+        14
+      ],
+      [
+        35
+      ],
+      [
+        9
+      ]
+    ]
+  },
+  {
+    "q": "اجر",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 32,
+    "totalWordOccurrences": 32,
+    "topVerseIds": [
+      429,
+      464,
+      465,
+      472,
+      1124
+    ],
+    "topMatchedIndexes": [
+      [
+        14
+      ],
+      [
+        11
+      ],
+      [
+        14
+      ],
+      [
+        35
+      ],
+      [
+        9
+      ]
+    ]
+  },
+  {
+    "q": "اجر",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 32,
+    "totalWordOccurrences": 32,
+    "topVerseIds": [
+      429,
+      464,
+      465,
+      472,
+      1124
+    ],
+    "topMatchedIndexes": [
+      [
+        14
+      ],
+      [
+        11
+      ],
+      [
+        14
+      ],
+      [
+        35
+      ],
+      [
+        9
+      ]
+    ]
+  },
+  {
+    "q": "اجر",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "كبير",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 10,
+    "totalWordOccurrences": 10,
+    "topVerseIds": [
+      224,
+      226,
+      1233,
+      1476,
+      1484
+    ],
+    "topMatchedIndexes": [
+      [
+        10
+      ],
+      [
+        9
+      ],
+      [
+        13
+      ],
+      [
+        25
+      ],
+      [
+        10
+      ]
+    ]
+  },
+  {
+    "q": "كبير",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 10,
+    "totalWordOccurrences": 10,
+    "topVerseIds": [
+      224,
+      226,
+      1233,
+      1476,
+      1484
+    ],
+    "topMatchedIndexes": [
+      [
+        10
+      ],
+      [
+        9
+      ],
+      [
+        13
+      ],
+      [
+        25
+      ],
+      [
+        10
+      ]
+    ]
+  },
+  {
+    "q": "كبير",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 10,
+    "totalWordOccurrences": 10,
+    "topVerseIds": [
+      224,
+      226,
+      1233,
+      1476,
+      1484
+    ],
+    "topMatchedIndexes": [
+      [
+        10
+      ],
+      [
+        9
+      ],
+      [
+        13
+      ],
+      [
+        25
+      ],
+      [
+        10
+      ]
+    ]
+  },
+  {
+    "q": "كبير",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 10,
+    "totalWordOccurrences": 10,
+    "topVerseIds": [
+      224,
+      226,
+      1233,
+      1476,
+      1484
+    ],
+    "topMatchedIndexes": [
+      [
+        10
+      ],
+      [
+        9
+      ],
+      [
+        13
+      ],
+      [
+        25
+      ],
+      [
+        10
+      ]
+    ]
+  },
+  {
+    "q": "كبير",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "شاكر",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 1,
+    "totalWordOccurrences": 1,
+    "topVerseIds": [
+      165
+    ],
+    "topMatchedIndexes": [
+      [
+        24
+      ]
+    ]
+  },
+  {
+    "q": "شاكر",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 1,
+    "totalWordOccurrences": 1,
+    "topVerseIds": [
+      165
+    ],
+    "topMatchedIndexes": [
+      [
+        24
+      ]
+    ]
+  },
+  {
+    "q": "شاكر",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 1,
+    "totalWordOccurrences": 1,
+    "topVerseIds": [
+      165
+    ],
+    "topMatchedIndexes": [
+      [
+        24
+      ]
+    ]
+  },
+  {
+    "q": "شاكر",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 1,
+    "totalWordOccurrences": 1,
+    "topVerseIds": [
+      165
+    ],
+    "topMatchedIndexes": [
+      [
+        24
+      ]
+    ]
+  },
+  {
+    "q": "شاكر",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "عليم",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 106,
+    "totalWordOccurrences": 106,
+    "topVerseIds": [
+      36,
+      102,
+      122,
+      165,
+      188
+    ],
+    "topMatchedIndexes": [
+      [
+        19
+      ],
+      [
+        8
+      ],
+      [
+        12
+      ],
+      [
+        25
+      ],
+      [
+        14
+      ]
+    ]
+  },
+  {
+    "q": "عليم",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 106,
+    "totalWordOccurrences": 106,
+    "topVerseIds": [
+      36,
+      102,
+      122,
+      165,
+      188
+    ],
+    "topMatchedIndexes": [
+      [
+        19
+      ],
+      [
+        8
+      ],
+      [
+        12
+      ],
+      [
+        25
+      ],
+      [
+        14
+      ]
+    ]
+  },
+  {
+    "q": "عليم",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 106,
+    "totalWordOccurrences": 106,
+    "topVerseIds": [
+      36,
+      102,
+      122,
+      165,
+      188
+    ],
+    "topMatchedIndexes": [
+      [
+        19
+      ],
+      [
+        8
+      ],
+      [
+        12
+      ],
+      [
+        25
+      ],
+      [
+        14
+      ]
+    ]
+  },
+  {
+    "q": "عليم",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 106,
+    "totalWordOccurrences": 106,
+    "topVerseIds": [
+      36,
+      102,
+      122,
+      165,
+      188
+    ],
+    "topMatchedIndexes": [
+      [
+        19
+      ],
+      [
+        8
+      ],
+      [
+        12
+      ],
+      [
+        25
+      ],
+      [
+        14
+      ]
+    ]
+  },
+  {
+    "q": "عليم",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "حكيم",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 39,
+    "totalWordOccurrences": 39,
+    "topVerseIds": [
+      216,
+      227,
+      235,
+      247,
+      267
+    ],
+    "topMatchedIndexes": [
+      [
+        12
+      ],
+      [
+        26
+      ],
+      [
+        40
+      ],
+      [
+        27
+      ],
+      [
+        39
+      ]
+    ]
+  },
+  {
+    "q": "حكيم",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 39,
+    "totalWordOccurrences": 39,
+    "topVerseIds": [
+      216,
+      227,
+      235,
+      247,
+      267
+    ],
+    "topMatchedIndexes": [
+      [
+        12
+      ],
+      [
+        26
+      ],
+      [
+        40
+      ],
+      [
+        27
+      ],
+      [
+        39
+      ]
+    ]
+  },
+  {
+    "q": "حكيم",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 39,
+    "totalWordOccurrences": 39,
+    "topVerseIds": [
+      216,
+      227,
+      235,
+      247,
+      267
+    ],
+    "topMatchedIndexes": [
+      [
+        12
+      ],
+      [
+        26
+      ],
+      [
+        40
+      ],
+      [
+        27
+      ],
+      [
+        39
+      ]
+    ]
+  },
+  {
+    "q": "حكيم",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 39,
+    "totalWordOccurrences": 39,
+    "topVerseIds": [
+      216,
+      227,
+      235,
+      247,
+      267
+    ],
+    "topMatchedIndexes": [
+      [
+        12
+      ],
+      [
+        26
+      ],
+      [
+        40
+      ],
+      [
+        27
+      ],
+      [
+        39
+      ]
+    ]
+  },
+  {
+    "q": "حكيم",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "غفور",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 52,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      180,
+      189,
+      199,
+      206,
+      225
+    ],
+    "topMatchedIndexes": [
+      [
+        24
+      ],
+      [
+        15
+      ],
+      [
+        5
+      ],
+      [
+        11
+      ],
+      [
+        15
+      ]
+    ]
+  },
+  {
+    "q": "غفور",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 52,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      180,
+      189,
+      199,
+      206,
+      225
+    ],
+    "topMatchedIndexes": [
+      [
+        24
+      ],
+      [
+        15
+      ],
+      [
+        5
+      ],
+      [
+        11
+      ],
+      [
+        15
+      ]
+    ]
+  },
+  {
+    "q": "غفور",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 52,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      180,
+      189,
+      199,
+      206,
+      225
+    ],
+    "topMatchedIndexes": [
+      [
+        24
+      ],
+      [
+        15
+      ],
+      [
+        5
+      ],
+      [
+        11
+      ],
+      [
+        15
+      ]
+    ]
+  },
+  {
+    "q": "غفور",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 52,
+    "totalWordOccurrences": 52,
+    "topVerseIds": [
+      180,
+      189,
+      199,
+      206,
+      225
+    ],
+    "topMatchedIndexes": [
+      [
+        24
+      ],
+      [
+        15
+      ],
+      [
+        5
+      ],
+      [
+        11
+      ],
+      [
+        15
+      ]
+    ]
+  },
+  {
+    "q": "غفور",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "رحيم",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 61,
+    "totalWordOccurrences": 61,
+    "topVerseIds": [
+      150,
+      180,
+      189,
+      199,
+      206
+    ],
+    "topMatchedIndexes": [
+      [
+        45
+      ],
+      [
+        25
+      ],
+      [
+        16
+      ],
+      [
+        6
+      ],
+      [
+        12
+      ]
+    ]
+  },
+  {
+    "q": "رحيم",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 61,
+    "totalWordOccurrences": 61,
+    "topVerseIds": [
+      150,
+      180,
+      189,
+      199,
+      206
+    ],
+    "topMatchedIndexes": [
+      [
+        45
+      ],
+      [
+        25
+      ],
+      [
+        16
+      ],
+      [
+        6
+      ],
+      [
+        12
+      ]
+    ]
+  },
+  {
+    "q": "رحيم",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 61,
+    "totalWordOccurrences": 61,
+    "topVerseIds": [
+      150,
+      180,
+      189,
+      199,
+      206
+    ],
+    "topMatchedIndexes": [
+      [
+        45
+      ],
+      [
+        25
+      ],
+      [
+        16
+      ],
+      [
+        6
+      ],
+      [
+        12
+      ]
+    ]
+  },
+  {
+    "q": "رحيم",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 61,
+    "totalWordOccurrences": 61,
+    "topVerseIds": [
+      150,
+      180,
+      189,
+      199,
+      206
+    ],
+    "topMatchedIndexes": [
+      [
+        45
+      ],
+      [
+        25
+      ],
+      [
+        16
+      ],
+      [
+        6
+      ],
+      [
+        12
+      ]
+    ]
+  },
+  {
+    "q": "رحيم",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "سميع",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 21,
+    "totalWordOccurrences": 21,
+    "topVerseIds": [
+      188,
+      231,
+      234,
+      251,
+      263
+    ],
+    "topMatchedIndexes": [
+      [
+        13
+      ],
+      [
+        13
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ],
+      [
+        23
+      ]
+    ]
+  },
+  {
+    "q": "سميع",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 21,
+    "totalWordOccurrences": 21,
+    "topVerseIds": [
+      188,
+      231,
+      234,
+      251,
+      263
+    ],
+    "topMatchedIndexes": [
+      [
+        13
+      ],
+      [
+        13
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ],
+      [
+        23
+      ]
+    ]
+  },
+  {
+    "q": "سميع",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 21,
+    "totalWordOccurrences": 21,
+    "topVerseIds": [
+      188,
+      231,
+      234,
+      251,
+      263
+    ],
+    "topMatchedIndexes": [
+      [
+        13
+      ],
+      [
+        13
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ],
+      [
+        23
+      ]
+    ]
+  },
+  {
+    "q": "سميع",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 21,
+    "totalWordOccurrences": 21,
+    "topVerseIds": [
+      188,
+      231,
+      234,
+      251,
+      263
+    ],
+    "topMatchedIndexes": [
+      [
+        13
+      ],
+      [
+        13
+      ],
+      [
+        6
+      ],
+      [
+        8
+      ],
+      [
+        23
+      ]
+    ]
+  },
+  {
+    "q": "سميع",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "بصير",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 27,
+    "totalWordOccurrences": 27,
+    "topVerseIds": [
+      103,
+      117,
+      240,
+      244,
+      272
+    ],
+    "topMatchedIndexes": [
+      [
+        23
+      ],
+      [
+        17
+      ],
+      [
+        65
+      ],
+      [
+        35
+      ],
+      [
+        27
+      ]
+    ]
+  },
+  {
+    "q": "بصير",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 27,
+    "totalWordOccurrences": 27,
+    "topVerseIds": [
+      103,
+      117,
+      240,
+      244,
+      272
+    ],
+    "topMatchedIndexes": [
+      [
+        23
+      ],
+      [
+        17
+      ],
+      [
+        65
+      ],
+      [
+        35
+      ],
+      [
+        27
+      ]
+    ]
+  },
+  {
+    "q": "بصير",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 27,
+    "totalWordOccurrences": 27,
+    "topVerseIds": [
+      103,
+      117,
+      240,
+      244,
+      272
+    ],
+    "topMatchedIndexes": [
+      [
+        23
+      ],
+      [
+        17
+      ],
+      [
+        65
+      ],
+      [
+        35
+      ],
+      [
+        27
+      ]
+    ]
+  },
+  {
+    "q": "بصير",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 27,
+    "totalWordOccurrences": 27,
+    "topVerseIds": [
+      103,
+      117,
+      240,
+      244,
+      272
+    ],
+    "topMatchedIndexes": [
+      [
+        23
+      ],
+      [
+        17
+      ],
+      [
+        65
+      ],
+      [
+        35
+      ],
+      [
+        27
+      ]
+    ]
+  },
+  {
+    "q": "بصير",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "قدير",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 37,
+    "totalWordOccurrences": 37,
+    "topVerseIds": [
+      27,
+      113,
+      116,
+      155,
+      266
+    ],
+    "topMatchedIndexes": [
+      [
+        25
+      ],
+      [
+        20
+      ],
+      [
+        33
+      ],
+      [
+        19
+      ],
+      [
+        67
+      ]
+    ]
+  },
+  {
+    "q": "قدير",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 37,
+    "totalWordOccurrences": 37,
+    "topVerseIds": [
+      27,
+      113,
+      116,
+      155,
+      266
+    ],
+    "topMatchedIndexes": [
+      [
+        25
+      ],
+      [
+        20
+      ],
+      [
+        33
+      ],
+      [
+        19
+      ],
+      [
+        67
+      ]
+    ]
+  },
+  {
+    "q": "قدير",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 37,
+    "totalWordOccurrences": 37,
+    "topVerseIds": [
+      27,
+      113,
+      116,
+      155,
+      266
+    ],
+    "topMatchedIndexes": [
+      [
+        25
+      ],
+      [
+        20
+      ],
+      [
+        33
+      ],
+      [
+        19
+      ],
+      [
+        67
+      ]
+    ]
+  },
+  {
+    "q": "قدير",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 37,
+    "totalWordOccurrences": 37,
+    "topVerseIds": [
+      27,
+      113,
+      116,
+      155,
+      266
+    ],
+    "topMatchedIndexes": [
+      [
+        25
+      ],
+      [
+        20
+      ],
+      [
+        33
+      ],
+      [
+        19
+      ],
+      [
+        67
+      ]
+    ]
+  },
+  {
+    "q": "قدير",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "خبير",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 25,
+    "totalWordOccurrences": 25,
+    "topVerseIds": [
+      241,
+      278,
+      446,
+      473,
+      677
+    ],
+    "topMatchedIndexes": [
+      [
+        25
+      ],
+      [
+        20
+      ],
+      [
+        24
+      ],
+      [
+        30
+      ],
+      [
+        24
+      ]
+    ]
+  },
+  {
+    "q": "خبير",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 25,
+    "totalWordOccurrences": 25,
+    "topVerseIds": [
+      241,
+      278,
+      446,
+      473,
+      677
+    ],
+    "topMatchedIndexes": [
+      [
+        25
+      ],
+      [
+        20
+      ],
+      [
+        24
+      ],
+      [
+        30
+      ],
+      [
+        24
+      ]
+    ]
+  },
+  {
+    "q": "خبير",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 25,
+    "totalWordOccurrences": 25,
+    "topVerseIds": [
+      241,
+      278,
+      446,
+      473,
+      677
+    ],
+    "topMatchedIndexes": [
+      [
+        25
+      ],
+      [
+        20
+      ],
+      [
+        24
+      ],
+      [
+        30
+      ],
+      [
+        24
+      ]
+    ]
+  },
+  {
+    "q": "خبير",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 25,
+    "totalWordOccurrences": 25,
+    "topVerseIds": [
+      241,
+      278,
+      446,
+      473,
+      677
+    ],
+    "topMatchedIndexes": [
+      [
+        25
+      ],
+      [
+        20
+      ],
+      [
+        24
+      ],
+      [
+        30
+      ],
+      [
+        24
+      ]
+    ]
+  },
+  {
+    "q": "خبير",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "عزيز",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 24,
+    "totalWordOccurrences": 24,
+    "topVerseIds": [
+      216,
+      227,
+      235,
+      247,
+      267
+    ],
+    "topMatchedIndexes": [
+      [
+        11
+      ],
+      [
+        25
+      ],
+      [
+        39
+      ],
+      [
+        26
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "عزيز",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 24,
+    "totalWordOccurrences": 24,
+    "topVerseIds": [
+      216,
+      227,
+      235,
+      247,
+      267
+    ],
+    "topMatchedIndexes": [
+      [
+        11
+      ],
+      [
+        25
+      ],
+      [
+        39
+      ],
+      [
+        26
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "عزيز",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 24,
+    "totalWordOccurrences": 24,
+    "topVerseIds": [
+      216,
+      227,
+      235,
+      247,
+      267
+    ],
+    "topMatchedIndexes": [
+      [
+        11
+      ],
+      [
+        25
+      ],
+      [
+        39
+      ],
+      [
+        26
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "عزيز",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 24,
+    "totalWordOccurrences": 24,
+    "topVerseIds": [
+      216,
+      227,
+      235,
+      247,
+      267
+    ],
+    "topMatchedIndexes": [
+      [
+        11
+      ],
+      [
+        25
+      ],
+      [
+        39
+      ],
+      [
+        26
+      ],
+      [
+        38
+      ]
+    ]
+  },
+  {
+    "q": "عزيز",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "وهاب",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "وهاب",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "وهاب",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "وهاب",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "وهاب",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "تواب",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 2,
+    "totalWordOccurrences": 2,
+    "topVerseIds": [
+      2801,
+      4624
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        30
+      ]
+    ]
+  },
+  {
+    "q": "تواب",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 2,
+    "totalWordOccurrences": 2,
+    "topVerseIds": [
+      2801,
+      4624
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        30
+      ]
+    ]
+  },
+  {
+    "q": "تواب",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 2,
+    "totalWordOccurrences": 2,
+    "topVerseIds": [
+      2801,
+      4624
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        30
+      ]
+    ]
+  },
+  {
+    "q": "تواب",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 2,
+    "totalWordOccurrences": 2,
+    "topVerseIds": [
+      2801,
+      4624
+    ],
+    "topMatchedIndexes": [
+      [
+        8
+      ],
+      [
+        30
+      ]
+    ]
+  },
+  {
+    "q": "تواب",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "قدوس",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "قدوس",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "قدوس",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "قدوس",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "قدوس",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "خلق",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 80,
+    "totalWordOccurrences": 83,
+    "topVerseIds": [
+      36,
+      171,
+      235,
+      483,
+      484
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        3
+      ],
+      [
+        12
+      ],
+      [
+        3
+      ],
+      [
+        10
+      ]
+    ]
+  },
+  {
+    "q": "خلق",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 80,
+    "totalWordOccurrences": 83,
+    "topVerseIds": [
+      36,
+      171,
+      235,
+      483,
+      484
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        3
+      ],
+      [
+        12
+      ],
+      [
+        3
+      ],
+      [
+        10
+      ]
+    ]
+  },
+  {
+    "q": "خلق",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 80,
+    "totalWordOccurrences": 83,
+    "topVerseIds": [
+      36,
+      171,
+      235,
+      483,
+      484
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        3
+      ],
+      [
+        12
+      ],
+      [
+        3
+      ],
+      [
+        10
+      ]
+    ]
+  },
+  {
+    "q": "خلق",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 80,
+    "totalWordOccurrences": 83,
+    "topVerseIds": [
+      36,
+      171,
+      235,
+      483,
+      484
+    ],
+    "topMatchedIndexes": [
+      [
+        3
+      ],
+      [
+        3
+      ],
+      [
+        12
+      ],
+      [
+        3
+      ],
+      [
+        10
+      ]
+    ]
+  },
+  {
+    "q": "خلق",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "جعل",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 42,
+    "totalWordOccurrences": 45,
+    "topVerseIds": [
+      29,
+      498,
+      583,
+      689,
+      766
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        6
+      ],
+      [
+        32
+      ],
+      [
+        11
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "جعل",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 42,
+    "totalWordOccurrences": 45,
+    "topVerseIds": [
+      29,
+      498,
+      583,
+      689,
+      766
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        6
+      ],
+      [
+        32
+      ],
+      [
+        11
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "جعل",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 42,
+    "totalWordOccurrences": 45,
+    "topVerseIds": [
+      29,
+      498,
+      583,
+      689,
+      766
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        6
+      ],
+      [
+        32
+      ],
+      [
+        11
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "جعل",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 42,
+    "totalWordOccurrences": 45,
+    "topVerseIds": [
+      29,
+      498,
+      583,
+      689,
+      766
+    ],
+    "topMatchedIndexes": [
+      [
+        2
+      ],
+      [
+        6
+      ],
+      [
+        32
+      ],
+      [
+        11
+      ],
+      [
+        2
+      ]
+    ]
+  },
+  {
+    "q": "جعل",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "قال",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 371,
+    "totalWordOccurrences": 416,
+    "topVerseIds": [
+      37,
+      40,
+      61,
+      68,
+      74
+    ],
+    "topMatchedIndexes": [
+      [
+        2,
+        23
+      ],
+      [
+        1,
+        8
+      ],
+      [
+        2
+      ],
+      [
+        23
+      ],
+      [
+        2,
+        14
+      ]
+    ]
+  },
+  {
+    "q": "قال",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 371,
+    "totalWordOccurrences": 416,
+    "topVerseIds": [
+      37,
+      40,
+      61,
+      68,
+      74
+    ],
+    "topMatchedIndexes": [
+      [
+        2,
+        23
+      ],
+      [
+        1,
+        8
+      ],
+      [
+        2
+      ],
+      [
+        23
+      ],
+      [
+        2,
+        14
+      ]
+    ]
+  },
+  {
+    "q": "قال",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 371,
+    "totalWordOccurrences": 416,
+    "topVerseIds": [
+      37,
+      40,
+      61,
+      68,
+      74
+    ],
+    "topMatchedIndexes": [
+      [
+        2,
+        23
+      ],
+      [
+        1,
+        8
+      ],
+      [
+        2
+      ],
+      [
+        23
+      ],
+      [
+        2,
+        14
+      ]
+    ]
+  },
+  {
+    "q": "قال",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 371,
+    "totalWordOccurrences": 416,
+    "topVerseIds": [
+      37,
+      40,
+      61,
+      68,
+      74
+    ],
+    "topMatchedIndexes": [
+      [
+        2,
+        23
+      ],
+      [
+        1,
+        8
+      ],
+      [
+        2
+      ],
+      [
+        23
+      ],
+      [
+        2,
+        14
+      ]
+    ]
+  },
+  {
+    "q": "قال",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "كان",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 306,
+    "totalWordOccurrences": 333,
+    "topVerseIds": [
+      82,
+      104,
+      105,
+      118,
+      121
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        3
+      ],
+      [
+        2
+      ],
+      [
+        7
+      ],
+      [
+        16
+      ]
+    ]
+  },
+  {
+    "q": "كان",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 306,
+    "totalWordOccurrences": 333,
+    "topVerseIds": [
+      82,
+      104,
+      105,
+      118,
+      121
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        3
+      ],
+      [
+        2
+      ],
+      [
+        7
+      ],
+      [
+        16
+      ]
+    ]
+  },
+  {
+    "q": "كان",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 306,
+    "totalWordOccurrences": 333,
+    "topVerseIds": [
+      82,
+      104,
+      105,
+      118,
+      121
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        3
+      ],
+      [
+        2
+      ],
+      [
+        7
+      ],
+      [
+        16
+      ]
+    ]
+  },
+  {
+    "q": "كان",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 306,
+    "totalWordOccurrences": 333,
+    "topVerseIds": [
+      82,
+      104,
+      105,
+      118,
+      121
+    ],
+    "topMatchedIndexes": [
+      [
+        7
+      ],
+      [
+        3
+      ],
+      [
+        2
+      ],
+      [
+        7
+      ],
+      [
+        16
+      ]
+    ]
+  },
+  {
+    "q": "كان",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "امن",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 36,
+    "totalWordOccurrences": 39,
+    "topVerseIds": [
+      20,
+      69,
+      133,
+      184,
+      260
+    ],
+    "topMatchedIndexes": [
+      [
+        6,
+        11
+      ],
+      [
+        9
+      ],
+      [
+        14
+      ],
+      [
+        13
+      ],
+      [
+        40
+      ]
+    ]
+  },
+  {
+    "q": "امن",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 36,
+    "totalWordOccurrences": 39,
+    "topVerseIds": [
+      20,
+      69,
+      133,
+      184,
+      260
+    ],
+    "topMatchedIndexes": [
+      [
+        6,
+        11
+      ],
+      [
+        9
+      ],
+      [
+        14
+      ],
+      [
+        13
+      ],
+      [
+        40
+      ]
+    ]
+  },
+  {
+    "q": "امن",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 36,
+    "totalWordOccurrences": 39,
+    "topVerseIds": [
+      20,
+      69,
+      133,
+      184,
+      260
+    ],
+    "topMatchedIndexes": [
+      [
+        6,
+        11
+      ],
+      [
+        9
+      ],
+      [
+        14
+      ],
+      [
+        13
+      ],
+      [
+        40
+      ]
+    ]
+  },
+  {
+    "q": "امن",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 36,
+    "totalWordOccurrences": 39,
+    "topVerseIds": [
+      20,
+      69,
+      133,
+      184,
+      260
+    ],
+    "topMatchedIndexes": [
+      [
+        6,
+        11
+      ],
+      [
+        9
+      ],
+      [
+        14
+      ],
+      [
+        13
+      ],
+      [
+        40
+      ]
+    ]
+  },
+  {
+    "q": "امن",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  },
+  {
+    "q": "علم",
+    "mode": "phrase",
+    "matchBy": "phonetic",
+    "totalCount": 58,
+    "totalWordOccurrences": 60,
+    "topVerseIds": [
+      39,
+      67,
+      194,
+      242,
+      359
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        16
+      ],
+      [
+        14
+      ],
+      [
+        14
+      ],
+      [
+        7,
+        14
+      ]
+    ]
+  },
+  {
+    "q": "علم",
+    "mode": "all",
+    "matchBy": "phonetic",
+    "totalCount": 58,
+    "totalWordOccurrences": 60,
+    "topVerseIds": [
+      39,
+      67,
+      194,
+      242,
+      359
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        16
+      ],
+      [
+        14
+      ],
+      [
+        14
+      ],
+      [
+        7,
+        14
+      ]
+    ]
+  },
+  {
+    "q": "علم",
+    "mode": "any",
+    "matchBy": "phonetic",
+    "totalCount": 58,
+    "totalWordOccurrences": 60,
+    "topVerseIds": [
+      39,
+      67,
+      194,
+      242,
+      359
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        16
+      ],
+      [
+        14
+      ],
+      [
+        14
+      ],
+      [
+        7,
+        14
+      ]
+    ]
+  },
+  {
+    "q": "علم",
+    "mode": "phrase",
+    "matchBy": "spelling",
+    "totalCount": 58,
+    "totalWordOccurrences": 60,
+    "topVerseIds": [
+      39,
+      67,
+      194,
+      242,
+      359
+    ],
+    "topMatchedIndexes": [
+      [
+        4
+      ],
+      [
+        16
+      ],
+      [
+        14
+      ],
+      [
+        14
+      ],
+      [
+        7,
+        14
+      ]
+    ]
+  },
+  {
+    "q": "علم",
+    "mode": "phrase",
+    "matchBy": "exact",
+    "totalCount": 0,
+    "totalWordOccurrences": 0,
+    "topVerseIds": [],
+    "topMatchedIndexes": []
+  }
+]

@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+    color: #1F2937;
+    background-color: #FAF7F0;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #FAF7F0;
+    color: #1F2937;
+    font-size: 1rem;
+    line-height: 1.7;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Mixed content isolation */
+  bdi, [dir="ltr"] {
+    unicode-bidi: isolate;
+  }
+}
+
+/* Quranic verse styling */
+.font-quran {
+  font-family: 'Amiri Quran', 'Amiri', 'Noto Naskh Arabic', serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 2.5;
+  word-spacing: 0.1em;
+  letter-spacing: 0;
+  text-rendering: optimizeLegibility;
+  padding-block: 0.25rem;
+}
+
+.font-ui {
+  font-family: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+}
+
+/* Subtle, tasteful scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAF7F0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* Accessible focus visible outlines */
+:focus-visible {
+  outline: 2px solid #0F5C4A;
+  outline-offset: 2px;
+}
+
+/* Ayah end ornament */
+.ayah-number-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Amiri', 'IBM Plex Sans Arabic', serif;
+  font-size: 0.85em;
+  color: #0F5C4A;
+  margin-inline-start: 0.35em;
+  vertical-align: middle;
+}
+
+/* Soft gold search mark highlight without breaking script flow */
+mark.quran-highlight {
+  background-color: #F6EEDC;
+  color: #1F2937;
+  border-radius: 0.25rem;
+  padding-inline: 0.15rem;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* Motion reduction */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
