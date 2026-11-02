@@ -131,4 +131,20 @@ describe('User Data Offline DB & Outbox Suite', () => {
 
     expect(resolved).toBe(serverGuid);
   });
+
+  it('supports comparison and difference outbox operations in offline store', async () => {
+    const compOp: OutboxOperation = {
+      id: 'op-comp-1',
+      userId: userA,
+      type: 'CREATE_COMPARISON',
+      entityId: 'col-1',
+      payload: { title: 'ولقد استهزئ', quranVerseIds: [799, 1739] },
+      timestamp: 3000,
+      status: 'PENDING',
+    };
+
+    await enqueueOutboxOperation(compOp);
+    const pending = await getPendingOutboxOperations(userA);
+    expect(pending.some(op => op.id === 'op-comp-1')).toBe(true);
+  });
 });

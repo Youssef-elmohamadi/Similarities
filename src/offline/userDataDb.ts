@@ -23,7 +23,25 @@ export interface CachedCollectionDetail extends CachedCollection {
 export interface OutboxOperation {
   id: string; // Unique idempotency key / operation ID
   userId: string;
-  type: 'CREATE_COLLECTION' | 'UPDATE_COLLECTION' | 'DELETE_COLLECTION' | 'ADD_VERSE' | 'REMOVE_VERSE' | 'SAVE_NOTE';
+  type:
+    | 'CREATE_COLLECTION'
+    | 'UPDATE_COLLECTION'
+    | 'DELETE_COLLECTION'
+    | 'ADD_VERSE'
+    | 'REMOVE_VERSE'
+    | 'SAVE_NOTE'
+    | 'CREATE_COMPARISON'
+    | 'DELETE_COMPARISON'
+    | 'ADD_DIFFERENCE'
+    | 'DELETE_DIFFERENCE'
+    | 'CREATE_CONNECTION'
+    | 'UPDATE_CONNECTION'
+    | 'DELETE_CONNECTION'
+    | 'REORDER_CONNECTIONS'
+    | 'CREATE_NOTE'
+    | 'UPDATE_NOTE'
+    | 'DELETE_NOTE'
+    | 'REORDER_VERSES';
   entityId: string; // Target collection / note ID
   payload: any;
   timestamp: number;

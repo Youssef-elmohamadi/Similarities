@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, getApiErrorMessage } from '@/lib/api';
 import { CollectionDetail } from '@/types/collection';
 import { ConnectionType } from '@/types/connection';
+import { VerseDifference } from '@/types/comparison';
 import { VerseListEditor } from '@/components/collection/VerseListEditor';
 import { ComparisonEditor } from '@/components/editor/ComparisonEditor';
 import { MemorizationConnectionsEditor } from '@/components/editor/MemorizationConnectionsEditor';
@@ -62,6 +63,7 @@ export const CollectionDetailsPage: React.FC = () => {
 
   const { data: collection, isLoading, error } = useQuery<CollectionDetail>({
     queryKey: ['collection', id, user?.id],
+    networkMode: 'always',
     queryFn: async () => {
       if (!id) throw new Error('Missing ID');
       if (!navigator.onLine) {
@@ -120,6 +122,7 @@ export const CollectionDetailsPage: React.FC = () => {
 
   // Verse mutations
   const addVerseMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (quranVerseId: number) => {
       if (!id) return;
       if (!navigator.onLine) {
@@ -172,6 +175,7 @@ export const CollectionDetailsPage: React.FC = () => {
   });
 
   const removeVerseMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (quranVerseId: number) => {
       if (!id) return;
       if (!navigator.onLine) {
@@ -208,6 +212,7 @@ export const CollectionDetailsPage: React.FC = () => {
   });
 
   const updateVerseNoteMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async ({ quranVerseId, note }: { quranVerseId: number; note: string }) => {
       if (!id) return;
       if (!navigator.onLine) {
@@ -247,144 +252,558 @@ export const CollectionDetailsPage: React.FC = () => {
   });
 
   const reorderVersesMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (orderedVerseIds: string[]) => {
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          const map = new Map((current.verses || []).map(v => [v.id, v]));
+          const newVerses: any[] = [];
+          orderedVerseIds.forEach((vid, idx) => {
+            const v = map.get(vid);
+            if (v) {
+              v.displayOrder = idx;
+              newVerses.push(v);
+            }
+          });
+          current.verses = newVerses;
+          await setCachedCollectionDetail(user.id, current);
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'REORDER_VERSES',
+            entityId: id,
+            payload: { orderedVerseIds },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
       const res = await api.put(`/collections/${id}/verses/reorder`, { orderedVerseIds });
       return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تم حفظ ترتيب الآيات.', 'Verse order saved.'));
+      if (data?.isOffline) {
+        toast.info(t('تم حفظ الترتيب محلياً — في انتظار المزامنة.', 'Order saved locally — pending sync.'));
+      } else {
+        toast.success(t('تم حفظ ترتيب الآيات.', 'Verse order saved.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   // Comparison mutations
   const createComparisonMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (payload: { title: string; description?: string; sharedPhrases?: string; quranVerseIds: number[] }) => {
-      await api.post(`/collections/${id}/comparisons`, payload);
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          const tempId = crypto.randomUUID();
+          const matchedVerses = (current.verses || [])
+            .filter(v => payload.quranVerseIds.includes(v.quranVerseId))
+            .map(v => ({
+              id: crypto.randomUUID(),
+              comparisonId: tempId,
+              quranVerseId: v.quranVerseId,
+              surahNumber: v.surahNumber,
+              surahNameArabic: v.surahNameArabic,
+              ayahNumber: v.ayahNumber,
+              uthmaniText: v.uthmaniText,
+            }));
+
+          const newComp: any = {
+            id: tempId,
+            collectionId: id,
+            title: payload.title,
+            description: payload.description,
+            sharedPhrases: payload.sharedPhrases,
+            verses: matchedVerses,
+            differences: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          current.comparisons = [...(current.comparisons || []), newComp];
+          await setCachedCollectionDetail(user.id, current);
+
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'CREATE_COMPARISON',
+            entityId: id,
+            payload: { tempId, body: payload },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
+      const res = await api.post(`/collections/${id}/comparisons`, payload);
+      return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تم إنشاء المقارنة بنجاح.', 'Comparison created.'));
+      if (data?.isOffline) {
+        toast.info(t('تم حفظ المقارنة محلياً — في انتظار المزامنة.', 'Comparison saved locally — pending sync.'));
+      } else {
+        toast.success(t('تم إنشاء المقارنة بنجاح.', 'Comparison created.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   const deleteComparisonMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (comparisonId: string) => {
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          current.comparisons = (current.comparisons || []).filter(c => c.id !== comparisonId);
+          await setCachedCollectionDetail(user.id, current);
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'DELETE_COMPARISON',
+            entityId: id,
+            payload: { comparisonId },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
       await api.delete(`/comparisons/${comparisonId}`);
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تم حذف المقارنة.', 'Comparison deleted.'));
+      if (data?.isOffline) {
+        toast.info(t('تم حذف المقارنة محلياً — في انتظار المزامنة.', 'Comparison deleted locally — pending sync.'));
+      } else {
+        toast.success(t('تم حذف المقارنة.', 'Comparison deleted.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   const addDifferenceMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async ({ comparisonId, payload }: { comparisonId: string; payload: { quranVerseId: number; selectedText: string; explanation: string } }) => {
-      await api.post(`/comparisons/${comparisonId}/differences`, payload);
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          const comp = (current.comparisons || []).find(c => c.id === comparisonId);
+          if (comp) {
+            const diffId = crypto.randomUUID();
+            const matchedVerse = (current.verses || []).find(v => v.quranVerseId === payload.quranVerseId);
+            const newDiff: VerseDifference = {
+              id: diffId,
+              comparisonId,
+              quranVerseId: payload.quranVerseId,
+              selectedText: payload.selectedText,
+              explanation: payload.explanation,
+              surahNumber: matchedVerse?.surahNumber || 1,
+              surahNameArabic: matchedVerse?.surahNameArabic || '',
+              ayahNumber: matchedVerse?.ayahNumber || 1,
+            };
+            comp.differences = [...(comp.differences || []), newDiff];
+            await setCachedCollectionDetail(user.id, current);
+          }
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'ADD_DIFFERENCE',
+            entityId: id,
+            payload: { comparisonId, diffPayload: payload },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
+      const res = await api.post(`/comparisons/${comparisonId}/differences`, payload);
+      return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تم رصد الفارق وإضافته بنجاح.', 'Difference added.'));
+      if (data?.isOffline) {
+        toast.info(t('تمت إضافة الفارق محلياً — في انتظار المزامنة.', 'Difference added locally — pending sync.'));
+      } else {
+        toast.success(t('تم رصد الفارق وإضافته بنجاح.', 'Difference added.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   const deleteDifferenceMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (differenceId: string) => {
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          (current.comparisons || []).forEach(c => {
+            c.differences = (c.differences || []).filter(d => d.id !== differenceId);
+          });
+          await setCachedCollectionDetail(user.id, current);
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'DELETE_DIFFERENCE',
+            entityId: id,
+            payload: { differenceId },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
       await api.delete(`/differences/${differenceId}`);
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تم حذف الفارق.', 'Difference removed.'));
+      if (data?.isOffline) {
+        toast.info(t('تم حذف الفارق محلياً — في انتظار المزامنة.', 'Difference deleted locally — pending sync.'));
+      } else {
+        toast.success(t('تم حذف الفارق.', 'Difference removed.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   // Memorization Connection mutations
   const createConnectionMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (payload: { title?: string; content: string; type: ConnectionType; displayOrder?: number }) => {
-      await api.post(`/collections/${id}/connections`, payload);
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          const tempId = crypto.randomUUID();
+          const newConn = {
+            id: tempId,
+            collectionId: id,
+            title: payload.title,
+            content: payload.content,
+            type: payload.type,
+            displayOrder: payload.displayOrder || (current.connections || []).length,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          current.connections = [...(current.connections || []), newConn as any];
+          await setCachedCollectionDetail(user.id, current);
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'CREATE_CONNECTION',
+            entityId: id,
+            payload: { tempId, body: payload },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
+      const res = await api.post(`/collections/${id}/connections`, payload);
+      return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تم حفظ رابط الحفظ بنجاح.', 'Connection added.'));
+      if (data?.isOffline) {
+        toast.info(t('تم حفظ رابط الحفظ محلياً — في انتظار المزامنة.', 'Connection saved locally — pending sync.'));
+      } else {
+        toast.success(t('تم حفظ رابط الحفظ بنجاح.', 'Connection added.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   const updateConnectionMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async ({ connectionId, payload }: { connectionId: string; payload: { title?: string; content: string; type: ConnectionType } }) => {
-      await api.put(`/connections/${connectionId}`, payload);
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          const conn = (current.connections || []).find(c => c.id === connectionId);
+          if (conn) {
+            conn.title = payload.title;
+            conn.content = payload.content;
+            conn.type = payload.type;
+            conn.updatedAt = new Date().toISOString();
+          }
+          await setCachedCollectionDetail(user.id, current);
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'UPDATE_CONNECTION',
+            entityId: id,
+            payload: { connectionId, body: payload },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
+      const res = await api.put(`/connections/${connectionId}`, payload);
+      return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تم تحديث الرابط.', 'Connection updated.'));
+      if (data?.isOffline) {
+        toast.info(t('تم تحديث الرابط محلياً — في انتظار المزامنة.', 'Connection updated locally — pending sync.'));
+      } else {
+        toast.success(t('تم تحديث الرابط.', 'Connection updated.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   const deleteConnectionMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (connectionId: string) => {
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          current.connections = (current.connections || []).filter(c => c.id !== connectionId);
+          await setCachedCollectionDetail(user.id, current);
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'DELETE_CONNECTION',
+            entityId: id,
+            payload: { connectionId },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
       await api.delete(`/connections/${connectionId}`);
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تم حذف الرابط.', 'Connection deleted.'));
+      if (data?.isOffline) {
+        toast.info(t('تم حذف الرابط محلياً — في انتظار المزامنة.', 'Connection deleted locally — pending sync.'));
+      } else {
+        toast.success(t('تم حذف الرابط.', 'Connection deleted.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   const reorderConnectionsMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (orderedConnectionIds: string[]) => {
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          const map = new Map((current.connections || []).map(c => [c.id, c]));
+          const newConns: any[] = [];
+          orderedConnectionIds.forEach((cid, idx) => {
+            const c = map.get(cid);
+            if (c) {
+              c.displayOrder = idx;
+              newConns.push(c);
+            }
+          });
+          current.connections = newConns;
+          await setCachedCollectionDetail(user.id, current);
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'REORDER_CONNECTIONS',
+            entityId: id,
+            payload: { orderedConnectionIds },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
       await api.put(`/collections/${id}/connections/reorder`, { orderedConnectionIds });
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تم حفظ الترتيب.', 'Order saved.'));
+      if (data?.isOffline) {
+        toast.info(t('تم حفظ الترتيب محلياً — في انتظار المزامنة.', 'Order saved locally — pending sync.'));
+      } else {
+        toast.success(t('تم حفظ الترتيب.', 'Order saved.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   // Notes mutations
   const createNoteMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (content: string) => {
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          const tempId = crypto.randomUUID();
+          const newNote = {
+            id: tempId,
+            collectionId: id,
+            content,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          current.notes = [...(current.notes || []), newNote as any];
+          await setCachedCollectionDetail(user.id, current);
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'CREATE_NOTE',
+            entityId: id,
+            payload: { tempId, body: { content } },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
       await api.post(`/collections/${id}/notes`, { content });
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تمت إضافة الملاحظة العامة.', 'Note added.'));
+      if (data?.isOffline) {
+        toast.info(t('تم حفظ الملاحظة محلياً — في انتظار المزامنة.', 'Note saved locally — pending sync.'));
+      } else {
+        toast.success(t('تمت إضافة الملاحظة العامة.', 'Note added.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   const updateNoteMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async ({ noteId, content }: { noteId: string; content: string }) => {
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          const note = (current.notes || []).find(n => n.id === noteId);
+          if (note) {
+            note.content = content;
+            note.updatedAt = new Date().toISOString();
+          }
+          await setCachedCollectionDetail(user.id, current);
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'UPDATE_NOTE',
+            entityId: id,
+            payload: { noteId, body: { content } },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
       await api.put(`/notes/${noteId}`, { content });
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تم تعديل الملاحظة.', 'Note updated.'));
+      if (data?.isOffline) {
+        toast.info(t('تم تعديل الملاحظة محلياً — في انتظار المزامنة.', 'Note updated locally — pending sync.'));
+      } else {
+        toast.success(t('تم تعديل الملاحظة.', 'Note updated.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   const deleteNoteMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (noteId: string) => {
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+        if (current) {
+          current.notes = (current.notes || []).filter(n => n.id !== noteId);
+          await setCachedCollectionDetail(user.id, current);
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'DELETE_NOTE',
+            entityId: id,
+            payload: { noteId },
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
+        return { isOffline: true };
+      }
+
       await api.delete(`/notes/${noteId}`);
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      toast.success(t('تم حذف الملاحظة.', 'Note deleted.'));
+      if (data?.isOffline) {
+        toast.info(t('تم حذف الملاحظة محلياً — في انتظار المزامنة.', 'Note deleted locally — pending sync.'));
+      } else {
+        toast.success(t('تم حذف الملاحظة.', 'Note deleted.'));
+      }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
   });
 
   // Delete Collection
   const deleteCollectionMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async () => {
+      if (!id) return;
+      if (!navigator.onLine) {
+        if (!user) throw new Error('Not logged in');
+        const { getUserDB } = await import('@/offline/userDataDb');
+        const db = await getUserDB();
+        await db.delete('collections', id);
+        await db.delete('collectionDetails', id);
+        await enqueueOutboxOperation({
+          id: crypto.randomUUID(),
+          userId: user.id,
+          type: 'DELETE_COLLECTION',
+          entityId: id,
+          payload: {},
+          timestamp: Date.now(),
+          status: 'PENDING',
+        });
+        return { isOffline: true };
+      }
+
       await api.delete(`/collections/${id}`);
     },
     onSuccess: () => {
