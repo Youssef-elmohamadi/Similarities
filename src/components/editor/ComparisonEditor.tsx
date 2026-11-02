@@ -337,38 +337,38 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
     verses.find(v => v.quranVerseId === anchorVerseId);
 
   return (
-    <div className="space-y-3 text-start">
+    <div className="space-y-2 sm:space-y-3 text-start">
       {/* Sub-header Bar: Position Count + Collapse / Expand All */}
       {sortedComparisons.length > 0 && (
-        <div className="flex items-center justify-between gap-2 px-1 pb-0.5">
-          <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-sm font-bold text-text-primary flex items-center gap-1.5">
-              <Layers className="w-4 h-4 text-primary" />
+        <div className="flex items-center justify-between gap-1.5 sm:gap-2 px-1 pb-0.5">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-xs sm:text-sm font-bold text-text-primary flex items-center gap-1 sm:gap-1.5">
+              <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
               <span>
                 {baseSurahNameArabic
                   ? t(`مواضع سورة ${baseSurahNameArabic}`, `Positions in Surah ${baseSurahNameArabic}`)
                   : t('مواضع المتشابهات', 'Similar Positions')}
               </span>
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-primary-tint text-primary text-xs font-bold border border-primary/20">
+            <span className="px-1.5 py-0.5 rounded-full bg-primary-tint text-primary text-[10px] sm:text-xs font-bold border border-primary/20">
               {isRtl ? toArabicDigits(sortedComparisons.length) : sortedComparisons.length} {t('مواضع', 'positions')}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 sm:gap-1.5">
             {sortedComparisons.length > 1 && (
               <>
                 <button
                   type="button"
                   onClick={collapseAll}
-                  className="px-2.5 py-1 rounded-lg border border-border bg-surface hover:bg-background text-text-secondary hover:text-text-primary transition text-xs font-medium"
+                  className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border border-border bg-surface hover:bg-background text-text-secondary hover:text-text-primary transition text-[11px] sm:text-xs font-medium"
                 >
                   {t('طي الكل', 'Collapse All')}
                 </button>
                 <button
                   type="button"
                   onClick={expandAll}
-                  className="px-2.5 py-1 rounded-lg border border-border bg-surface hover:bg-background text-text-secondary hover:text-text-primary transition text-xs font-medium"
+                  className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border border-border bg-surface hover:bg-background text-text-secondary hover:text-text-primary transition text-[11px] sm:text-xs font-medium"
                 >
                   {t('فتح الكل', 'Expand All')}
                 </button>
