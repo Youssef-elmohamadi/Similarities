@@ -52,7 +52,7 @@ export const CollectionDetailsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
 
-  const [activeTab, setActiveTab] = useState<'comparisons' | 'verses' | 'connections' | 'notes'>('comparisons');
+  const [activeTab, setActiveTab] = useState<'comparisons' | 'connections' | 'notes'>('comparisons');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isCreateComparisonOpen, setIsCreateComparisonOpen] = useState(false);
 
@@ -947,18 +947,6 @@ export const CollectionDetailsPage: React.FC = () => {
               </Button>
             )}
 
-            {activeTab === 'verses' && (
-              <Button
-                size="sm"
-                variant="primary"
-                icon={<Plus className="w-4 h-4" />}
-                onClick={() => setIsAddVerseModalOpen(true)}
-                className="font-bold shadow-sm text-xs sm:text-sm whitespace-nowrap"
-              >
-                {t('+ إضافة آية', '+ Add Verse')}
-              </Button>
-            )}
-
             {id?.startsWith('temp-') && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
                 {t('محفوظ محلياً', 'Saved locally')}
@@ -1002,18 +990,18 @@ export const CollectionDetailsPage: React.FC = () => {
         <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-border text-xs text-text-secondary">
           <div className="flex flex-wrap items-center gap-2.5">
             <Badge variant="primary">
-              <BookMarked className="w-3.5 h-3.5 me-1" />
-              <span>{isRtl ? toArabicDigits(collection.verses.length) : collection.verses.length} {t('آيات', 'Verses')}</span>
-            </Badge>
-
-            <Badge variant="accent">
               <GitCompare className="w-3.5 h-3.5 me-1" />
-              <span>{isRtl ? toArabicDigits(collection.comparisons.length) : collection.comparisons.length} {t('مقارنات', 'Comparisons')}</span>
+              <span>{isRtl ? toArabicDigits(collection.comparisons.length) : collection.comparisons.length} {t('مواضع متشابهة', 'Positions')}</span>
             </Badge>
 
             <Badge variant="blue">
               <Sparkles className="w-3.5 h-3.5 me-1" />
               <span>{isRtl ? toArabicDigits(collection.connections.length) : collection.connections.length} {t('روابط حفظ', 'Links')}</span>
+            </Badge>
+
+            <Badge variant="accent">
+              <FileText className="w-3.5 h-3.5 me-1" />
+              <span>{isRtl ? toArabicDigits(collection.notes.length) : collection.notes.length} {t('ملاحظات', 'Notes')}</span>
             </Badge>
           </div>
 
@@ -1024,7 +1012,7 @@ export const CollectionDetailsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Tabs Navigation: Horizontal scroll on mobile without visible scrollbar */}
+      {/* Tabs Navigation: 3 Focused Pillars */}
       <div className="flex items-center gap-2 border-b border-border overflow-x-auto pb-px no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <button
           onClick={() => setActiveTab('comparisons')}
@@ -1038,21 +1026,6 @@ export const CollectionDetailsPage: React.FC = () => {
           <span>{t('مواضع المتشابهات (المجموعات الفرعية)', 'Positions & Subgroups')}</span>
           <span className="px-2 py-0.5 rounded-full bg-charcoal-100 text-xs font-bold text-text-primary">
             {isRtl ? toArabicDigits(collection.comparisons.length) : collection.comparisons.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('verses')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition whitespace-nowrap min-h-[44px] ${
-            activeTab === 'verses'
-              ? 'border-primary text-primary bg-primary-tint/30 rounded-t-lg'
-              : 'border-transparent text-text-secondary hover:text-text-primary'
-          }`}
-        >
-          <BookMarked className="w-4 h-4" />
-          <span>{t('فهرس الآيات الكريمة', 'Verses Index')}</span>
-          <span className="px-2 py-0.5 rounded-full bg-charcoal-100 text-xs font-bold text-text-primary">
-            {isRtl ? toArabicDigits(collection.verses.length) : collection.verses.length}
           </span>
         </button>
 
@@ -1104,39 +1077,7 @@ export const CollectionDetailsPage: React.FC = () => {
         />
       )}
 
-      {/* Tab 2: Verses Overview & Order & Verse Note */}
-      {activeTab === 'verses' && (
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-semibold text-text-primary leading-snug">
-                {t('فهرس الآيات الكريمة بالرسم العثماني', 'Verses in Authentic Uthmani Script')}
-              </h2>
-              <p className="text-sm text-text-secondary">
-                {t('قائمة مسرودة لكافة الآيات المشمولة في مواضع هذه المجموعة مع إمكانية تدوين ملاحظات شخصية.', 'Index of all verses in this collection with personal notes.')}
-              </p>
-            </div>
-
-            <Button
-              size="sm"
-              variant="outline"
-              icon={<Plus className="w-4 h-4 text-primary" />}
-              onClick={() => setIsAddVerseModalOpen(true)}
-            >
-              {t('إضافة آية للمجموعة', 'Add Verse')}
-            </Button>
-          </div>
-
-          <VerseListEditor
-            verses={collection.verses}
-            onReorder={ids => reorderVersesMutation.mutate(ids)}
-            onRemoveVerse={verseId => removeVerseMutation.mutate(verseId)}
-            onUpdateNote={(verseId, note) => updateVerseNoteMutation.mutate({ quranVerseId: verseId, note })}
-          />
-        </div>
-      )}
-
-      {/* Tab 3: Memorization Connections */}
+      {/* Tab 2: Memorization Connections */}
       {activeTab === 'connections' && (
         <MemorizationConnectionsEditor
           collectionId={collection.id}
