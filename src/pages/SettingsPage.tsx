@@ -6,6 +6,7 @@ import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
 import { PageHeader } from '@/components/common/PageHeader';
+import { SyncStatusPanel } from '@/components/settings/SyncStatusPanel';
 import { User, Globe, ShieldCheck, Database, LogOut, Smartphone, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -87,6 +88,9 @@ export const SettingsPage: React.FC = () => {
           </Button>
         </div>
       </Card>
+
+      {/* Sync Status & Offline Queue Management */}
+      <SyncStatusPanel />
 
       {/* Language Preference Card */}
       <Card className="space-y-4">

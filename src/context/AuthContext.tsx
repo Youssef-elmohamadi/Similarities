@@ -61,6 +61,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    if (user?.id) {
+      import('../offline/outboxSyncManager').then(({ outboxSyncManager }) => {
+        outboxSyncManager.reconcileAndCleanup(user.id).catch(e => {
+          console.warn('Startup sync & cleanup notice:', e);
+        });
+      });
+    }
+
+    if (typeof window !== 'undefined') {
+      const handleOnline = () => {
+        if (user?.id) {
+          import('../offline/outboxSyncManager').then(({ outboxSyncManager }) => {
+            outboxSyncManager.reconcileAndCleanup(user.id).catch(() => {});
+          });
+        }
+      };
+      window.addEventListener('online', handleOnline);
+      return () => window.removeEventListener('online', handleOnline);
+    }
+  }, [user?.id]);
+
   const handleAuthSuccess = (data: AuthResponse) => {
     localStorage.setItem('access_token', data.accessToken);
     localStorage.setItem('refresh_token', data.refreshToken);

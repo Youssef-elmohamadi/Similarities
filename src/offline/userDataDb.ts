@@ -20,7 +20,10 @@ export interface CachedCollectionDetail extends CachedCollection {
   comparisons: any[];
   connections: any[];
   notes: any[];
+  verses?: any[];
 }
+
+export type OutboxStatus = 'PENDING' | 'SYNCING' | 'FAILED' | 'DEAD' | 'CONFLICT';
 
 export interface OutboxOperation {
   id: string; // Unique idempotency key / operation ID
@@ -48,8 +51,27 @@ export interface OutboxOperation {
   payload: any;
   timestamp: number;
   baseUpdatedAt?: string;
-  status: 'PENDING' | 'SYNCING' | 'FAILED' | 'CONFLICT';
-  errorMessage?: string;
+  status?: OutboxStatus;
+  attempts?: number;
+  lastError?: string;
+  lastStatusCode?: number;
+  nextRetryAt?: number;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
+export interface TombstoneRecord {
+  entityId: string;
+  userId: string;
+  entityType: 'collection' | 'comparison' | 'difference' | 'connection' | 'note' | 'verse';
+  deletedAt: number;
+}
+
+export interface TempIdMapping {
+  tempId: string;
+  serverId: string;
+  userId: string;
+  createdAt: number;
 }
 
 interface UserDBSchema extends DBSchema {
@@ -66,19 +88,29 @@ interface UserDBSchema extends DBSchema {
   outbox: {
     key: string; // operation id (idempotency key)
     value: OutboxOperation;
-    indexes: { 'by-user': string; 'by-timestamp': number };
+    indexes: { 'by-user': string; 'by-timestamp': number; 'by-status': string; 'by-entity': string };
+  };
+  tombstones: {
+    key: string; // entityId
+    value: TombstoneRecord;
+    indexes: { 'by-user': string };
+  };
+  tempIdMappings: {
+    key: string; // tempId
+    value: TempIdMapping;
+    indexes: { 'by-user': string };
   };
 }
 
 const USER_DB_NAME = 'QuranUserOfflineDB';
-const USER_DB_VERSION = 1;
+const USER_DB_VERSION = 2;
 
 let userDbPromise: Promise<IDBPDatabase<UserDBSchema>> | null = null;
 
 export function getUserDB(): Promise<IDBPDatabase<UserDBSchema>> {
   if (!userDbPromise) {
     userDbPromise = openDB<UserDBSchema>(USER_DB_NAME, USER_DB_VERSION, {
-      upgrade(db) {
+      upgrade(db, oldVersion, _newVersion, transaction) {
         if (!db.objectStoreNames.contains('collections')) {
           const s = db.createObjectStore('collections', { keyPath: 'id' });
           s.createIndex('by-user', 'userId');
@@ -91,6 +123,24 @@ export function getUserDB(): Promise<IDBPDatabase<UserDBSchema>> {
           const s = db.createObjectStore('outbox', { keyPath: 'id' });
           s.createIndex('by-user', 'userId');
           s.createIndex('by-timestamp', 'timestamp');
+          s.createIndex('by-status', 'status');
+          s.createIndex('by-entity', 'entityId');
+        } else {
+          const outboxStore = transaction.objectStore('outbox');
+          if (!outboxStore.indexNames.contains('by-status')) {
+            outboxStore.createIndex('by-status', 'status');
+          }
+          if (!outboxStore.indexNames.contains('by-entity')) {
+            outboxStore.createIndex('by-entity', 'entityId');
+          }
+        }
+        if (!db.objectStoreNames.contains('tombstones')) {
+          const s = db.createObjectStore('tombstones', { keyPath: 'entityId' });
+          s.createIndex('by-user', 'userId');
+        }
+        if (!db.objectStoreNames.contains('tempIdMappings')) {
+          const s = db.createObjectStore('tempIdMappings', { keyPath: 'tempId' });
+          s.createIndex('by-user', 'userId');
         }
       },
     });
@@ -98,24 +148,158 @@ export function getUserDB(): Promise<IDBPDatabase<UserDBSchema>> {
   return userDbPromise;
 }
 
-// 1. Isolation & Cache per user
+// ---------------------------------------------------------------------------
+// 1. Tombstone Management
+// ---------------------------------------------------------------------------
+export async function addTombstone(
+  userId: string,
+  entityId: string,
+  entityType: TombstoneRecord['entityType'] = 'collection'
+): Promise<void> {
+  const db = await getUserDB();
+  await db.put('tombstones', {
+    entityId,
+    userId,
+    entityType,
+    deletedAt: Date.now(),
+  });
+}
+
+export async function removeTombstone(entityId: string): Promise<void> {
+  const db = await getUserDB();
+  await db.delete('tombstones', entityId);
+}
+
+export async function isTombstoned(userId: string, entityId: string): Promise<boolean> {
+  const db = await getUserDB();
+  const item = await db.get('tombstones', entityId);
+  return !!item && item.userId === userId;
+}
+
+export async function getTombstonedEntityIds(userId: string): Promise<Set<string>> {
+  const db = await getUserDB();
+  const all = await db.getAllFromIndex('tombstones', 'by-user', userId);
+  return new Set(all.map(t => t.entityId));
+}
+
+// ---------------------------------------------------------------------------
+// 2. Temp-ID Mapping Management
+// ---------------------------------------------------------------------------
+export async function saveTempIdMapping(userId: string, tempId: string, serverId: string): Promise<void> {
+  const db = await getUserDB();
+  await db.put('tempIdMappings', {
+    tempId,
+    serverId,
+    userId,
+    createdAt: Date.now(),
+  });
+}
+
+export async function getResolvedEntityId(userId: string, id: string): Promise<string> {
+  if (!id || !id.startsWith('temp-')) return id;
+  const db = await getUserDB();
+  const mapping = await db.get('tempIdMappings', id);
+  if (mapping && mapping.userId === userId) {
+    return mapping.serverId;
+  }
+  return id;
+}
+
+export async function remapOutboxEntityIds(userId: string, tempId: string, serverId: string): Promise<void> {
+  const db = await getUserDB();
+  const tx = db.transaction('outbox', 'readwrite');
+  const ops = await tx.store.index('by-user').getAll(userId);
+  for (const op of ops) {
+    let changed = false;
+    if (op.entityId === tempId) {
+      op.entityId = serverId;
+      changed = true;
+    }
+    if (op.payload && typeof op.payload === 'object') {
+      if (op.payload.collectionId === tempId) {
+        op.payload.collectionId = serverId;
+        changed = true;
+      }
+      if (op.payload.tempId === tempId) {
+        op.payload.tempId = serverId;
+        changed = true;
+      }
+    }
+    if (changed) {
+      op.updatedAt = Date.now();
+      await tx.store.put(op);
+    }
+  }
+  await tx.done;
+}
+
+export async function remapLocalCollectionId(
+  userId: string,
+  tempId: string,
+  serverId: string,
+  serverRecord?: any
+): Promise<void> {
+  const db = await getUserDB();
+
+  // 1. Collections store
+  const coll = await db.get('collections', tempId);
+  if (coll) {
+    await db.delete('collections', tempId);
+    await db.put('collections', {
+      ...(serverRecord || coll),
+      id: serverId,
+      userId,
+    });
+  }
+
+  // 2. CollectionDetails store
+  const detail = await db.get('collectionDetails', tempId);
+  if (detail) {
+    await db.delete('collectionDetails', tempId);
+    await db.put('collectionDetails', {
+      ...(serverRecord || detail),
+      id: serverId,
+      userId,
+    });
+  }
+}
+
+export async function removeStaleLocalEntity(userId: string, entityId: string): Promise<void> {
+  const db = await getUserDB();
+  await db.delete('collections', entityId);
+  await db.delete('collectionDetails', entityId);
+}
+
+// ---------------------------------------------------------------------------
+// 3. Cached Collections (Tombstone-Aware)
+// ---------------------------------------------------------------------------
 export async function getCachedUserCollections(userId: string): Promise<CachedCollection[]> {
   const db = await getUserDB();
   const all = await db.getAllFromIndex('collections', 'by-user', userId);
-  return all.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  const tombstones = await getTombstonedEntityIds(userId);
+  return all
+    .filter(c => !tombstones.has(c.id))
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 }
 
 export async function setCachedUserCollections(userId: string, collections: any[]): Promise<void> {
   const db = await getUserDB();
+  const tombstones = await getTombstonedEntityIds(userId);
   const tx = db.transaction('collections', 'readwrite');
   for (const c of collections) {
-    await tx.store.put({ ...c, userId });
+    if (!tombstones.has(c.id)) {
+      await tx.store.put({ ...c, userId });
+    }
   }
   await tx.done;
 }
 
 export async function getCachedCollectionDetail(userId: string, collectionId: string): Promise<CachedCollectionDetail | null> {
   const db = await getUserDB();
+  const tombstones = await getTombstonedEntityIds(userId);
+  if (tombstones.has(collectionId)) {
+    return null;
+  }
   const detail = await db.get('collectionDetails', collectionId);
   if (detail && detail.userId === userId) {
     return detail;
@@ -125,19 +309,107 @@ export async function getCachedCollectionDetail(userId: string, collectionId: st
 
 export async function setCachedCollectionDetail(userId: string, detail: any): Promise<void> {
   const db = await getUserDB();
+  const tombstones = await getTombstonedEntityIds(userId);
+  if (tombstones.has(detail.id)) {
+    return;
+  }
   await db.put('collectionDetails', { ...detail, userId });
 }
 
-// 2. Outbox Queue management
-export async function enqueueOutboxOperation(op: OutboxOperation): Promise<void> {
+// ---------------------------------------------------------------------------
+// 4. Outbox Queue Management & Coalescing
+// ---------------------------------------------------------------------------
+export async function enqueueOutboxOperation(op: OutboxOperation): Promise<{ coalesced: boolean }> {
   const db = await getUserDB();
+  const now = Date.now();
+  op.attempts = op.attempts ?? 0;
+  op.status = op.status ?? 'PENDING';
+  op.timestamp = op.timestamp ?? now;
+  op.createdAt = op.createdAt ?? now;
+  op.updatedAt = now;
+
+  // Requirement 4 & 5: Coalesce operations & Store Tombstones
+  if (op.type === 'DELETE_COLLECTION') {
+    await addTombstone(op.userId, op.entityId, 'collection');
+
+    const tx = db.transaction('outbox', 'readwrite');
+    const userOps = await tx.store.index('by-user').getAll(op.userId);
+
+    const isTemp = op.entityId.startsWith('temp-');
+    const createOp = userOps.find(o => o.entityId === op.entityId && o.type === 'CREATE_COLLECTION');
+
+    if (createOp || isTemp) {
+      // Create + Delete on temp-id cancels both without network call
+      for (const o of userOps) {
+        if (o.entityId === op.entityId) {
+          await tx.store.delete(o.id);
+        }
+      }
+      await tx.done;
+      await removeStaleLocalEntity(op.userId, op.entityId);
+      await removeTombstone(op.entityId);
+      return { coalesced: true };
+    }
+
+    // Delete supersedes pending updates for this entity
+    for (const o of userOps) {
+      if (
+        o.entityId === op.entityId &&
+        (o.type === 'UPDATE_COLLECTION' || o.type.startsWith('ADD_') || o.type.startsWith('SAVE_'))
+      ) {
+        await tx.store.delete(o.id);
+      }
+    }
+    await tx.store.put(op);
+    await tx.done;
+    return { coalesced: false };
+  }
+
+  if (op.type === 'UPDATE_COLLECTION') {
+    const tx = db.transaction('outbox', 'readwrite');
+    const userOps = await tx.store.index('by-user').getAll(op.userId);
+    const existingUpdate = userOps.find(
+      o => o.entityId === op.entityId && o.type === 'UPDATE_COLLECTION' && o.status !== 'SYNCING'
+    );
+    if (existingUpdate) {
+      // Multiple updates collapse into latest
+      existingUpdate.payload = { ...existingUpdate.payload, ...op.payload };
+      existingUpdate.timestamp = op.timestamp;
+      existingUpdate.updatedAt = now;
+      existingUpdate.baseUpdatedAt = op.baseUpdatedAt || existingUpdate.baseUpdatedAt;
+      existingUpdate.status = 'PENDING';
+      existingUpdate.nextRetryAt = undefined;
+      await tx.store.put(existingUpdate);
+      await tx.done;
+      return { coalesced: true };
+    }
+    await tx.store.put(op);
+    await tx.done;
+    return { coalesced: false };
+  }
+
   await db.put('outbox', op);
+  return { coalesced: false };
 }
 
 export async function getPendingOutboxOperations(userId: string): Promise<OutboxOperation[]> {
   const db = await getUserDB();
   const ops = await db.getAllFromIndex('outbox', 'by-user', userId);
+  return ops
+    .filter(o => o.status !== 'DEAD')
+    .sort((a, b) => a.timestamp - b.timestamp);
+}
+
+export async function getAllOutboxOperations(userId: string): Promise<OutboxOperation[]> {
+  const db = await getUserDB();
+  const ops = await db.getAllFromIndex('outbox', 'by-user', userId);
   return ops.sort((a, b) => a.timestamp - b.timestamp);
+}
+
+export async function updateOutboxOperation(op: OutboxOperation): Promise<void> {
+  const db = await getUserDB();
+  op.updatedAt = Date.now();
+  await db.put('outbox', op);
 }
 
 export async function removeOutboxOperation(opId: string): Promise<void> {
@@ -145,11 +417,64 @@ export async function removeOutboxOperation(opId: string): Promise<void> {
   await db.delete('outbox', opId);
 }
 
-// 3. User Isolation & Logout Wipe
-export async function wipeUserDataOnLogout(userId: string): Promise<void> {
+export async function retryOutboxOperation(opId: string): Promise<void> {
+  const db = await getUserDB();
+  const op = await db.get('outbox', opId);
+  if (op) {
+    op.status = 'PENDING';
+    op.attempts = 0;
+    op.lastError = undefined;
+    op.lastStatusCode = undefined;
+    op.nextRetryAt = undefined;
+    op.updatedAt = Date.now();
+    await db.put('outbox', op);
+  }
+}
+
+export async function discardOutboxOperation(opId: string): Promise<void> {
+  const db = await getUserDB();
+  await db.delete('outbox', opId);
+}
+
+export async function getOutboxStats(
+  userId: string
+): Promise<{ pending: number; failed: number; dead: number; total: number }> {
+  const db = await getUserDB();
+  const ops = await db.getAllFromIndex('outbox', 'by-user', userId);
+  let pending = 0;
+  let failed = 0;
+  let dead = 0;
+  for (const op of ops) {
+    if (op.status === 'DEAD') dead++;
+    else if (op.status === 'FAILED' || op.status === 'CONFLICT') failed++;
+    else pending++;
+  }
+  return { pending, failed, dead, total: ops.length };
+}
+
+// ---------------------------------------------------------------------------
+// 5. Data Export & Reset (Never Lose User Text)
+// ---------------------------------------------------------------------------
+export async function exportUnsyncedData(userId: string): Promise<string> {
+  const db = await getUserDB();
+  const ops = await db.getAllFromIndex('outbox', 'by-user', userId);
+  const collections = await db.getAllFromIndex('collections', 'by-user', userId);
+  const details = await db.getAllFromIndex('collectionDetails', 'by-user', userId);
+
+  const backup = {
+    exportedAt: new Date().toISOString(),
+    userId,
+    unsyncedOutboxOperations: ops,
+    cachedCollections: collections,
+    cachedCollectionDetails: details,
+  };
+  return JSON.stringify(backup, null, 2);
+}
+
+export async function resetLocalCache(userId: string): Promise<void> {
   const db = await getUserDB();
 
-  // Remove all collections for this user
+  // Clear collections and details for this user
   const colls = await db.getAllFromIndex('collections', 'by-user', userId);
   const tx1 = db.transaction('collections', 'readwrite');
   for (const c of colls) {
@@ -157,7 +482,29 @@ export async function wipeUserDataOnLogout(userId: string): Promise<void> {
   }
   await tx1.done;
 
-  // Remove collection details
+  const details = await db.getAllFromIndex('collectionDetails', 'by-user', userId);
+  const tx2 = db.transaction('collectionDetails', 'readwrite');
+  for (const d of details) {
+    await tx2.store.delete(d.id);
+  }
+  await tx2.done;
+}
+
+// ---------------------------------------------------------------------------
+// 6. User Isolation & Logout Wipe
+// ---------------------------------------------------------------------------
+export async function wipeUserDataOnLogout(userId: string): Promise<void> {
+  const db = await getUserDB();
+
+  // 1. Collections
+  const colls = await db.getAllFromIndex('collections', 'by-user', userId);
+  const tx1 = db.transaction('collections', 'readwrite');
+  for (const c of colls) {
+    await tx1.store.delete(c.id);
+  }
+  await tx1.done;
+
+  // 2. Collection details
   const details = await db.getAllFromIndex('collectionDetails', 'by-user', userId);
   const tx2 = db.transaction('collectionDetails', 'readwrite');
   for (const d of details) {
@@ -165,12 +512,27 @@ export async function wipeUserDataOnLogout(userId: string): Promise<void> {
   }
   await tx2.done;
 
-  // Remove outbox operations
+  // 3. Outbox
   const ops = await db.getAllFromIndex('outbox', 'by-user', userId);
   const tx3 = db.transaction('outbox', 'readwrite');
   for (const op of ops) {
     await tx3.store.delete(op.id);
   }
   await tx3.done;
-}
 
+  // 4. Tombstones
+  const tombstones = await db.getAllFromIndex('tombstones', 'by-user', userId);
+  const tx4 = db.transaction('tombstones', 'readwrite');
+  for (const t of tombstones) {
+    await tx4.store.delete(t.entityId);
+  }
+  await tx4.done;
+
+  // 5. Temp-ID mappings
+  const mappings = await db.getAllFromIndex('tempIdMappings', 'by-user', userId);
+  const tx5 = db.transaction('tempIdMappings', 'readwrite');
+  for (const m of mappings) {
+    await tx5.store.delete(m.tempId);
+  }
+  await tx5.done;
+}

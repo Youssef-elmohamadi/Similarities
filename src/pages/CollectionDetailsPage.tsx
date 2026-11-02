@@ -76,6 +76,12 @@ export const CollectionDetailsPage: React.FC = () => {
       }
 
       try {
+        if (user) {
+          const { isTombstoned } = await import('@/offline/userDataDb');
+          if (await isTombstoned(user.id, id)) {
+            throw new Error('Collection was deleted locally');
+          }
+        }
         const res = await api.get<CollectionDetail>(`/collections/${id}`);
         if (user) {
           await setCachedCollectionDetail(user.id, res.data);

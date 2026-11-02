@@ -77,11 +77,15 @@ export const MyLibraryPage: React.FC = () => {
 
         const res = await api.get<CollectionSummary[]>(`/collections?${params.toString()}`);
         if (user) {
-          // Keep offline pending creations merged
+          // Keep offline pending creations merged, and filter out tombstones
+          const { getTombstonedEntityIds } = await import('@/offline/userDataDb');
+          const tombstones = await getTombstonedEntityIds(user.id);
+          const filteredServer = (res.data || []).filter(c => !tombstones.has(c.id));
+
           const localColls = await getCachedUserCollections(user.id);
-          const pendingTemps = localColls.filter(c => c.id.startsWith('temp-'));
-          await setCachedUserCollections(user.id, [...pendingTemps, ...res.data]);
-          return filterAndSortLocal([...pendingTemps, ...res.data]);
+          const pendingTemps = localColls.filter(c => c.id.startsWith('temp-') && !tombstones.has(c.id));
+          await setCachedUserCollections(user.id, [...pendingTemps, ...filteredServer]);
+          return filterAndSortLocal([...pendingTemps, ...filteredServer]);
         }
         return res.data;
       } catch (err) {
@@ -102,17 +106,15 @@ export const MyLibraryPage: React.FC = () => {
         const db = await getUserDB();
         await db.delete('collections', id);
         await db.delete('collectionDetails', id);
-        if (!id.startsWith('temp-')) {
-          await enqueueOutboxOperation({
-            id: crypto.randomUUID(),
-            userId: user.id,
-            type: 'DELETE_COLLECTION',
-            entityId: id,
-            payload: {},
-            timestamp: Date.now(),
-            status: 'PENDING',
-          });
-        }
+        await enqueueOutboxOperation({
+          id: crypto.randomUUID(),
+          userId: user.id,
+          type: 'DELETE_COLLECTION',
+          entityId: id,
+          payload: {},
+          timestamp: Date.now(),
+          status: 'PENDING',
+        });
         return { isOffline: true };
       }
 
