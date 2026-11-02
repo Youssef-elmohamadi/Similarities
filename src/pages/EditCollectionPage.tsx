@@ -4,13 +4,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, getApiErrorMessage } from '@/lib/api';
 import { CollectionDetail } from '@/types/collection';
 import { Button } from '@/components/common/Button';
-import { Input, Textarea } from '@/components/common/Input';
+import { Input, Textarea, Select } from '@/components/common/Input';
 import { Card } from '@/components/common/Card';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Skeleton } from '@/components/common/Skeleton';
 import { useToast } from '@/components/common/Toast';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
+import { toArabicDigits } from '@/lib/utils';
+import { getQuranDB, CompactSurah } from '@/offline/quranDb';
 import {
   getCachedCollectionDetail,
   setCachedCollectionDetail,
@@ -18,7 +20,7 @@ import {
   setCachedUserCollections,
   enqueueOutboxOperation,
 } from '@/offline/userDataDb';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, BookOpen, Layers, Sparkles } from 'lucide-react';
 
 export const EditCollectionPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,8 +32,36 @@ export const EditCollectionPage: React.FC = () => {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [collectionType, setCollectionType] = useState<'surah' | 'custom'>('custom');
+  const [selectedSurahId, setSelectedSurahId] = useState<number>(1);
 
   const isRtl = direction === 'rtl';
+
+  // Load all Surahs for base surah selection
+  const { data: surahs = [] } = useQuery<CompactSurah[]>({
+    queryKey: ['surahsList'],
+    networkMode: 'always',
+    queryFn: async () => {
+      try {
+        const db = await getQuranDB();
+        const localSurahs = await db.getAll('surahs');
+        if (localSurahs && localSurahs.length > 0) {
+          return localSurahs.sort((a, b) => a.number - b.number);
+        }
+      } catch (e) {
+        console.warn('Failed to get surahs from indexedDB', e);
+      }
+      if (navigator.onLine) {
+        try {
+          const res = await api.get<any[]>('/quran/surahs');
+          return res.data;
+        } catch (e) {
+          console.warn('Failed to get surahs from API', e);
+        }
+      }
+      return [];
+    },
+  });
 
   const { data: collection, isLoading } = useQuery<CollectionDetail>({
     queryKey: ['collection', id, user?.id],
@@ -64,14 +94,25 @@ export const EditCollectionPage: React.FC = () => {
     if (collection) {
       setTitle(collection.title);
       setDescription(collection.description || '');
+      if (collection.baseSurahId) {
+        setCollectionType('surah');
+        setSelectedSurahId(collection.baseSurahId);
+      } else {
+        setCollectionType('custom');
+      }
     }
   }, [collection]);
 
   const updateMutation = useMutation({
     mutationFn: async () => {
+      const selectedSurah = surahs.find(s => s.id === Number(selectedSurahId) || s.number === Number(selectedSurahId));
+      const baseSurahId = collectionType === 'surah' ? (selectedSurah?.id || Number(selectedSurahId)) : null;
+      const baseSurahNameArabic = collectionType === 'surah' ? selectedSurah?.nameArabic : undefined;
+
       const payload = {
         title: title.trim(),
         description: description.trim() || undefined,
+        baseSurahId: baseSurahId,
       };
 
       if (!navigator.onLine) {
@@ -81,6 +122,8 @@ export const EditCollectionPage: React.FC = () => {
           const baseUpdatedAt = current.updatedAt;
           current.title = payload.title;
           current.description = payload.description;
+          current.baseSurahId = payload.baseSurahId || undefined;
+          current.baseSurahNameArabic = baseSurahNameArabic;
           current.updatedAt = new Date().toISOString();
           await setCachedCollectionDetail(user.id, current);
 
@@ -89,6 +132,8 @@ export const EditCollectionPage: React.FC = () => {
           if (idx !== -1) {
             list[idx].title = payload.title;
             list[idx].description = payload.description;
+            list[idx].baseSurahId = payload.baseSurahId || undefined;
+            list[idx].baseSurahNameArabic = baseSurahNameArabic;
             list[idx].updatedAt = current.updatedAt;
             await setCachedUserCollections(user.id, list);
           }
@@ -163,6 +208,74 @@ export const EditCollectionPage: React.FC = () => {
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Collection Type Selector */}
+        <div className="space-y-2.5">
+          <label className="block text-sm font-semibold text-text-primary">
+            {t('نوع المجموعة الهيكلي', 'Collection Structure Type')}
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+              onClick={() => setCollectionType('surah')}
+              className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all flex items-start gap-3 ${
+                collectionType === 'surah'
+                  ? 'border-primary bg-primary-tint/30 shadow-xs'
+                  : 'border-border bg-surface hover:border-border/80'
+              }`}
+            >
+              <div className={`p-2 rounded-lg shrink-0 ${collectionType === 'surah' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
+                <BookOpen className="w-4 h-4" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="font-bold text-text-primary text-sm block">
+                  {t('مجموعة سورة (المرجع سورة محددة)', 'Surah-Based')}
+                </span>
+                <p className="text-xs text-text-secondary">
+                  {t('مربوطة بسورة مرجعية تقاس عليها باقي السور', 'Anchored to a specific base Surah')}
+                </p>
+              </div>
+            </div>
+
+            <div
+              onClick={() => setCollectionType('custom')}
+              className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all flex items-start gap-3 ${
+                collectionType === 'custom'
+                  ? 'border-primary bg-primary-tint/30 shadow-xs'
+                  : 'border-border bg-surface hover:border-border/80'
+              }`}
+            >
+              <div className={`p-2 rounded-lg shrink-0 ${collectionType === 'custom' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
+                <Layers className="w-4 h-4" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="font-bold text-text-primary text-sm block">
+                  {t('مجموعة موضوعية / حرة', 'Thematic / Custom')}
+                </span>
+                <p className="text-xs text-text-secondary">
+                  {t('متشابهات عامة حول موضوع أو ألفاظ محددة', 'Cross-Quran topical grouping')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Base Surah Selector (when Surah type is active) */}
+        {collectionType === 'surah' && (
+          <Card className="p-4 bg-primary-tint/20 border-primary/30 space-y-2.5">
+            <div className="flex items-center gap-2 text-primary font-semibold text-xs sm:text-sm">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span>{t('السورة الأساس (المرجع لهذه المجموعة)', 'Anchor Surah')}</span>
+            </div>
+            <Select
+              value={selectedSurahId}
+              onChange={e => setSelectedSurahId(Number(e.target.value))}
+              options={surahs.map(s => ({
+                value: s.id,
+                label: `${isRtl ? toArabicDigits(s.number) : s.number}. سورة ${s.nameArabic} (${isRtl ? toArabicDigits(s.ayahCount) : s.ayahCount} آية) - ${s.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}`,
+              }))}
+            />
+          </Card>
+        )}
+
         <Card className="space-y-4">
           <Input
             label={t('عنوان المجموعة *', 'Collection Title *')}

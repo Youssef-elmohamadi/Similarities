@@ -27,6 +27,7 @@ export interface VerseComparison {
   title: string;
   description?: string;
   sharedPhrases?: string;
+  anchorQuranVerseId?: number;
   createdAt: string;
   updatedAt: string;
   verses: ComparisonVerse[];
@@ -38,6 +39,7 @@ export interface CreateComparisonPayload {
   description?: string;
   sharedPhrases?: string;
   quranVerseIds?: number[];
+  anchorQuranVerseId?: number;
 }
 
 export interface UpdateComparisonPayload {
@@ -45,6 +47,7 @@ export interface UpdateComparisonPayload {
   description?: string;
   sharedPhrases?: string;
   quranVerseIds?: number[];
+  anchorQuranVerseId?: number;
 }
 
 export interface CreateDifferencePayload {

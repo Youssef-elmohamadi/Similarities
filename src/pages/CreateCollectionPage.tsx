@@ -13,9 +13,10 @@ import { Skeleton } from '@/components/common/Skeleton';
 import { useToast } from '@/components/common/Toast';
 import { useLanguage } from '@/context/LanguageContext';
 import { toArabicDigits, formatAyahOrnament } from '@/lib/utils';
-import { Plus, Trash2, ChevronUp, ChevronDown, BookOpen, Search, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, ChevronUp, ChevronDown, BookOpen, Search, ArrowRight, ArrowLeft, Layers, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { getFullVersesByIds, isOfflineDatasetAvailable } from '@/offline/quranDb';
+import { getFullVersesByIds, isOfflineDatasetAvailable, getQuranDB, CompactSurah } from '@/offline/quranDb';
+import { Select } from '@/components/common/Input';
 import { searchLocalWorker } from '@/offline/searchWorkerClient';
 import {
   setCachedCollectionDetail,
@@ -33,6 +34,8 @@ export const CreateCollectionPage: React.FC = () => {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [collectionType, setCollectionType] = useState<'surah' | 'custom'>('surah');
+  const [selectedSurahId, setSelectedSurahId] = useState<number>(1);
   const [selectedVerses, setSelectedVerses] = useState<QuranVerse[]>([]);
   const [isLoadingInitialVerses, setIsLoadingInitialVerses] = useState(false);
 
@@ -42,6 +45,52 @@ export const CreateCollectionPage: React.FC = () => {
 
   const isRtl = direction === 'rtl';
   const { user } = useAuth();
+
+  // Load all Surahs for base surah selection
+  const { data: surahs = [] } = useQuery<CompactSurah[]>({
+    queryKey: ['surahsList'],
+    networkMode: 'always',
+    queryFn: async () => {
+      try {
+        const db = await getQuranDB();
+        const localSurahs = await db.getAll('surahs');
+        if (localSurahs && localSurahs.length > 0) {
+          return localSurahs.sort((a, b) => a.number - b.number);
+        }
+      } catch (e) {
+        console.warn('Failed to get surahs from indexedDB', e);
+      }
+      if (navigator.onLine) {
+        try {
+          const res = await api.get<any[]>('/quran/surahs');
+          return res.data;
+        } catch (e) {
+          console.warn('Failed to get surahs from API', e);
+        }
+      }
+      return [];
+    },
+  });
+
+  // If initial verses were loaded from URL, auto-align the base surah
+  useEffect(() => {
+    if (selectedVerses.length > 0 && collectionType === 'surah') {
+      const firstSurahId = selectedVerses[0].surahId;
+      if (firstSurahId && !title) {
+        setSelectedSurahId(firstSurahId);
+      }
+    }
+  }, [selectedVerses]);
+
+  // Auto-suggest title when surah changes and user hasn't typed custom title
+  useEffect(() => {
+    if (collectionType === 'surah' && surahs.length > 0) {
+      const s = surahs.find(item => item.id === Number(selectedSurahId) || item.number === Number(selectedSurahId));
+      if (s) {
+        setTitle(prev => (!prev || prev.startsWith('متشابهات سورة ') ? `متشابهات سورة ${s.nameArabic}` : prev));
+      }
+    }
+  }, [collectionType, selectedSurahId, surahs]);
 
   // Read verses param from URL (e.g. ?verses=1,2,3)
   useEffect(() => {
@@ -114,9 +163,14 @@ export const CreateCollectionPage: React.FC = () => {
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      const selectedSurah = surahs.find(s => s.id === Number(selectedSurahId) || s.number === Number(selectedSurahId));
+      const baseSurahId = collectionType === 'surah' ? (selectedSurah?.id || Number(selectedSurahId)) : undefined;
+      const baseSurahNameArabic = collectionType === 'surah' ? selectedSurah?.nameArabic : undefined;
+
       const payload = {
         title: title.trim(),
         description: description.trim() || undefined,
+        baseSurahId: baseSurahId,
         quranVerseIds: selectedVerses.map(v => v.id),
       };
 
@@ -129,6 +183,8 @@ export const CreateCollectionPage: React.FC = () => {
           userId: user.id,
           title: payload.title,
           description: payload.description,
+          baseSurahId: payload.baseSurahId,
+          baseSurahNameArabic: baseSurahNameArabic,
           createdAt: now,
           updatedAt: now,
           verses: selectedVerses.map((v, idx) => ({
@@ -154,6 +210,8 @@ export const CreateCollectionPage: React.FC = () => {
           userId: user.id,
           title: payload.title,
           description: payload.description,
+          baseSurahId: payload.baseSurahId,
+          baseSurahNameArabic: baseSurahNameArabic,
           verseCount: selectedVerses.length,
           comparisonCount: 0,
           connectionCount: 0,
@@ -262,6 +320,97 @@ export const CreateCollectionPage: React.FC = () => {
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Collection Type Selector */}
+        <div className="space-y-2.5">
+          <label className="block text-sm font-semibold text-text-primary">
+            {t('نوع المجموعة الهيكلي', 'Collection Structure Type')}
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {/* Surah-based option */}
+            <div
+              onClick={() => setCollectionType('surah')}
+              className={`cursor-pointer p-4 rounded-xl border-2 transition-all flex flex-col justify-between ${
+                collectionType === 'surah'
+                  ? 'border-primary bg-primary-tint/30 shadow-xs'
+                  : 'border-border bg-surface hover:border-border/80'
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`p-2 rounded-lg shrink-0 ${collectionType === 'surah' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-text-primary text-sm sm:text-base">
+                      {t('مجموعة سورة (المرجع سورة محددة)', 'Surah-Based Collection')}
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                      {t('الأنسب للحفظ', 'Recommended')}
+                    </span>
+                  </div>
+                  <p className="text-xs text-text-secondary leading-relaxed">
+                    {t(
+                      'تُربط المجموعة بسورة محددة؛ فتكون مواضعها هي الأساس، وتُبنى عليها المقارنات مع السور الأخرى.',
+                      'Anchored to a specific Surah whose verses act as the base against other surahs.'
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Custom/Thematic option */}
+            <div
+              onClick={() => setCollectionType('custom')}
+              className={`cursor-pointer p-4 rounded-xl border-2 transition-all flex flex-col justify-between ${
+                collectionType === 'custom'
+                  ? 'border-primary bg-primary-tint/30 shadow-xs'
+                  : 'border-border bg-surface hover:border-border/80'
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`p-2 rounded-lg shrink-0 ${collectionType === 'custom' ? 'bg-primary text-white' : 'bg-charcoal-100 text-text-secondary'}`}>
+                  <Layers className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <span className="font-bold text-text-primary text-sm sm:text-base">
+                    {t('مجموعة موضوعية / حرة', 'Thematic / Custom Collection')}
+                  </span>
+                  <p className="text-xs text-text-secondary leading-relaxed">
+                    {t(
+                      'لجمع المتشابهات حول موضوع أو لفظ محدد عبر سور متعددة دون التقيد بسورة مرجع واحدة.',
+                      'A flexible collection grouping verses across multiple surahs by topic or recurring phrase.'
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Base Surah Selector (when Surah type is active) */}
+        {collectionType === 'surah' && (
+          <Card className="p-4 sm:p-5 bg-primary-tint/20 border-primary/30 space-y-3">
+            <div className="flex items-center gap-2 text-primary font-semibold text-sm">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span>{t('اختر السورة الأساس (المرجع لهذه المجموعة)', 'Choose the Anchor Surah')}</span>
+            </div>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              {t(
+                'آيات هذه السورة ستكون هي المرجع الأساسي، وكل مقارنة ستشمل موضعاً من هذه السورة ومواضعه الشبيهة في السور الأخرى.',
+                'Verses from this Surah will serve as the primary anchor for all comparisons in this collection.'
+              )}
+            </p>
+            <Select
+              value={selectedSurahId}
+              onChange={e => setSelectedSurahId(Number(e.target.value))}
+              options={surahs.map(s => ({
+                value: s.id,
+                label: `${isRtl ? toArabicDigits(s.number) : s.number}. سورة ${s.nameArabic} (${isRtl ? toArabicDigits(s.ayahCount) : s.ayahCount} آية) - ${s.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}`,
+              }))}
+            />
+          </Card>
+        )}
+
         {/* Collection Metadata Card */}
         <Card className="space-y-4">
           <Input

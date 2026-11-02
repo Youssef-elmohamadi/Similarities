@@ -12,15 +12,25 @@ import { useLanguage } from '@/context/LanguageContext';
 
 export interface ComparisonEditorProps {
   collectionId: string;
+  baseSurahId?: number;
+  baseSurahNameArabic?: string;
   verses: CollectionVerse[];
   comparisons: VerseComparison[];
-  onCreateComparison: (payload: { title: string; description?: string; sharedPhrases?: string; quranVerseIds: number[] }) => Promise<void>;
+  onCreateComparison: (payload: {
+    title: string;
+    description?: string;
+    sharedPhrases?: string;
+    quranVerseIds: number[];
+    anchorQuranVerseId?: number;
+  }) => Promise<void>;
   onDeleteComparison: (comparisonId: string) => Promise<void>;
   onAddDifference: (comparisonId: string, payload: { quranVerseId: number; selectedText: string; explanation: string }) => Promise<void>;
   onDeleteDifference: (differenceId: string) => Promise<void>;
 }
 
 export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
+  baseSurahId,
+  baseSurahNameArabic,
   verses,
   comparisons,
   onCreateComparison,
@@ -38,6 +48,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
   const [description, setDescription] = useState('');
   const [sharedPhrases, setSharedPhrases] = useState('');
   const [selectedVerseIds, setSelectedVerseIds] = useState<number[]>([]);
+  const [anchorVerseId, setAnchorVerseId] = useState<number | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // New difference form state
@@ -51,7 +62,12 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
     setTitle('');
     setDescription('');
     setSharedPhrases('');
-    setSelectedVerseIds(verses.map(v => v.quranVerseId));
+    const allIds = verses.map(v => v.quranVerseId);
+    setSelectedVerseIds(allIds);
+    const baseVerse = baseSurahNameArabic
+      ? verses.find(v => v.surahNameArabic === baseSurahNameArabic)
+      : verses[0];
+    setAnchorVerseId(baseVerse?.quranVerseId);
     setIsCreateModalOpen(true);
   };
 
@@ -66,6 +82,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
         description: description.trim() || undefined,
         sharedPhrases: sharedPhrases.trim() || undefined,
         quranVerseIds: selectedVerseIds,
+        anchorQuranVerseId: anchorVerseId,
       });
       setIsCreateModalOpen(false);
     } finally {
@@ -207,31 +224,51 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
                 </span>
 
                 <div className="grid grid-cols-1 gap-3">
-                  {comparison.verses.map(compVerse => (
-                    <div
-                      key={compVerse.id}
-                      className="p-4 md:p-5 rounded-xl bg-background border border-border"
-                    >
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <Badge variant="primary" size="sm">
-                          {t('سورة', 'Surah')} {compVerse.surahNameArabic}
-                        </Badge>
-                        <Badge variant="charcoal" size="sm">
-                          {t('الآية', 'Ayah')} {toArabicDigits(compVerse.ayahNumber)}
-                        </Badge>
-                      </div>
-                      <p
-                        dir="rtl"
-                        lang="ar"
-                        className="font-quran text-lg md:text-xl text-text-primary text-start leading-[2.5] py-1"
+                  {comparison.verses.map(compVerse => {
+                    const isAnchor = comparison.anchorQuranVerseId
+                      ? compVerse.quranVerseId === comparison.anchorQuranVerseId
+                      : (baseSurahNameArabic && compVerse.surahNameArabic === baseSurahNameArabic);
+
+                    return (
+                      <div
+                        key={compVerse.id}
+                        className={`p-4 md:p-5 rounded-xl transition ${
+                          isAnchor
+                            ? 'bg-amber-500/10 dark:bg-amber-950/25 border-2 border-amber-500/40 shadow-xs'
+                            : 'bg-background border border-border'
+                        }`}
                       >
-                        {compVerse.uthmaniText}{' '}
-                        <span className="ayah-number-badge text-primary font-bold">
-                          {formatAyahOrnament(compVerse.ayahNumber)}
-                        </span>
-                      </p>
-                    </div>
-                  ))}
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          {isAnchor ? (
+                            <Badge variant="gold" size="sm">
+                              <Sparkles className="w-3.5 h-3.5 me-1 inline-block" />
+                              {t('موضع السورة الأساس (المرجع)', 'Anchor Verse')}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" size="sm">
+                              {t('موضع مقارن', 'Compared Verse')}
+                            </Badge>
+                          )}
+                          <Badge variant="primary" size="sm">
+                            {t('سورة', 'Surah')} {compVerse.surahNameArabic}
+                          </Badge>
+                          <Badge variant="charcoal" size="sm">
+                            {t('الآية', 'Ayah')} {toArabicDigits(compVerse.ayahNumber)}
+                          </Badge>
+                        </div>
+                        <p
+                          dir="rtl"
+                          lang="ar"
+                          className="font-quran text-lg md:text-xl text-text-primary text-start leading-[2.5] py-1"
+                        >
+                          {compVerse.uthmaniText}{' '}
+                          <span className="ayah-number-badge text-primary font-bold">
+                            {formatAyahOrnament(compVerse.ayahNumber)}
+                          </span>
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -343,6 +380,33 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
               ))}
             </div>
           </div>
+
+          {/* Anchor Verse Selection */}
+          {selectedVerseIds.length > 0 && (
+            <div className="p-3.5 rounded-lg bg-primary-tint/20 border border-primary/25 space-y-2">
+              <label className="block text-xs sm:text-sm font-semibold text-text-primary">
+                {t('الآية المرجع الأساسية للمقارنة (الموضع الأصل) *', 'Anchor Verse (Base Context) *')}
+              </label>
+              <p className="text-[11px] text-text-secondary leading-relaxed">
+                {baseSurahNameArabic
+                  ? t(`في هذه المجموعة، يفضل اختيار موضع سورة ${baseSurahNameArabic} كمرجع تقاس عليه الفروق في السور الأخرى.`, `In this collection, choose a verse from Surah ${baseSurahNameArabic} as the base.`)
+                  : t('الآية التي يُقاس عليها التغيير أو الفارق اللفظي في باقي الآيات.', 'The verse against which other verses will be compared.')}
+              </p>
+              <Select
+                value={anchorVerseId || ''}
+                onChange={e => setAnchorVerseId(e.target.value ? Number(e.target.value) : undefined)}
+                options={verses
+                  .filter(v => selectedVerseIds.includes(v.quranVerseId))
+                  .map(v => {
+                    const isBase = baseSurahNameArabic && v.surahNameArabic === baseSurahNameArabic;
+                    return {
+                      value: v.quranVerseId,
+                      label: `${isBase ? '⭐ [سورة الأساس] ' : ''}سورة ${v.surahNameArabic} - الآية ${toArabicDigits(v.ayahNumber)}: ${v.uthmaniText.slice(0, 35)}...`,
+                    };
+                  })}
+              />
+            </div>
+          )}
 
           <div className="flex items-center justify-end gap-2 pt-4 border-t border-border">
             <Button

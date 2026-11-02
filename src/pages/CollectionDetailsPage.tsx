@@ -20,6 +20,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { formatRelativeTime, toArabicDigits } from '@/lib/utils';
 import {
   BookMarked,
+  BookOpen,
   GitCompare,
   Sparkles,
   FileText,
@@ -300,7 +301,7 @@ export const CollectionDetailsPage: React.FC = () => {
   // Comparison mutations
   const createComparisonMutation = useMutation({
     networkMode: 'always',
-    mutationFn: async (payload: { title: string; description?: string; sharedPhrases?: string; quranVerseIds: number[] }) => {
+    mutationFn: async (payload: { title: string; description?: string; sharedPhrases?: string; quranVerseIds: number[]; anchorQuranVerseId?: number }) => {
       if (!id) return;
       if (!navigator.onLine) {
         if (!user) throw new Error('Not logged in');
@@ -325,6 +326,7 @@ export const CollectionDetailsPage: React.FC = () => {
             title: payload.title,
             description: payload.description,
             sharedPhrases: payload.sharedPhrases,
+            anchorQuranVerseId: payload.anchorQuranVerseId,
             verses: matchedVerses,
             differences: [],
             createdAt: new Date().toISOString(),
@@ -872,8 +874,8 @@ export const CollectionDetailsPage: React.FC = () => {
       {/* Header Info Card */}
       <Card className="p-5 md:p-6 space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1.5 flex-1 text-start">
-            <div className="flex items-center gap-2">
+          <div className="space-y-2 flex-1 text-start">
+            <div className="flex items-center gap-2 flex-wrap">
               <Button
                 variant="ghost"
                 size="sm"
@@ -887,6 +889,16 @@ export const CollectionDetailsPage: React.FC = () => {
               <h1 className="text-2xl md:text-3xl font-bold text-text-primary tracking-tight leading-snug">
                 {collection.title}
               </h1>
+              {collection.baseSurahNameArabic ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary-tint text-primary border border-primary/30">
+                  <BookOpen className="w-3.5 h-3.5 text-primary" />
+                  {t('سورة الأساس:', 'Anchor Surah:')} سورة {collection.baseSurahNameArabic}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-charcoal-100 text-text-secondary">
+                  {t('مجموعة موضوعية / حرة', 'Thematic Collection')}
+                </span>
+              )}
             </div>
 
             {collection.description && (
@@ -1062,6 +1074,8 @@ export const CollectionDetailsPage: React.FC = () => {
       {activeTab === 'comparisons' && (
         <ComparisonEditor
           collectionId={collection.id}
+          baseSurahId={collection.baseSurahId}
+          baseSurahNameArabic={collection.baseSurahNameArabic}
           verses={collection.verses}
           comparisons={collection.comparisons}
           onCreateComparison={payload => createComparisonMutation.mutateAsync(payload)}

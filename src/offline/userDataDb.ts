@@ -9,6 +9,8 @@ export interface CachedCollection {
   isFavorite: boolean;
   itemCount: number;
   tags?: string;
+  baseSurahId?: number;
+  baseSurahNameArabic?: string;
   createdAt: string;
   updatedAt: string;
 }

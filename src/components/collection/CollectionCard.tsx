@@ -59,6 +59,15 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onDe
         </div>
 
         {/* Optional Description */}
+        {collection.baseSurahNameArabic && (
+          <div className="flex items-center gap-1.5 mb-2.5">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary-tint text-primary border border-primary/25">
+              <BookMarked className="w-3 h-3" />
+              {t('سورة الأساس:', 'Anchor:')} سورة {collection.baseSurahNameArabic}
+            </span>
+          </div>
+        )}
+
         {collection.description && (
           <p className="text-sm text-text-secondary mb-3.5 line-clamp-2 leading-relaxed">
             {collection.description}

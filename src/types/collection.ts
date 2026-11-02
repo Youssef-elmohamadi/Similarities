@@ -12,6 +12,8 @@ export interface CollectionSummary {
   createdAt: string;
   updatedAt: string;
   surahNames?: string[];
+  baseSurahId?: number;
+  baseSurahNameArabic?: string;
 }
 
 export interface CollectionVerse {
@@ -39,17 +41,21 @@ export interface CollectionDetail {
   comparisons: VerseComparison[];
   connections: MemorizationConnection[];
   notes: PersonalNote[];
+  baseSurahId?: number;
+  baseSurahNameArabic?: string;
 }
 
 export interface CreateCollectionPayload {
   title: string;
   description?: string;
   quranVerseIds?: number[];
+  baseSurahId?: number;
 }
 
 export interface UpdateCollectionPayload {
   title: string;
   description?: string;
+  baseSurahId?: number;
 }
 
 export interface DashboardStats {
