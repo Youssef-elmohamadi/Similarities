@@ -8,7 +8,7 @@ import { Button } from '@/components/common/Button';
 import { Input, Textarea, Select } from '@/components/common/Input';
 import { Modal } from '@/components/common/Modal';
 import { Card } from '@/components/common/Card';
-import { GitCompare, Plus, Trash2, Edit2, Sparkles, AlertCircle, Search, Check, X, Layers, BookOpen } from 'lucide-react';
+import { GitCompare, Plus, Trash2, Edit2, Sparkles, AlertCircle, Search, Check, X, Layers, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import { toArabicDigits, formatAyahOrnament } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { getVersesBySurahId, isOfflineDatasetAvailable, CompactVerse } from '@/offline/quranDb';
@@ -61,6 +61,26 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDiffModalOpen, setIsDiffModalOpen] = useState(false);
   const [activeComparisonId, setActiveComparisonId] = useState<string | null>(null);
+
+  // Set of collapsed comparison IDs
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
+
+  const toggleCollapse = (id: string) => {
+    setCollapsedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const collapseAll = () => {
+    setCollapsedIds(new Set(comparisons.map(c => c.id)));
+  };
+
+  const expandAll = () => {
+    setCollapsedIds(new Set());
+  };
 
   // New comparison form state
   const [title, setTitle] = useState('');
@@ -375,7 +395,32 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
           </Button>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-3">
+          {/* Collapse / Expand all controls & count */}
+          {sortedComparisons.length > 1 && (
+            <div className="flex items-center justify-between gap-2 text-xs text-text-secondary px-1 pb-1">
+              <span className="font-medium">
+                {t(`إجمالي المواضع: ${isRtl ? toArabicDigits(sortedComparisons.length) : sortedComparisons.length}`, `Total positions: ${sortedComparisons.length}`)}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={collapseAll}
+                  className="px-2.5 py-1 rounded-lg border border-border bg-surface hover:bg-background text-text-secondary hover:text-text-primary transition text-xs"
+                >
+                  {t('طي الكل', 'Collapse All')}
+                </button>
+                <button
+                  type="button"
+                  onClick={expandAll}
+                  className="px-2.5 py-1 rounded-lg border border-border bg-surface hover:bg-background text-text-secondary hover:text-text-primary transition text-xs"
+                >
+                  {t('فتح الكل', 'Expand All')}
+                </button>
+              </div>
+            </div>
+          )}
+
           {sortedComparisons.map((comparison, idx) => {
             const anchorVerse = comparison.anchorQuranVerseId
               ? comparison.verses.find(v => v.quranVerseId === comparison.anchorQuranVerseId)
@@ -384,198 +429,232 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
                   : comparison.verses[0]);
 
             const otherVerses = comparison.verses.filter(v => v !== anchorVerse);
+            const isCollapsed = collapsedIds.has(comparison.id);
 
             return (
-              <Card key={comparison.id} className="p-5 md:p-6 space-y-5 rounded-2xl border border-border shadow-xs hover:border-primary/40 transition">
-                {/* Cluster Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-border/80">
-                  <div className="space-y-1 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary text-white text-xs font-bold shrink-0">
-                        {isRtl ? toArabicDigits(idx + 1) : idx + 1}
+              <Card
+                key={comparison.id}
+                className={`transition-all rounded-xl border border-border shadow-xs hover:border-primary/40 bg-surface ${
+                  isCollapsed ? 'p-3 sm:p-3.5' : 'p-3.5 sm:p-4 space-y-3.5'
+                }`}
+              >
+                {/* Cluster Header (Clickable to Collapse / Expand) */}
+                <div
+                  onClick={() => toggleCollapse(comparison.id)}
+                  className="flex items-center justify-between gap-3 cursor-pointer select-none group/hdr"
+                >
+                  <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-[11px] font-bold shrink-0">
+                      {isRtl ? toArabicDigits(idx + 1) : idx + 1}
+                    </span>
+                    <h4 className="font-bold text-sm sm:text-base text-text-primary group-hover/hdr:text-primary transition truncate">
+                      {comparison.title}
+                    </h4>
+                    {anchorVerse && (
+                      <Badge variant="gold" size="sm" className="shrink-0 text-[11px]">
+                        <Sparkles className="w-3 h-3 me-1 inline-block" />
+                        {anchorVerse.surahNameArabic} [{toArabicDigits(anchorVerse.ayahNumber)}]
+                      </Badge>
+                    )}
+                    {isCollapsed && otherVerses.length > 0 && (
+                      <span className="text-[11px] text-text-secondary hidden md:inline truncate">
+                        مقابل: {otherVerses.map(v => `${v.surahNameArabic} [${toArabicDigits(v.ayahNumber)}]`).join(' • ')}
                       </span>
-                      <h4 className="font-bold text-lg text-text-primary leading-snug">
-                        {comparison.title}
-                      </h4>
-                      {anchorVerse && (
-                        <Badge variant="gold" size="sm">
-                          <Sparkles className="w-3.5 h-3.5 me-1 inline-block" />
-                          {t('الموضع في السورة:', 'Position:')} {anchorVerse.surahNameArabic} [الآية {toArabicDigits(anchorVerse.ayahNumber)}]
-                        </Badge>
-                      )}
-                    </div>
-                    {comparison.description && (
-                      <p className="text-xs sm:text-sm text-text-secondary leading-relaxed ps-9">
-                        {comparison.description}
-                      </p>
+                    )}
+                    {isCollapsed && comparison.differences && comparison.differences.length > 0 && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent-tint text-accent font-bold">
+                        {toArabicDigits(comparison.differences.length)} فوارق
+                      </span>
                     )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                  {/* Actions & Collapse Toggle */}
+                  <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                     <Button
                       size="sm"
                       variant="outline"
                       icon={<Plus className="w-3.5 h-3.5 text-primary" />}
                       onClick={() => handleOpenDiffModal(comparison.id)}
+                      className="h-7 text-xs px-2.5 hidden sm:inline-flex"
                     >
-                      {t('رصد فارق لفظي', 'Add Difference')}
+                      {t('رصد فارق', 'Add Diff')}
                     </Button>
 
                     <button
                       onClick={() => onDeleteComparison(comparison.id)}
-                      className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-danger hover:bg-danger-subtle transition"
+                      className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-danger hover:bg-danger-subtle transition"
                       title={t('حذف هذا الموضع', 'Delete Position')}
                       aria-label={t('حذف هذا الموضع', 'Delete Position')}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => toggleCollapse(comparison.id)}
+                      className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-text-secondary hover:bg-charcoal-100 hover:text-text-primary transition"
+                      title={isCollapsed ? t('فتح الموضع', 'Expand Position') : t('طي الموضع', 'Collapse Position')}
+                      aria-label={isCollapsed ? t('فتح الموضع', 'Expand Position') : t('طي الموضع', 'Collapse Position')}
+                    >
+                      {isCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
 
-                {/* Shared Phrases Callout */}
-                {comparison.sharedPhrases && (
-                  <div className="p-3.5 sm:p-4 rounded-xl bg-accent-tint/60 border border-accent/25">
-                    <span className="text-xs font-bold text-accent uppercase tracking-wider block mb-1">
-                      {t('الألفاظ والعبارات المشتركة في هذا الموضع:', 'Shared Wording in this Position:')}
-                    </span>
-                    <p className="text-base font-semibold text-text-primary font-quran">
-                      « {comparison.sharedPhrases} »
-                    </p>
-                  </div>
-                )}
+                {/* Collapsible Content */}
+                {!isCollapsed && (
+                  <div className="space-y-3 pt-1 border-t border-border/70">
+                    {/* Description if present */}
+                    {comparison.description && (
+                      <p className="text-xs text-text-secondary leading-relaxed ps-1">
+                        {comparison.description}
+                      </p>
+                    )}
 
-                {/* Compared Verses */}
-                <div className="space-y-3">
-                  {/* 1. Anchor Verse: prominently styled */}
-                  {anchorVerse && (
-                    <div className="space-y-1.5">
-                      <span className="text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                        <span>{t('موضع سورة الأساس (المرجع الذي يُقاس عليه):', 'Anchor Verse in Base Surah:')}</span>
-                      </span>
-                      <div className="p-4 md:p-5 rounded-xl bg-amber-500/10 dark:bg-amber-950/25 border-2 border-amber-500/40 shadow-xs">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <Badge variant="gold" size="sm">
-                            <Sparkles className="w-3.5 h-3.5 me-1 inline-block" />
-                            {t('موضع السورة الأساس', 'Anchor')}
-                          </Badge>
-                          <Badge variant="primary" size="sm">
-                            {t('سورة', 'Surah')} {anchorVerse.surahNameArabic}
-                          </Badge>
-                          <Badge variant="charcoal" size="sm">
-                            {t('الآية', 'Ayah')} {toArabicDigits(anchorVerse.ayahNumber)}
-                          </Badge>
-                        </div>
-                        <p
-                          dir="rtl"
-                          lang="ar"
-                          className="font-quran text-lg md:text-xl text-text-primary text-start leading-[2.5] py-1"
-                        >
-                          {anchorVerse.uthmaniText}{' '}
-                          <span className="ayah-number-badge text-primary font-bold">
-                            {formatAyahOrnament(anchorVerse.ayahNumber)}
-                          </span>
+                    {/* Shared Phrases Callout (Compact) */}
+                    {comparison.sharedPhrases && (
+                      <div className="p-2.5 rounded-lg bg-accent-tint/50 border border-accent/20">
+                        <span className="text-[11px] font-bold text-accent uppercase tracking-wider block mb-0.5">
+                          {t('الألفاظ والعبارات المشتركة في هذا الموضع:', 'Shared Wording in this Position:')}
+                        </span>
+                        <p className="text-sm sm:text-base font-semibold text-text-primary font-quran">
+                          « {comparison.sharedPhrases} »
                         </p>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* 2. Other comparative verses */}
-                  {otherVerses.length > 0 && (
-                    <div className="space-y-2 pt-1">
-                      <span className="text-xs font-bold text-text-secondary uppercase tracking-wider block">
-                        {t('المواضع المقابلة في السور الأخرى:', 'Comparative Verses in Other Surahs:')}
-                      </span>
-                      <div className="grid grid-cols-1 gap-2.5">
-                        {otherVerses.map(compVerse => (
-                          <div
-                            key={compVerse.id}
-                            className="p-4 rounded-xl bg-background border border-border"
-                          >
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <Badge variant="outline" size="sm">
-                                {t('موضع مقارن', 'Compared Verse')}
+                    {/* Verses Section (Compact) */}
+                    <div className="space-y-2.5">
+                      {/* Anchor Verse (Compact Frame) */}
+                      {anchorVerse && (
+                        <div className="space-y-1">
+                          <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-amber-500" />
+                            <span>{t('موضع سورة الأساس (المرجع الذي يُقاس عليه):', 'Anchor Verse in Base Surah:')}</span>
+                          </span>
+                          <div className="p-3 sm:p-3.5 rounded-xl bg-amber-500/10 dark:bg-amber-950/20 border border-amber-500/35 shadow-xs">
+                            <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+                              <Badge variant="gold" size="sm" className="text-[11px]">
+                                {t('موضع الأساس', 'Anchor')}
                               </Badge>
-                              <Badge variant="primary" size="sm">
-                                {t('سورة', 'Surah')} {compVerse.surahNameArabic}
+                              <Badge variant="primary" size="sm" className="text-[11px]">
+                                {t('سورة', 'Surah')} {anchorVerse.surahNameArabic}
                               </Badge>
-                              <Badge variant="charcoal" size="sm">
-                                {t('الآية', 'Ayah')} {toArabicDigits(compVerse.ayahNumber)}
+                              <Badge variant="charcoal" size="sm" className="text-[11px]">
+                                {t('الآية', 'Ayah')} {toArabicDigits(anchorVerse.ayahNumber)}
                               </Badge>
                             </div>
                             <p
                               dir="rtl"
                               lang="ar"
-                              className="font-quran text-base md:text-lg text-text-primary text-start leading-[2.4] py-1"
+                              className="font-quran text-base sm:text-lg text-text-primary text-start leading-[2.2] py-0.5"
                             >
-                              {compVerse.uthmaniText}{' '}
-                              <span className="ayah-number-badge text-primary font-bold">
-                                {formatAyahOrnament(compVerse.ayahNumber)}
+                              {anchorVerse.uthmaniText}{' '}
+                              <span className="ayah-number-badge text-primary font-bold text-sm">
+                                {formatAyahOrnament(anchorVerse.ayahNumber)}
                               </span>
                             </p>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Documented Differences List */}
-                <div className="pt-2 border-t border-border/80">
-                  <div className="flex items-center justify-between gap-2 mb-2.5">
-                    <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-                      {t('الفوارق المرصودة ومواضع الاختلاف لهذا الموضع:', 'Wording Differences for this Position:')}
-                    </span>
-                    <button
-                      onClick={() => handleOpenDiffModal(comparison.id)}
-                      className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
-                    >
-                      <Plus className="w-3 h-3" />
-                      <span>{t('إضافة فارق', 'Add Diff')}</span>
-                    </button>
-                  </div>
-
-                  {comparison.differences.length === 0 ? (
-                    <div className="p-3 rounded-lg bg-surface border border-dashed border-border text-center">
-                      <p className="text-xs text-text-secondary">
-                        {t('لم يُرصد فارق لفظي بعد لهذا الموضع. اضغط «رصد فارق لفظي» لتوثيق الاختلاف.', 'No specific differences added yet. Click Add Difference to document nuances.')}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2.5">
-                      {comparison.differences.map(diff => (
-                        <div
-                          key={diff.id}
-                          className="p-3.5 rounded-xl bg-surface border border-border flex items-start justify-between gap-3 shadow-xs"
-                        >
-                          <div className="space-y-1.5 text-start flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge variant="accent" size="sm">
-                                {t('سورة', 'Surah')} {diff.surahNameArabic} : {t('الآية', 'Ayah')} {toArabicDigits(diff.ayahNumber)}
-                              </Badge>
-                              <span className="text-xs font-bold text-primary bg-primary-tint px-2.5 py-1 rounded-md border border-primary/20 font-quran">
-                                « {diff.selectedText} »
-                              </span>
-                            </div>
-                            <p className="text-xs sm:text-sm text-text-primary leading-relaxed ps-1">
-                              {diff.explanation}
-                            </p>
-                          </div>
-
-                          <button
-                            onClick={() => onDeleteDifference(diff.id)}
-                            className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-danger hover:bg-danger-subtle transition shrink-0"
-                            title={t('حذف هذا الفارق', 'Delete Difference')}
-                            aria-label={t('حذف هذا الفارق', 'Delete Difference')}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
                         </div>
-                      ))}
+                      )}
+
+                      {/* Comparative Verses (Compact) */}
+                      {otherVerses.length > 0 && (
+                        <div className="space-y-1.5">
+                          <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider block">
+                            {t('المواضع المقابلة في السور الأخرى:', 'Comparative Verses in Other Surahs:')}
+                          </span>
+                          <div className="grid grid-cols-1 gap-2">
+                            {otherVerses.map(compVerse => (
+                              <div
+                                key={compVerse.id}
+                                className="p-2.5 sm:p-3 rounded-lg bg-background border border-border"
+                              >
+                                <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                                  <Badge variant="outline" size="sm" className="text-[11px]">
+                                    {t('موضع مقارن', 'Compared Verse')}
+                                  </Badge>
+                                  <Badge variant="primary" size="sm" className="text-[11px]">
+                                    {t('سورة', 'Surah')} {compVerse.surahNameArabic}
+                                  </Badge>
+                                  <Badge variant="charcoal" size="sm" className="text-[11px]">
+                                    {t('الآية', 'Ayah')} {toArabicDigits(compVerse.ayahNumber)}
+                                  </Badge>
+                                </div>
+                                <p
+                                  dir="rtl"
+                                  lang="ar"
+                                  className="font-quran text-sm sm:text-base text-text-primary text-start leading-[2.1]"
+                                >
+                                  {compVerse.uthmaniText}{' '}
+                                  <span className="ayah-number-badge text-primary font-bold text-xs">
+                                    {formatAyahOrnament(compVerse.ayahNumber)}
+                                  </span>
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+
+                    {/* Documented Differences (Compact) */}
+                    <div className="pt-2 border-t border-border/70">
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
+                          {t('الفوارق المرصودة ومواضع الاختلاف لهذا الموضع:', 'Wording Differences for this Position:')}
+                        </span>
+                        <button
+                          onClick={() => handleOpenDiffModal(comparison.id)}
+                          className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>{t('إضافة فارق', 'Add Diff')}</span>
+                        </button>
+                      </div>
+
+                      {comparison.differences.length === 0 ? (
+                        <div className="p-2.5 rounded-lg bg-surface border border-dashed border-border text-center">
+                          <p className="text-xs text-text-secondary">
+                            {t('لم يُرصد فارق لفظي بعد لهذا الموضع. اضغط «رصد فارق لفظي» لتوثيق الاختلاف.', 'No specific differences added yet. Click Add Difference to document nuances.')}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {comparison.differences.map(diff => (
+                            <div
+                              key={diff.id}
+                              className="p-2.5 rounded-lg bg-surface border border-border flex items-start justify-between gap-2.5 shadow-xs"
+                            >
+                              <div className="space-y-1 text-start flex-1">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <Badge variant="accent" size="sm" className="text-[10px]">
+                                    {t('سورة', 'Surah')} {diff.surahNameArabic} : {t('الآية', 'Ayah')} {toArabicDigits(diff.ayahNumber)}
+                                  </Badge>
+                                  <span className="text-xs font-bold text-primary bg-primary-tint px-2 py-0.5 rounded border border-primary/20 font-quran">
+                                    « {diff.selectedText} »
+                                  </span>
+                                </div>
+                                <p className="text-xs text-text-primary leading-relaxed ps-0.5">
+                                  {diff.explanation}
+                                </p>
+                              </div>
+
+                              <button
+                                onClick={() => onDeleteDifference(diff.id)}
+                                className="w-6 h-6 inline-flex items-center justify-center rounded text-text-secondary hover:text-danger hover:bg-danger-subtle transition shrink-0"
+                                title={t('حذف هذا الفارق', 'Delete Difference')}
+                                aria-label={t('حذف هذا الفارق', 'Delete Difference')}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </Card>
             );
           })}
