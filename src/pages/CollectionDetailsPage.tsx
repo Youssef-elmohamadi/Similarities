@@ -37,7 +37,7 @@ import {
 import { QuranVerse } from '@/types/quran';
 import { useAuth } from '@/context/AuthContext';
 import { searchLocalWorker } from '@/offline/searchWorkerClient';
-import { getFullVerseById, isOfflineDatasetAvailable } from '@/offline/quranDb';
+import { getFullVerseById, getFullVersesByIds, isOfflineDatasetAvailable } from '@/offline/quranDb';
 import {
   getCachedCollectionDetail,
   setCachedCollectionDetail,
@@ -52,7 +52,7 @@ export const CollectionDetailsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
 
-  const [activeTab, setActiveTab] = useState<'verses' | 'comparisons' | 'connections' | 'notes'>('verses');
+  const [activeTab, setActiveTab] = useState<'comparisons' | 'verses' | 'connections' | 'notes'>('comparisons');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Add Verse Quick Search Modal
@@ -308,17 +308,38 @@ export const CollectionDetailsPage: React.FC = () => {
         const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
         if (current) {
           const tempId = crypto.randomUUID();
-          const matchedVerses = (current.verses || [])
-            .filter(v => payload.quranVerseIds.includes(v.quranVerseId))
-            .map(v => ({
-              id: crypto.randomUUID(),
-              comparisonId: tempId,
-              quranVerseId: v.quranVerseId,
-              surahNumber: v.surahNumber,
-              surahNameArabic: v.surahNameArabic,
-              ayahNumber: v.ayahNumber,
-              uthmaniText: v.uthmaniText,
-            }));
+          const allFullVerses = await getFullVersesByIds(payload.quranVerseIds);
+          let currentOrder = (current.verses || []).length;
+          const existingVerseIds = new Set((current.verses || []).map(v => v.quranVerseId));
+
+          for (const fv of allFullVerses) {
+            if (!existingVerseIds.has(fv.id)) {
+              current.verses.push({
+                id: `temp-v-${crypto.randomUUID()}`,
+                collectionId: id,
+                quranVerseId: fv.id,
+                displayOrder: ++currentOrder,
+                addedAt: new Date().toISOString(),
+                surahId: fv.surahId,
+                surahNumber: fv.surahNumber || fv.surahId,
+                surahNameArabic: fv.surahNameArabic,
+                surahNameEnglish: fv.surahNameEnglish,
+                ayahNumber: fv.ayahNumber,
+                uthmaniText: fv.uthmaniText,
+              });
+              existingVerseIds.add(fv.id);
+            }
+          }
+
+          const matchedVerses = allFullVerses.map((v: any) => ({
+            id: crypto.randomUUID(),
+            comparisonId: tempId,
+            quranVerseId: v.id,
+            surahNumber: v.surahNumber,
+            surahNameArabic: v.surahNameArabic,
+            ayahNumber: v.ayahNumber,
+            uthmaniText: v.uthmaniText,
+          }));
 
           const newComp: any = {
             id: tempId,
@@ -355,9 +376,9 @@ export const CollectionDetailsPage: React.FC = () => {
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });
       if (data?.isOffline) {
-        toast.info(t('تم حفظ المقارنة محلياً — في انتظار المزامنة.', 'Comparison saved locally — pending sync.'));
+        toast.info(t('تم حفظ الموضع محلياً — في انتظار المزامنة.', 'Position saved locally — pending sync.'));
       } else {
-        toast.success(t('تم إنشاء المقارنة بنجاح.', 'Comparison created.'));
+        toast.success(t('تمت إضافة الموضع المتشابه بنجاح.', 'Position cluster added successfully.'));
       }
     },
     onError: err => toast.error(getApiErrorMessage(err)),
@@ -978,21 +999,6 @@ export const CollectionDetailsPage: React.FC = () => {
       {/* Tabs Navigation: Horizontal scroll on mobile */}
       <div className="flex items-center gap-2 border-b border-border overflow-x-auto pb-px">
         <button
-          onClick={() => setActiveTab('verses')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition whitespace-nowrap min-h-[44px] ${
-            activeTab === 'verses'
-              ? 'border-primary text-primary bg-primary-tint/30 rounded-t-lg'
-              : 'border-transparent text-text-secondary hover:text-text-primary'
-          }`}
-        >
-          <BookMarked className="w-4 h-4" />
-          <span>{t('الآيات المتشابهة', 'Verses')}</span>
-          <span className="px-2 py-0.5 rounded-full bg-charcoal-100 text-xs font-bold text-text-primary">
-            {isRtl ? toArabicDigits(collection.verses.length) : collection.verses.length}
-          </span>
-        </button>
-
-        <button
           onClick={() => setActiveTab('comparisons')}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition whitespace-nowrap min-h-[44px] ${
             activeTab === 'comparisons'
@@ -1001,9 +1007,24 @@ export const CollectionDetailsPage: React.FC = () => {
           }`}
         >
           <GitCompare className="w-4 h-4" />
-          <span>{t('محرر المقارنات والفروق', 'Comparisons & Differences')}</span>
+          <span>{t('مواضع المتشابهات (المجموعات الفرعية)', 'Positions & Subgroups')}</span>
           <span className="px-2 py-0.5 rounded-full bg-charcoal-100 text-xs font-bold text-text-primary">
             {isRtl ? toArabicDigits(collection.comparisons.length) : collection.comparisons.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('verses')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition whitespace-nowrap min-h-[44px] ${
+            activeTab === 'verses'
+              ? 'border-primary text-primary bg-primary-tint/30 rounded-t-lg'
+              : 'border-transparent text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          <BookMarked className="w-4 h-4" />
+          <span>{t('فهرس الآيات الكريمة', 'Verses Index')}</span>
+          <span className="px-2 py-0.5 rounded-full bg-charcoal-100 text-xs font-bold text-text-primary">
+            {isRtl ? toArabicDigits(collection.verses.length) : collection.verses.length}
           </span>
         </button>
 
@@ -1038,16 +1059,31 @@ export const CollectionDetailsPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Tab 1: Verses Overview & Order & Verse Note */}
+      {/* Tab 1: Dedicated Similarities & Differences Clusters (Primary View) */}
+      {activeTab === 'comparisons' && (
+        <ComparisonEditor
+          collectionId={collection.id}
+          baseSurahId={collection.baseSurahId}
+          baseSurahNameArabic={collection.baseSurahNameArabic}
+          verses={collection.verses}
+          comparisons={collection.comparisons}
+          onCreateComparison={payload => createComparisonMutation.mutateAsync(payload)}
+          onDeleteComparison={cmpId => deleteComparisonMutation.mutateAsync(cmpId)}
+          onAddDifference={(cmpId, payload) => addDifferenceMutation.mutateAsync({ comparisonId: cmpId, payload })}
+          onDeleteDifference={diffId => deleteDifferenceMutation.mutateAsync(diffId)}
+        />
+      )}
+
+      {/* Tab 2: Verses Overview & Order & Verse Note */}
       {activeTab === 'verses' && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-text-primary leading-snug">
-                {t('نصوص الآيات الكريمة بالرسم العثماني', 'Verses in Authentic Uthmani Script')}
+                {t('فهرس الآيات الكريمة بالرسم العثماني', 'Verses in Authentic Uthmani Script')}
               </h2>
               <p className="text-sm text-text-secondary">
-                {t('يمكنك إعادة ترتيب الآيات وكتابة ملاحظة شخصية على كل آية بشكل مستقل.', 'Reorder verses and add notes.')}
+                {t('قائمة مسرودة لكافة الآيات المشمولة في مواضع هذه المجموعة مع إمكانية تدوين ملاحظات شخصية.', 'Index of all verses in this collection with personal notes.')}
               </p>
             </div>
 
@@ -1068,21 +1104,6 @@ export const CollectionDetailsPage: React.FC = () => {
             onUpdateNote={(verseId, note) => updateVerseNoteMutation.mutate({ quranVerseId: verseId, note })}
           />
         </div>
-      )}
-
-      {/* Tab 2: Dedicated Similarities & Differences Editor */}
-      {activeTab === 'comparisons' && (
-        <ComparisonEditor
-          collectionId={collection.id}
-          baseSurahId={collection.baseSurahId}
-          baseSurahNameArabic={collection.baseSurahNameArabic}
-          verses={collection.verses}
-          comparisons={collection.comparisons}
-          onCreateComparison={payload => createComparisonMutation.mutateAsync(payload)}
-          onDeleteComparison={cmpId => deleteComparisonMutation.mutateAsync(cmpId)}
-          onAddDifference={(cmpId, payload) => addDifferenceMutation.mutateAsync({ comparisonId: cmpId, payload })}
-          onDeleteDifference={diffId => deleteDifferenceMutation.mutateAsync(diffId)}
-        />
       )}
 
       {/* Tab 3: Memorization Connections */}

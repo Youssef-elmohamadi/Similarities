@@ -148,6 +148,16 @@ export async function getSurahById(id: number): Promise<CompactSurah | undefined
   }
 }
 
+export async function getVersesBySurahId(surahId: number): Promise<CompactVerse[]> {
+  try {
+    const db = await getQuranDB();
+    const verses = await db.getAllFromIndex('verses', 'by-surah', surahId);
+    return verses.sort((a, b) => a.ayahNumber - b.ayahNumber);
+  } catch {
+    return [];
+  }
+}
+
 export async function getFullVerseById(id: number): Promise<any | null> {
   try {
     const db = await getQuranDB();
