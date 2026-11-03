@@ -8,7 +8,7 @@ import { Button } from '@/components/common/Button';
 import { Input, Textarea, Select } from '@/components/common/Input';
 import { Modal } from '@/components/common/Modal';
 import { Card } from '@/components/common/Card';
-import { GitCompare, Plus, Trash2, Edit2, Sparkles, AlertCircle, Search, Check, X, Layers, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import { GitCompare, Plus, Trash2, Edit2, Sparkles, AlertCircle, Search, Check, X, Layers, BookOpen, ChevronDown, ChevronUp, Printer } from 'lucide-react';
 import { toArabicDigits, formatAyahOrnament } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { getVersesBySurahId, isOfflineDatasetAvailable, CompactVerse } from '@/offline/quranDb';
@@ -45,6 +45,7 @@ export interface ComparisonEditorProps {
   onDeleteComparison: (comparisonId: string) => Promise<void>;
   onAddDifference: (comparisonId: string, payload: { quranVerseId: number; selectedText: string; explanation: string }) => Promise<void>;
   onDeleteDifference: (differenceId: string) => Promise<void>;
+  onExportComparison?: (comparisonId: string) => void;
   isCreateModalOpen?: boolean;
   onCloseCreateModal?: () => void;
 }
@@ -58,6 +59,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
   onDeleteComparison,
   onAddDifference,
   onDeleteDifference,
+  onExportComparison,
   isCreateModalOpen: externalCreateModalOpen,
   onCloseCreateModal,
 }) => {
@@ -494,6 +496,18 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
                     >
                       {t('رصد فارق', 'Add Diff')}
                     </Button>
+
+                    {onExportComparison && (
+                      <button
+                        type="button"
+                        onClick={() => onExportComparison(comparison.id)}
+                        className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-primary hover:bg-primary-tint/30 transition"
+                        title={t('تصدير هذا الموضع فقط كـ PDF', 'Export only this position as PDF')}
+                        aria-label={t('تصدير هذا الموضع فقط كـ PDF', 'Export only this position as PDF')}
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                      </button>
+                    )}
 
                     <button
                       onClick={() => onDeleteComparison(comparison.id)}

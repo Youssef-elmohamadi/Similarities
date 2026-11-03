@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Loader2, Palette, Type, AlertTriangle, WifiOff, FileText, Check, Printer } from 'lucide-react';
+import { Download, Loader2, Palette, Type, AlertTriangle, WifiOff, FileText, Check, Printer, Layers } from 'lucide-react';
 import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { useLanguage } from '@/context/LanguageContext';
 import { api } from '@/lib/api';
 import { exportCollectionToPdf } from '@/lib/collectionPdfGenerator';
 import { CollectionDetail } from '@/types/collection';
+import { toArabicDigits } from '@/lib/utils';
 
 export interface ExportPdfModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export interface ExportPdfModalProps {
   collectionId: string;
   collectionTitle: string;
   collection?: CollectionDetail;
+  initialSelectedComparisonId?: string;
   hasUnsavedChanges?: boolean;
 }
 
@@ -22,6 +24,7 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
   collectionId,
   collectionTitle,
   collection,
+  initialSelectedComparisonId,
   hasUnsavedChanges = false,
 }) => {
   const { t } = useLanguage();
@@ -36,6 +39,25 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
     const saved = localStorage.getItem('pdf_export_font_size');
     return saved === 'large' ? 'large' : 'normal';
   });
+
+  const comparisons = collection?.comparisons || [];
+  const [selectedCompIds, setSelectedCompIds] = useState<Set<string>>(() => {
+    if (initialSelectedComparisonId) {
+      return new Set([initialSelectedComparisonId]);
+    }
+    return new Set(comparisons.map(c => c.id));
+  });
+
+  // Re-sync when modal opens or initial selection changes
+  useEffect(() => {
+    if (isOpen) {
+      if (initialSelectedComparisonId) {
+        setSelectedCompIds(new Set([initialSelectedComparisonId]));
+      } else {
+        setSelectedCompIds(new Set(comparisons.map(c => c.id)));
+      }
+    }
+  }, [isOpen, initialSelectedComparisonId, collection]);
 
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -69,6 +91,11 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
   const handleExport = async () => {
     if (isExporting) return;
 
+    if (comparisons.length > 0 && selectedCompIds.size === 0) {
+      setExportError(t('يرجى اختيار موضع واحد على الأقل لتصديره.', 'Please select at least one position to export.'));
+      return;
+    }
+
     setIsExporting(true);
     setExportError(null);
 
@@ -85,9 +112,10 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
       exportCollectionToPdf(targetCollection, {
         color,
         fontSize,
+        selectedComparisonIds: comparisons.length > 0 ? Array.from(selectedCompIds) : undefined,
       });
 
-      // Close modal upon successful export initiation
+      // Close modal upon initiating export
       setTimeout(() => {
         onClose();
       }, 500);
@@ -170,6 +198,76 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
             <Button size="sm" variant="outline" onClick={handleExport} className="h-7 text-xs">
               {t('إعادة المحاولة', 'Retry')}
             </Button>
+          </div>
+        )}
+
+        {/* Option: Choose Sub-Collections (When comparisons exist) */}
+        {comparisons.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5" />
+                <span>{t('اختر المواضع المراد تصديرها', 'Select Sub-Collections to Export')}</span>
+                <span className="text-[11px] font-normal text-text-secondary">
+                  ({toArabicDigits(selectedCompIds.size)} / {toArabicDigits(comparisons.length)})
+                </span>
+              </label>
+              <div className="flex items-center gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCompIds(new Set(comparisons.map(c => c.id)))}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  {t('تحديد الكل', 'Select All')}
+                </button>
+                <span className="text-border">|</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCompIds(new Set())}
+                  className="text-text-secondary hover:text-danger font-semibold"
+                >
+                  {t('إلغاء التحديد', 'Deselect All')}
+                </button>
+              </div>
+            </div>
+
+            <div className="max-h-44 overflow-y-auto space-y-1.5 p-2 rounded-xl border border-border bg-surface/50">
+              {comparisons.map((cmp, idx) => {
+                const isChecked = selectedCompIds.has(cmp.id);
+                const vCount = cmp.verses?.length || 0;
+                return (
+                  <label
+                    key={cmp.id}
+                    className={`flex items-center justify-between p-2 rounded-lg border text-xs cursor-pointer transition ${
+                      isChecked
+                        ? 'border-primary/50 bg-primary/5 font-semibold text-text-primary'
+                        : 'border-transparent text-text-secondary hover:bg-charcoal-100/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={e => {
+                          const next = new Set(selectedCompIds);
+                          if (e.target.checked) next.add(cmp.id);
+                          else next.delete(cmp.id);
+                          setSelectedCompIds(next);
+                        }}
+                        className="rounded border-border text-primary focus:ring-primary w-4 h-4 shrink-0"
+                      />
+                      <span className="truncate">
+                        <span className="text-text-secondary me-1">{toArabicDigits(idx + 1)}.</span>
+                        <bdi dir="auto">{cmp.title}</bdi>
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-text-secondary px-1.5 py-0.5 rounded bg-charcoal-100 shrink-0 ms-2">
+                      {toArabicDigits(vCount)} {vCount === 1 ? t('آية', 'ayah') : t('آيات', 'ayahs')}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -275,13 +373,13 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
         <div className="p-3 rounded-lg bg-surface border border-border text-[11px] text-text-secondary space-y-1">
           <div className="font-semibold text-text-primary flex items-center gap-1.5">
             <FileText className="w-3.5 h-3.5 text-primary" />
-            <span>{t('محتويات الملف المصدر:', 'Included in Export:')}</span>
+            <span>{t('محتويات وتنسيق التصدير المخصص:', 'Included in Custom Export:')}</span>
           </div>
           <ul className="list-disc list-inside space-y-0.5 ps-1">
+            <li>{t('فهرس مواضع منظم (عند تصدير موضعين أو أكثر)', 'Structured Table of Contents')}</li>
+            <li>{t('فصل كل موضع فرعي في قسم مستقل يبدأ بصفحة جديدة', 'Each sub-collection starts on a new page')}</li>
             <li>{t('الرسم العثماني المعتمد برواية حفص عن عاصم (مشروع تنزيل)', 'Verified Tanzil Uthmani script')}</li>
-            <li>{t('مواضع المتشابهات مع الفوارق الدقيقة وتوجيهها', 'Similarities, differences, and explanations')}</li>
-            <li>{t('الروابط والتقنيات الحفظية والملاحظات الخاصة', 'Memorization aids and personal notes')}</li>
-            <li>{t('ترقيم تلقائي للصفحات مع الحفاظ على ترابط كتل الآيات', 'Page numbers with clean non-breaking blocks')}</li>
+            <li>{t('مواضع المتشابهات مع الفوارق الدقيقة وتوجيهها والملاحظات', 'Similarities, differences, and explanations')}</li>
           </ul>
         </div>
 
@@ -301,8 +399,14 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
             size="md"
             icon={isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
             onClick={handleExport}
-            disabled={(!isOnline && !collection) || isExporting}
-            title={!isOnline && !collection ? t('يتطلب اتصالاً بالإنترنت لتحميل البيانات', 'Requires internet connection to load data') : undefined}
+            disabled={(!isOnline && !collection) || (comparisons.length > 0 && selectedCompIds.size === 0) || isExporting}
+            title={
+              !isOnline && !collection
+                ? t('يتطلب اتصالاً بالإنترنت لتحميل البيانات', 'Requires internet connection to load data')
+                : comparisons.length > 0 && selectedCompIds.size === 0
+                ? t('يرجى تحديد موضع واحد على الأقل', 'Please select at least one position')
+                : undefined
+            }
           >
             {isExporting ? t('جارٍ تجهيز الملف...', 'Preparing PDF...') : t('تصدير / حفظ كـ PDF', 'Export / Save as PDF')}
           </Button>
@@ -311,4 +415,3 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
     </Modal>
   );
 };
-

@@ -65,6 +65,7 @@ export const CollectionDetailsPage: React.FC = () => {
 
   // Export to PDF State
   const [isExportPdfOpen, setIsExportPdfOpen] = useState(false);
+  const [exportComparisonId, setExportComparisonId] = useState<string | undefined>(undefined);
   const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   useEffect(() => {
@@ -1007,9 +1008,11 @@ export const CollectionDetailsPage: React.FC = () => {
               size="sm"
               variant="outline"
               icon={<FileDown className="w-4 h-4 text-primary" />}
-              onClick={() => setIsExportPdfOpen(true)}
-              disabled={!isOnline}
-              title={!isOnline ? t('يتطلب اتصالاً بالإنترنت', 'Requires internet connection') : t('تصدير المجموعة كملف PDF', 'Export collection as PDF')}
+              onClick={() => {
+                setExportComparisonId(undefined);
+                setIsExportPdfOpen(true);
+              }}
+              title={t('تصدير المجموعة كملف PDF', 'Export collection as PDF')}
             >
               {t('تصدير PDF', 'Export PDF')}
             </Button>
@@ -1081,10 +1084,12 @@ export const CollectionDetailsPage: React.FC = () => {
               {/* Mobile Export PDF */}
               <button
                 type="button"
-                onClick={() => setIsExportPdfOpen(true)}
-                disabled={!isOnline}
-                className="p-1.5 rounded-lg border border-border bg-surface text-text-secondary hover:text-text-primary text-xs disabled:opacity-50"
-                title={!isOnline ? t('يتطلب اتصالاً بالإنترنت', 'Requires internet connection') : t('تصدير PDF', 'Export PDF')}
+                onClick={() => {
+                  setExportComparisonId(undefined);
+                  setIsExportPdfOpen(true);
+                }}
+                className="p-1.5 rounded-lg border border-border bg-surface text-text-secondary hover:text-text-primary text-xs"
+                title={t('تصدير PDF', 'Export PDF')}
                 aria-label={t('تصدير PDF', 'Export PDF')}
               >
                 <FileDown className="w-3.5 h-3.5 text-primary" />
@@ -1230,6 +1235,10 @@ export const CollectionDetailsPage: React.FC = () => {
           onDeleteComparison={cmpId => deleteComparisonMutation.mutateAsync(cmpId)}
           onAddDifference={(cmpId, payload) => addDifferenceMutation.mutateAsync({ comparisonId: cmpId, payload })}
           onDeleteDifference={diffId => deleteDifferenceMutation.mutateAsync(diffId)}
+          onExportComparison={cmpId => {
+            setExportComparisonId(cmpId);
+            setIsExportPdfOpen(true);
+          }}
           isCreateModalOpen={isCreateComparisonOpen}
           onCloseCreateModal={() => setIsCreateComparisonOpen(false)}
         />
@@ -1356,6 +1365,7 @@ export const CollectionDetailsPage: React.FC = () => {
           collectionId={collection.id}
           collectionTitle={collection.title}
           collection={collection}
+          initialSelectedComparisonId={exportComparisonId}
           hasUnsavedChanges={isAnySaving}
         />
       )}
