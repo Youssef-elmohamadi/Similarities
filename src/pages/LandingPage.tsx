@@ -4,6 +4,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { landingTranslations } from '@/i18n/landingTranslations';
 import { VerseText } from '@/components/quran/VerseText';
 import { AppFooter } from '@/components/layout/AppFooter';
+import { Seo } from '@/components/common/Seo';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
@@ -57,34 +58,6 @@ export const LandingPage: React.FC = () => {
   });
   const [isSampleLoading, setIsSampleLoading] = useState(true);
 
-  // SEO & OpenGraph Meta
-  useEffect(() => {
-    document.title = tData.metaTitle;
-
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (!metaDesc) {
-      metaDesc = document.createElement('meta');
-      metaDesc.setAttribute('name', 'description');
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute('content', tData.metaDescription);
-
-    let ogTitle = document.querySelector('meta[property="og:title"]');
-    if (!ogTitle) {
-      ogTitle = document.createElement('meta');
-      ogTitle.setAttribute('property', 'og:title');
-      document.head.appendChild(ogTitle);
-    }
-    ogTitle.setAttribute('content', tData.metaTitle);
-
-    let ogDesc = document.querySelector('meta[property="og:description"]');
-    if (!ogDesc) {
-      ogDesc = document.createElement('meta');
-      ogDesc.setAttribute('property', 'og:description');
-      document.head.appendChild(ogDesc);
-    }
-    ogDesc.setAttribute('content', tData.metaDescription);
-  }, [language, tData]);
 
   // Load sample verses 6:10 and 13:32 from public endpoint or local IndexedDB
   useEffect(() => {
@@ -132,8 +105,18 @@ export const LandingPage: React.FC = () => {
 
   const featureIcons = [Search, Layers, BookmarkCheck, GitCompare, Sparkles, Wifi];
 
+  const siteUrl = (import.meta.env.VITE_SITE_URL || '').replace(/\/+$/, '');
+  const canonicalUrl = siteUrl ? `${siteUrl}/` : '/';
+
   return (
     <div className="min-h-screen bg-background text-text-primary selection:bg-accent-tint flex flex-col scroll-smooth motion-reduce:scroll-auto">
+      <Seo
+        title={tData.metaTitle}
+        description={tData.metaDescription}
+        robots="index, follow"
+        canonical={canonicalUrl}
+        ogUrl={canonicalUrl}
+      />
       {/* 1. STICKY TOP BAR */}
       <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-border transition-colors">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 md:h-16 flex items-center justify-between">

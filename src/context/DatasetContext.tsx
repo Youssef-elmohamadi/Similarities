@@ -49,19 +49,40 @@ export const DatasetProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
   }, []);
 
-  // Check initial dataset readiness
+  // Check initial dataset readiness (deferred to idle/load for anonymous landing visitors)
   useEffect(() => {
+    let cancelled = false;
+
     const checkStatus = async () => {
-      const ready = await isOfflineDatasetAvailable();
-      setIsOfflineReady(ready);
-      if (ready) {
-        const ver = await getStoredDatasetVersion();
-        setDatasetVersion(ver);
-        // Initialize Web Worker with IndexedDB data
-        initLocalWorker().catch(err => console.error('Failed to init worker:', err));
+      try {
+        const ready = await isOfflineDatasetAvailable();
+        if (cancelled) return;
+        setIsOfflineReady(ready);
+        if (ready) {
+          const ver = await getStoredDatasetVersion();
+          if (cancelled) return;
+          setDatasetVersion(ver);
+          // Initialize Web Worker with IndexedDB data
+          initLocalWorker().catch(err => console.error('Failed to init worker:', err));
+        }
+      } catch (err) {
+        console.warn('Dataset readiness check failed:', err);
       }
     };
-    checkStatus();
+
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const handle = (window as any).requestIdleCallback(() => checkStatus(), { timeout: 2000 });
+      return () => {
+        cancelled = true;
+        (window as any).cancelIdleCallback(handle);
+      };
+    } else {
+      const timer = setTimeout(checkStatus, 500);
+      return () => {
+        cancelled = true;
+        clearTimeout(timer);
+      };
+    }
   }, []);
 
   // Check version on startup & auto-download on first login if online

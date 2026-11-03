@@ -7,6 +7,7 @@ import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SyncStatusPanel } from '@/components/settings/SyncStatusPanel';
+import { Seo } from '@/components/common/Seo';
 import { User, Globe, ShieldCheck, Database, LogOut, Smartphone, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,6 +24,7 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-20 text-start animate-fade-in">
+      <Seo title="الإعدادات" robots="noindex, nofollow" />
       <PageHeader
         title={t('الملف الشخصي والإعدادات', 'Profile & Settings')}
         description={t(

@@ -32,6 +32,7 @@ export const PwaProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
+    immediate: false,
     onRegistered(r?: ServiceWorkerRegistration) {
       console.log('SW Registered:', r);
     },

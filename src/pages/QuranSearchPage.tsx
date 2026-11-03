@@ -20,6 +20,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { VerseCardSkeleton } from '@/components/common/Skeleton';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Pagination } from '@/components/common/Pagination';
+import { Seo } from '@/components/common/Seo';
 import {
   Search,
   X,
@@ -501,6 +502,7 @@ export const QuranSearchPage: React.FC = () => {
 
   return (
     <div className="space-y-4 md:space-y-6 pb-24 text-start animate-fade-in">
+      <Seo title="البحث القرآني" robots="noindex, nofollow" />
       {/* Search Header - Compact on mobile, standard on desktop */}
       <div className="flex items-center justify-between gap-3 py-1 md:py-2 border-b border-border/60">
         <div className="space-y-0.5 md:space-y-1 text-start min-w-0">

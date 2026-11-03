@@ -11,6 +11,7 @@ import { Modal } from '@/components/common/Modal';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Skeleton } from '@/components/common/Skeleton';
 import { useToast } from '@/components/common/Toast';
+import { Seo } from '@/components/common/Seo';
 import { useLanguage } from '@/context/LanguageContext';
 import { toArabicDigits, formatAyahOrnament } from '@/lib/utils';
 import { Plus, Trash2, ChevronUp, ChevronDown, BookOpen, Search, ArrowRight, ArrowLeft, Layers, Sparkles } from 'lucide-react';
@@ -300,6 +301,7 @@ export const CreateCollectionPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-3.5 sm:space-y-6 pb-16 text-start animate-fade-in">
+      <Seo title="إنشاء مجموعة جديدة" robots="noindex, nofollow" />
       {/* Top Header: Compact on Mobile */}
       <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
         <div className="space-y-0.5 min-w-0">

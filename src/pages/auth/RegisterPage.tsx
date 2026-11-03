@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
+import { Seo } from '@/components/common/Seo';
 import { BookOpen, Lock, Mail, User, Eye, EyeOff, Globe } from 'lucide-react';
 import { getApiErrorMessage } from '@/lib/api';
 
@@ -60,6 +61,7 @@ export const RegisterPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 bg-background text-text-primary">
+      <Seo title="إنشاء حساب جديد" robots="noindex, follow" />
       {/* Top right language switch */}
       <div className="absolute top-4 end-4">
         <button

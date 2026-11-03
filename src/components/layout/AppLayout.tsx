@@ -4,12 +4,14 @@ import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { AppFooter } from './AppFooter';
+import { Seo } from '../common/Seo';
 
 export const AppLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-text-primary">
+      <Seo robots="noindex, nofollow" />
       <Navbar
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         isSidebarOpen={isSidebarOpen}

@@ -9,6 +9,7 @@ import { Skeleton, CollectionCardSkeleton } from '@/components/common/Skeleton';
 import { CollectionCard } from '@/components/collection/CollectionCard';
 import { useLanguage } from '@/context/LanguageContext';
 import { toArabicDigits } from '@/lib/utils';
+import { Seo } from '@/components/common/Seo';
 import {
   BookMarked,
   Layers,
@@ -45,6 +46,7 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-fade-in text-start">
+      <Seo title="لوحة التحكم" robots="noindex, nofollow" />
       {/* Welcome Banner */}
       <div 
         className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#0F5C4A] via-[#0B4738] to-[#08382C] text-white p-5 sm:p-6 shadow-sm border border-[#0B4738]"

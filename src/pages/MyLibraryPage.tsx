@@ -10,6 +10,7 @@ import { CollectionCardSkeleton } from '@/components/common/Skeleton';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { useToast } from '@/components/common/Toast';
+import { Seo } from '@/components/common/Seo';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -149,6 +150,7 @@ export const MyLibraryPage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12 text-start animate-fade-in">
+      <Seo title="مكتبتي الخاصة" robots="noindex, nofollow" />
       {/* Header */}
       <PageHeader
         title={t('مكتبتي القرآنية الخاصة', 'My Quranic Library')}

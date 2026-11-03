@@ -9,6 +9,7 @@ import { Card } from '@/components/common/Card';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Skeleton } from '@/components/common/Skeleton';
 import { useToast } from '@/components/common/Toast';
+import { Seo } from '@/components/common/Seo';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
 import { toArabicDigits } from '@/lib/utils';
@@ -192,6 +193,7 @@ export const EditCollectionPage: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-3.5 sm:space-y-6 pb-16 text-start animate-fade-in">
+      <Seo title="تعديل المجموعة" robots="noindex, nofollow" />
       {/* Top Header: Compact on Mobile */}
       <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
         <div className="space-y-0.5 min-w-0">

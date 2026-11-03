@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/common/Skeleton';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Modal } from '@/components/common/Modal';
 import { useToast } from '@/components/common/Toast';
+import { Seo } from '@/components/common/Seo';
 import { useLanguage } from '@/context/LanguageContext';
 import { formatRelativeTime, toArabicDigits } from '@/lib/utils';
 import {
@@ -899,6 +900,10 @@ export const CollectionDetailsPage: React.FC = () => {
 
   return (
     <div className="space-y-2.5 sm:space-y-3.5 pb-16 text-start animate-fade-in">
+      <Seo
+        title={collection?.title ? `${collection.title} | تفاصيل المجموعة` : 'تفاصيل المجموعة'}
+        robots="noindex, nofollow"
+      />
       {/* Header Info Card */}
       <Card className="p-3 sm:p-5 space-y-2.5 sm:space-y-3">
         {/* Desktop Layout (>= sm) */}

@@ -1,0 +1,12 @@
+# Robots.txt for Quran Similarities Platform
+# Landing page is public and indexable; application internal routes and API are disallowed.
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /library
+Disallow: /collections
+Disallow: /search
+Disallow: /settings
+Disallow: /api
+
+Sitemap: https://quran-similarities-sandy.vercel.app/sitemap.xml

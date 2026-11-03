@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -25,21 +26,23 @@ if (typeof window !== 'undefined') {
 
 export const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <LanguageProvider>
-          <AuthProvider>
-            <DatasetProvider>
-              <PwaProvider>
-                <ToastProvider>
-                  <AppRoutes />
-                </ToastProvider>
-              </PwaProvider>
-            </DatasetProvider>
-          </AuthProvider>
-        </LanguageProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <LanguageProvider>
+            <AuthProvider>
+              <DatasetProvider>
+                <PwaProvider>
+                  <ToastProvider>
+                    <AppRoutes />
+                  </ToastProvider>
+                </PwaProvider>
+              </DatasetProvider>
+            </AuthProvider>
+          </LanguageProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 
