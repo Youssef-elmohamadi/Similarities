@@ -1355,6 +1355,7 @@ export const CollectionDetailsPage: React.FC = () => {
           onClose={() => setIsExportPdfOpen(false)}
           collectionId={collection.id}
           collectionTitle={collection.title}
+          collection={collection}
           hasUnsavedChanges={isAnySaving}
         />
       )}

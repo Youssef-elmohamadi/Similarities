@@ -5,6 +5,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ExportPdfModal } from './ExportPdfModal';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { api } from '@/lib/api';
+import { exportCollectionToPdf } from '@/lib/collectionPdfGenerator';
+import { CollectionDetail } from '@/types/collection';
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -14,9 +16,38 @@ vi.mock('@/lib/api', () => ({
   },
 }));
 
+vi.mock('@/lib/collectionPdfGenerator', () => ({
+  exportCollectionToPdf: vi.fn(),
+}));
+
 describe('ExportPdfModal', () => {
   let container: HTMLDivElement;
   let root: Root;
+
+  const sampleCollection: CollectionDetail = {
+    id: 'test-col-id',
+    title: 'متشابهات سورة الأنعام',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    verses: [
+      {
+        id: 'v1',
+        collectionId: 'test-col-id',
+        quranVerseId: 800,
+        surahId: 6,
+        surahNumber: 6,
+        surahNameArabic: 'الأنعام',
+        surahNameEnglish: 'Al-An\'am',
+        ayahNumber: 10,
+        uthmaniText: 'وَلَقَدِ ٱسۡتُهۡزِئَ بِرُسُلࣲ مِّن قَبۡلِكَ فَحَاقَ بِٱلَّذِينَ سَخِرُوا۟ مِنۡهُم مَّا كَانُوا۟ بِهِۦ يَسۡتَہۡزِءُونَ',
+        displayOrder: 0,
+        addedAt: new Date().toISOString(),
+      },
+    ],
+    comparisons: [],
+    connections: [],
+    notes: [],
+  };
 
   beforeEach(() => {
     localStorage.clear();
@@ -43,6 +74,7 @@ describe('ExportPdfModal', () => {
             onClose={vi.fn()}
             collectionId="test-col-id"
             collectionTitle="متشابهات سورة الأنعام"
+            collection={sampleCollection}
             hasUnsavedChanges={false}
             {...props}
           />
@@ -57,7 +89,7 @@ describe('ExportPdfModal', () => {
     expect(document.body.textContent).toContain('تصدير المجموعة إلى ملف PDF');
     expect(document.body.textContent).toContain('نمط الألوان');
     expect(document.body.textContent).toContain('حجم خط الآيات القرآنية');
-    expect(document.body.textContent).toContain('تحميل ملف PDF');
+    expect(document.body.textContent).toContain('تصدير / حفظ كـ PDF');
   });
 
   it('updates and persists color mode to localStorage', async () => {
@@ -104,48 +136,37 @@ describe('ExportPdfModal', () => {
     expect(document.body.textContent).toContain('تنبيه: توجد تعديلات قيد المزامنة');
   });
 
-  it('calls export API with proper params and closes on success', async () => {
-    const mockBlob = new Blob(['%PDF-1.4 mock content'], { type: 'application/pdf' });
-    (api.get as any).mockResolvedValueOnce({
-      data: mockBlob,
-      headers: {
-        'content-disposition': 'attachment; filename="test_export.pdf"',
-      },
-    });
-
+  it('calls exportCollectionToPdf with proper options when collection is provided', async () => {
     const onClose = vi.fn();
     await renderModal({ onClose });
 
-    const downloadButton = Array.from(document.querySelectorAll('button')).find(b => b.textContent?.includes('تحميل ملف PDF'));
+    const exportButton = Array.from(document.querySelectorAll('button')).find(b => b.textContent?.includes('تصدير / حفظ كـ PDF'));
     await act(async () => {
-      downloadButton?.click();
+      exportButton?.click();
     });
 
-    expect(api.get).toHaveBeenCalledWith('/collections/test-col-id/export/pdf', {
-      params: {
-        color: true,
-        fontSize: 'normal',
-      },
-      responseType: 'blob',
+    expect(exportCollectionToPdf).toHaveBeenCalledWith(sampleCollection, {
+      color: true,
+      fontSize: 'normal',
     });
-    expect(onClose).toHaveBeenCalled();
   });
 
-  it('handles 429 rate limit error gracefully', async () => {
-    (api.get as any).mockRejectedValueOnce({
-      response: {
-        status: 429,
-        data: { message: 'Too many requests' },
-      },
+  it('fetches collection from API if collection prop is missing', async () => {
+    (api.get as any).mockResolvedValueOnce({
+      data: sampleCollection,
     });
 
-    await renderModal();
+    await renderModal({ collection: undefined });
 
-    const downloadButton = Array.from(document.querySelectorAll('button')).find(b => b.textContent?.includes('تحميل ملف PDF'));
+    const exportButton = Array.from(document.querySelectorAll('button')).find(b => b.textContent?.includes('تصدير / حفظ كـ PDF'));
     await act(async () => {
-      downloadButton?.click();
+      exportButton?.click();
     });
 
-    expect(document.body.textContent).toContain('تم تجاوز الحد المسموح به لتصدير الملفات');
+    expect(api.get).toHaveBeenCalledWith('/collections/test-col-id');
+    expect(exportCollectionToPdf).toHaveBeenCalledWith(sampleCollection, {
+      color: true,
+      fontSize: 'normal',
+    });
   });
 });

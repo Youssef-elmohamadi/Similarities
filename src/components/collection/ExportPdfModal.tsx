@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Loader2, Palette, Type, AlertTriangle, WifiOff, FileText, Check } from 'lucide-react';
+import { Download, Loader2, Palette, Type, AlertTriangle, WifiOff, FileText, Check, Printer } from 'lucide-react';
 import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { useLanguage } from '@/context/LanguageContext';
 import { api } from '@/lib/api';
+import { exportCollectionToPdf } from '@/lib/collectionPdfGenerator';
+import { CollectionDetail } from '@/types/collection';
 
 export interface ExportPdfModalProps {
   isOpen: boolean;
   onClose: () => void;
   collectionId: string;
   collectionTitle: string;
+  collection?: CollectionDetail;
   hasUnsavedChanges?: boolean;
 }
 
@@ -18,6 +21,7 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
   onClose,
   collectionId,
   collectionTitle,
+  collection,
   hasUnsavedChanges = false,
 }) => {
   const { t } = useLanguage();
@@ -63,54 +67,36 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
   };
 
   const handleExport = async () => {
-    if (!isOnline || isExporting) return;
+    if (isExporting) return;
 
     setIsExporting(true);
     setExportError(null);
 
     try {
-      const response = await api.get(`/collections/${collectionId}/export/pdf`, {
-        params: {
-          color,
-          fontSize,
-        },
-        responseType: 'blob',
-      });
-
-      // Extract filename from Content-Disposition header if present
-      let downloadName = `متشابهات_${collectionTitle}_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.pdf`;
-      const disposition = response.headers['content-disposition'];
-      if (disposition) {
-        const matchUtf8 = disposition.match(/filename\*=UTF-8''([^;]+)/i);
-        if (matchUtf8 && matchUtf8[1]) {
-          downloadName = decodeURIComponent(matchUtf8[1]);
-        } else {
-          const matchAscii = disposition.match(/filename="?([^";]+)"?/i);
-          if (matchAscii && matchAscii[1]) {
-            downloadName = matchAscii[1];
-          }
+      let targetCollection = collection;
+      if (!targetCollection) {
+        if (!isOnline) {
+          throw new Error('OFFLINE_FETCH_REQUIRED');
         }
+        const response = await api.get<CollectionDetail>(`/collections/${collectionId}`);
+        targetCollection = response.data;
       }
 
-      // Trigger browser download via object URL
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.setAttribute('download', downloadName);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
+      exportCollectionToPdf(targetCollection, {
+        color,
+        fontSize,
+      });
 
-      // Close modal upon successful export
-      onClose();
+      // Close modal upon successful export initiation
+      setTimeout(() => {
+        onClose();
+      }, 500);
     } catch (err: any) {
-      if (err.response?.status === 429) {
+      if (err.message === 'OFFLINE_FETCH_REQUIRED') {
         setExportError(
           t(
-            'تم تجاوز الحد المسموح به لتصدير الملفات (٥ مرات في الدقيقة). يرجى الانتظار قليلاً قبل المحاولة مجدداً.',
-            'Rate limit exceeded (5 exports per minute). Please wait a moment before trying again.'
+            'يتطلب جلب بيانات المجموعة اتصالاً بالإنترنت لأول مرة.',
+            'Internet connection required to load collection data.'
           )
         );
       } else if (err.response?.status === 404) {
@@ -118,8 +104,8 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
       } else {
         setExportError(
           t(
-            'حدث خطأ أثناء إنشاء وتنزيل ملف PDF. يرجى المحاولة مرة أخرى لاحقاً.',
-            'An error occurred while generating the PDF. Please try again later.'
+            'حدث خطأ أثناء إعداد وتصدير ملف PDF. يرجى المحاولة مرة أخرى.',
+            'An error occurred while preparing the PDF export. Please try again.'
           )
         );
       }
@@ -136,16 +122,16 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
       maxWidth="md"
     >
       <div className="space-y-5 text-start">
-        {/* Offline Warning Banner */}
-        {!isOnline && (
+        {/* Offline Warning Banner (only if collection is not already in memory) */}
+        {!isOnline && !collection && (
           <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-start gap-2.5 text-xs text-amber-800 dark:text-amber-200">
             <WifiOff className="w-4 h-4 shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold">{t('أنت غير متصل بالإنترنت حالياً', 'You are currently offline')}</p>
               <p className="mt-0.5 text-text-secondary">
                 {t(
-                  'يتطلب توليد ملف PDF اتصالاً بالإنترنت لتجهيز المصحف بخط الرسم العثماني المعتمد.',
-                  'Exporting to PDF requires an internet connection to render the verified Uthmani script.'
+                  'يتطلب جلب بيانات هذه المجموعة اتصالاً بالإنترنت لأول مرة.',
+                  'Loading collection data requires an internet connection for the first time.'
                 )}
               </p>
             </div>
@@ -301,7 +287,7 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
 
         {/* Screen Reader Live Status */}
         <div aria-live="polite" className="sr-only">
-          {isExporting ? t('جارٍ إنشاء ملف PDF وتجهيزه للتحميل...', 'Generating PDF file for download...') : ''}
+          {isExporting ? t('جارٍ تجهيز ملف PDF...', 'Preparing PDF file...') : ''}
         </div>
 
         {/* Modal Actions */}
@@ -313,12 +299,12 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
           <Button
             variant="primary"
             size="md"
-            icon={isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            icon={isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
             onClick={handleExport}
-            disabled={!isOnline || isExporting}
-            title={!isOnline ? t('يتطلب اتصالاً بالإنترنت', 'Requires internet connection') : undefined}
+            disabled={(!isOnline && !collection) || isExporting}
+            title={!isOnline && !collection ? t('يتطلب اتصالاً بالإنترنت لتحميل البيانات', 'Requires internet connection to load data') : undefined}
           >
-            {isExporting ? t('جارٍ إنشاء الملف...', 'Generating PDF...') : t('تحميل ملف PDF', 'Download PDF')}
+            {isExporting ? t('جارٍ تجهيز الملف...', 'Preparing PDF...') : t('تصدير / حفظ كـ PDF', 'Export / Save as PDF')}
           </Button>
         </div>
       </div>
