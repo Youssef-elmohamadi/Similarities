@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, getApiErrorMessage } from '@/lib/api';
@@ -9,6 +9,7 @@ import { VerseListEditor } from '@/components/collection/VerseListEditor';
 import { ComparisonEditor } from '@/components/editor/ComparisonEditor';
 import { MemorizationConnectionsEditor } from '@/components/editor/MemorizationConnectionsEditor';
 import { PersonalNotesEditor } from '@/components/editor/PersonalNotesEditor';
+import { ExportPdfModal } from '@/components/collection/ExportPdfModal';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
@@ -34,6 +35,7 @@ import {
   Search,
   CheckCircle2,
   Loader2,
+  FileDown,
 } from 'lucide-react';
 import { QuranVerse } from '@/types/quran';
 import { useAuth } from '@/context/AuthContext';
@@ -60,6 +62,22 @@ export const CollectionDetailsPage: React.FC = () => {
   // Add Verse Quick Search Modal
   const [isAddVerseModalOpen, setIsAddVerseModalOpen] = useState(false);
   const [verseSearchQuery, setVerseSearchQuery] = useState('');
+
+  // Export to PDF State
+  const [isExportPdfOpen, setIsExportPdfOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const isRtl = direction === 'rtl';
   const { user } = useAuth();
@@ -984,6 +1002,18 @@ export const CollectionDetailsPage: React.FC = () => {
               </Button>
             </Link>
 
+            {/* Export PDF */}
+            <Button
+              size="sm"
+              variant="outline"
+              icon={<FileDown className="w-4 h-4 text-primary" />}
+              onClick={() => setIsExportPdfOpen(true)}
+              disabled={!isOnline}
+              title={!isOnline ? t('يتطلب اتصالاً بالإنترنت', 'Requires internet connection') : t('تصدير المجموعة كملف PDF', 'Export collection as PDF')}
+            >
+              {t('تصدير PDF', 'Export PDF')}
+            </Button>
+
             <Button
               size="sm"
               variant="ghost"
@@ -1047,6 +1077,18 @@ export const CollectionDetailsPage: React.FC = () => {
                   <Edit3 className="w-3.5 h-3.5" />
                 </button>
               </Link>
+
+              {/* Mobile Export PDF */}
+              <button
+                type="button"
+                onClick={() => setIsExportPdfOpen(true)}
+                disabled={!isOnline}
+                className="p-1.5 rounded-lg border border-border bg-surface text-text-secondary hover:text-text-primary text-xs disabled:opacity-50"
+                title={!isOnline ? t('يتطلب اتصالاً بالإنترنت', 'Requires internet connection') : t('تصدير PDF', 'Export PDF')}
+                aria-label={t('تصدير PDF', 'Export PDF')}
+              >
+                <FileDown className="w-3.5 h-3.5 text-primary" />
+              </button>
 
               <button
                 type="button"
@@ -1306,6 +1348,16 @@ export const CollectionDetailsPage: React.FC = () => {
         cancelText={t('إلغاء', 'Cancel')}
         isLoading={deleteCollectionMutation.isPending}
       />
+      {/* Export to PDF Modal */}
+      {collection && (
+        <ExportPdfModal
+          isOpen={isExportPdfOpen}
+          onClose={() => setIsExportPdfOpen(false)}
+          collectionId={collection.id}
+          collectionTitle={collection.title}
+          hasUnsavedChanges={isAnySaving}
+        />
+      )}
     </div>
   );
 };
