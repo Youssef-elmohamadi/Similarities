@@ -14,6 +14,7 @@ import {
 import { VerseCard } from '@/components/quran/VerseCard';
 import { VerseSelectionBar } from '@/components/quran/VerseSelectionBar';
 import { VersePreviewModal } from '@/components/quran/VersePreviewModal';
+import { AddVersesToPositionModal } from '@/components/quran/AddVersesToPositionModal';
 import { WordOccurrencesView } from '@/components/quran/WordOccurrencesView';
 import { Button } from '@/components/common/Button';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -111,6 +112,7 @@ export const QuranSearchPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'verses' | 'words'>('verses');
 
   const [selectedVerses, setSelectedVerses] = useState<QuranVerse[]>([]);
+  const [isAddToModalOpen, setIsAddToModalOpen] = useState(false);
   const [previewVerse, setPreviewVerse] = useState<QuranVerse | null>(null);
 
   // Recent Searches state
@@ -1529,8 +1531,21 @@ export const QuranSearchPage: React.FC = () => {
       {/* Floating Bottom Selection Bar */}
       <VerseSelectionBar
         selectedCount={selectedVerses.length}
+        onAddToCollection={() => setIsAddToModalOpen(true)}
         onCreateCollection={handleCreateCollection}
         onClearSelection={handleClearSelection}
+      />
+
+      {/* Add Verses as Position to Collection Modal */}
+      <AddVersesToPositionModal
+        isOpen={isAddToModalOpen}
+        onClose={() => setIsAddToModalOpen(false)}
+        selectedVerses={selectedVerses}
+        onSuccess={(collectionId) => {
+          setSelectedVerses([]);
+          setIsAddToModalOpen(false);
+          navigate(`/collections/${collectionId}`);
+        }}
       />
     </div>
   );
