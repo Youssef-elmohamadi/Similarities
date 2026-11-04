@@ -45,10 +45,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
       {/* Avatar */}
       <div
         className={cn(
-          'w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs select-none shadow-2xs',
+          'w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs select-none shadow-xs',
           isUser
-            ? 'bg-emerald-700 dark:bg-emerald-600 text-white'
-            : 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25'
+            ? 'bg-primary text-white'
+            : 'bg-primary/10 text-primary border border-primary/25'
         )}
       >
         {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -57,9 +57,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
       {/* Bubble Content */}
       <div
         className={cn(
-          'rounded-2xl leading-relaxed shadow-2xs transition-all box-border break-words w-fit',
+          'rounded-2xl leading-relaxed shadow-xs transition-all box-border break-words w-fit',
           isUser
-            ? 'min-w-[90px] max-w-[85%] md:max-w-[70%] px-4 py-2.5 bg-gradient-to-br from-emerald-750 to-emerald-850 dark:from-emerald-800 dark:to-emerald-900 text-white rounded-tr-xs shadow-xs text-sm md:text-[15px]'
+            ? 'min-w-[90px] max-w-[85%] md:max-w-[70%] px-4 py-2.5 bg-primary text-white rounded-tr-xs shadow-xs text-sm md:text-[15px]'
             : 'max-w-[95%] md:max-w-[85%] px-3.5 sm:px-4 py-3 bg-surface border border-border/80 text-text-primary rounded-tl-xs overflow-hidden text-sm md:text-base'
         )}
       >
@@ -118,7 +118,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
         <div
           className={cn(
             'text-[10px] mt-1 select-none flex items-center',
-            isUser ? 'text-emerald-100/75 justify-end' : 'text-text-muted justify-start'
+            isUser ? 'text-white/80 justify-end' : 'text-text-muted justify-start'
           )}
         >
           <span>
