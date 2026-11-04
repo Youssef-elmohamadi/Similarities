@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { ListRow } from '@/components/common/ListRow';
 import { SyncStatusPanel } from '@/components/settings/SyncStatusPanel';
 import { SessionsPanel } from '@/components/settings/SessionsPanel';
+import { AppearancePanel } from '@/components/settings/AppearancePanel';
 import { Seo } from '@/components/common/Seo';
 import { User, Globe, ShieldCheck, Database, LogOut, Smartphone, Check, HardDrive } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -141,6 +142,9 @@ export const SettingsPage: React.FC = () => {
 
         {/* Devices & Active Sessions Management */}
         <SessionsPanel />
+
+        {/* Quran Typography & Appearance Preference */}
+        <AppearancePanel />
 
         {/* Language Preference Card */}
         <Card className="space-y-4">
@@ -350,6 +354,14 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {/* Preferences Section */}
+        <div className="space-y-1">
+          <span className="text-[11px] font-bold text-text-secondary uppercase px-1">
+            {t('تفضيلات الخط والمظهر', 'Typography & Appearance')}
+          </span>
+          <AppearancePanel />
+        </div>
+
+        {/* Language Section */}
         <div className="space-y-1">
           <span className="text-[11px] font-bold text-text-secondary uppercase px-1">
             {t('تفضيلات التطبيق', 'Preferences')}

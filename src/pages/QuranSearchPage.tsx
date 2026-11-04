@@ -504,88 +504,13 @@ export const QuranSearchPage: React.FC = () => {
     searchResponse.items.every(item => selectedVerses.some(v => v.id === item.id));
 
   return (
-    <div className="space-y-4 md:space-y-6 pb-24 text-start animate-fade-in">
+    <div className="space-y-3 md:space-y-4 pb-24 text-start animate-fade-in pt-0">
       <Seo title="البحث القرآني" robots="noindex, nofollow" />
-      {/* Search Header - Compact on mobile, standard on desktop */}
-      <div className="flex items-center justify-between gap-3 py-1 md:py-2 border-b border-border/60">
-        <div className="space-y-0.5 md:space-y-1 text-start min-w-0">
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-text-primary leading-tight truncate">
-              {t('محرك البحث القرآني المتطور', 'Advanced Quran Search Engine')}
-            </h1>
 
-            {/* Offline Local Engine Badge */}
-            {isOfflineReady && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] md:text-xs font-medium bg-primary-tint text-primary border border-primary/20 shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                <span>{isOffline ? t('يعمل بدون إنترنت', 'Offline Mode') : t('محرك محلي فائق السرعة', 'Local Engine')}</span>
-              </span>
-            )}
-
-            {/* Search Tips Popover Toggle on Mobile */}
-            <button
-              type="button"
-              onClick={() => setShowTipsPopover(!showTipsPopover)}
-              aria-label={t('تعليمات البحث', 'Search Tips')}
-              className="md:hidden text-text-secondary hover:text-primary p-1 rounded-md transition shrink-0"
-            >
-              <Info className="w-4 h-4" />
-            </button>
-          </div>
-          <p className="hidden md:block text-sm text-text-secondary leading-relaxed max-w-3xl">
-            {t(
-              'بحث دقيق في نص المصحف الشريف بالرسم العثماني، يدعم العبارات المتتالية، المتشابهات الإملائية، والبحث الجذري بالأجزاء والسور.',
-              'High-precision Quran search engine with Uthmani orthography, phrase sequences, spelling variants, and root indexing.'
-            )}
-          </p>
-        </div>
-
-        {/* Desktop search tips indicator */}
-        <button
-          type="button"
-          onClick={() => setShowTipsPopover(!showTipsPopover)}
-          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-surface border border-border transition shrink-0"
-        >
-          <Info className="w-4 h-4 text-primary" />
-          <span>{t('إرشادات البحث', 'Search Tips')}</span>
-        </button>
-      </div>
-
-      {/* Search Tips Popover / Modal */}
-      {showTipsPopover && (
-        <div className="bg-surface p-4 rounded-xl border border-primary/30 shadow-sm text-xs text-text-secondary space-y-2 animate-fade-in">
-          <div className="flex items-center justify-between font-semibold text-text-primary pb-1 border-b border-border">
-            <span className="flex items-center gap-1.5 text-primary">
-              <Sparkles className="w-4 h-4 text-accent" />
-              {t('إرشادات وصيغ البحث القرآني الذكي', 'Smart Quran Search Guidelines')}
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowTipsPopover(false)}
-              className="p-1 text-text-secondary hover:text-text-primary rounded"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <p className="leading-relaxed text-text-primary">
-            {t(
-              'بحث دقيق في نص المصحف الشريف بالرسم العثماني، يدعم العبارات المتتالية، المتشابهات الإملائية، والبحث الجذري بالأجزاء والسور.',
-              'High-precision Quran search engine with Uthmani orthography, phrase sequences, spelling variants, and root indexing.'
-            )}
-          </p>
-          <ul className="list-disc list-inside space-y-1 text-text-secondary">
-            <li>{t('البحث بمرجع الآية مباشرة: مثل 2:255 أو 1:1', 'Search directly by reference: e.g. 2:255 or 1:1')}</li>
-            <li>{t('البحث باللفظ (الافتراضي): مثل "يسيرو" يطابق "يَسِيرُوا۟"', 'Phonetic search: e.g. "يسيرو" matches "يَسِيرُوا۟"')}</li>
-            <li>{t('استبعاد كلمات باستخدام علامة السالب: مثل "الله -العالمين"', 'Exclude terms using minus: e.g. "الله -العالمين"')}</li>
-            <li>{t('البحث بعبارة متتالية دقيقة بين علامتي تنصيص: "جنات تجري"', 'Exact phrase in quotes: "جنات تجري"')}</li>
-          </ul>
-        </div>
-      )}
-
-      {/* Main Search Input & Top Controls - Sticky below mobile header (56px) and desktop header (64px) */}
-      <div className="sticky top-14 md:top-16 z-20 space-y-2 bg-background/95 backdrop-blur-md pt-1 pb-2 border-b border-border/50 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      {/* Main Search Input & Top Controls - Sticky directly below top bar (mobile 56px, desktop 64px) */}
+      <div className="sticky top-14 md:top-16 z-20 space-y-2 bg-background/95 backdrop-blur-md pt-0 pb-2 border-b border-border/50 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <div className="bg-surface p-2.5 sm:p-4 rounded-xl border border-border shadow-sm flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3">
-          {/* Row 1 on mobile: Input + Options Icon Button */}
+          {/* Row 1 on mobile: Input + Tips Icon Button + Options Icon Button */}
           <div className="flex items-center gap-2 flex-1">
             {/* Main search text field */}
             <div className="relative flex-1">
@@ -636,6 +561,20 @@ export const QuranSearchPage: React.FC = () => {
                 </kbd>
               </div>
             </div>
+
+            {/* Mobile Tips Button (Square 44px x 44px) */}
+            <button
+              type="button"
+              onClick={() => setShowTipsPopover(!showTipsPopover)}
+              aria-label={t('إرشادات البحث', 'Search Tips')}
+              className={`md:hidden h-11 w-11 rounded-lg border text-sm font-medium flex items-center justify-center transition shrink-0 ${
+                showTipsPopover
+                  ? 'bg-primary-tint text-primary border-primary/50'
+                  : 'bg-background hover:bg-surface border-border text-text-secondary hover:text-primary'
+              }`}
+            >
+              <Info className="w-5 h-5 text-primary" />
+            </button>
 
             {/* Mobile Options Icon Button (Square 44px x 44px) */}
             <button
@@ -691,7 +630,60 @@ export const QuranSearchPage: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-accent" />
             )}
           </button>
+
+          {/* Desktop Tips Button */}
+          <button
+            type="button"
+            onClick={() => setShowTipsPopover(!showTipsPopover)}
+            className={`hidden md:flex h-[52px] px-3.5 rounded-lg border text-sm font-medium items-center justify-center gap-1.5 transition shrink-0 ${
+              showTipsPopover
+                ? 'bg-primary-tint text-primary border-primary/50'
+                : 'bg-background hover:bg-surface border-border text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            <Info className="w-4 h-4 text-primary" />
+            <span>{t('إرشادات البحث', 'Search Tips')}</span>
+          </button>
+
+          {/* Offline Local Engine Badge */}
+          {isOfflineReady && (
+            <span className="hidden lg:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-tint text-primary border border-primary/20 shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              <span>{isOffline ? t('يعمل بدون إنترنت', 'Offline Mode') : t('محرك محلي فائق السرعة', 'Local Engine')}</span>
+            </span>
+          )}
         </div>
+
+        {/* Search Tips Popover / Modal (Collapsible below search bar) */}
+        {showTipsPopover && (
+          <div className="bg-surface p-4 rounded-xl border border-primary/30 shadow-sm text-xs text-text-secondary space-y-2 animate-fade-in">
+            <div className="flex items-center justify-between font-semibold text-text-primary pb-1 border-b border-border">
+              <span className="flex items-center gap-1.5 text-primary">
+                <Sparkles className="w-4 h-4 text-accent" />
+                {t('إرشادات وصيغ البحث القرآني الذكي', 'Smart Quran Search Guidelines')}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowTipsPopover(false)}
+                className="p-1 text-text-secondary hover:text-text-primary rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="leading-relaxed text-text-primary">
+              {t(
+                'بحث دقيق في نص المصحف الشريف بالرسم العثماني، يدعم العبارات المتتالية، المتشابهات الإملائية، والبحث الجذري بالأجزاء والسور.',
+                'High-precision Quran search engine with Uthmani orthography, phrase sequences, spelling variants, and root indexing.'
+              )}
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-text-secondary">
+              <li>{t('البحث بمرجع الآية مباشرة: مثل 2:255 أو 1:1', 'Search directly by reference: e.g. 2:255 or 1:1')}</li>
+              <li>{t('البحث باللفظ (الافتراضي): مثل "يسيرو" يطابق "يَسِيرُوا۟"', 'Phonetic search: e.g. "يسيرو" matches "يَسِيرُوا۟"')}</li>
+              <li>{t('استبعاد كلمات باستخدام علامة السالب: مثل "الله -العالمين"', 'Exclude terms using minus: e.g. "الله -العالمين"')}</li>
+              <li>{t('البحث بعبارة متتالية دقيقة بين علامتي تنصيص: "جنات تجري"', 'Exact phrase in quotes: "جنات تجري"')}</li>
+            </ul>
+          </div>
+        )}
 
         {/* Subtle Progress Bar while in-flight search is fetching */}
         {isFetching && (

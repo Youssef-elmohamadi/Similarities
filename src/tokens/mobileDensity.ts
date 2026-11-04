@@ -46,6 +46,6 @@ export const mobileDensity = {
   statsText: 'text-xs md:text-sm text-text-secondary font-medium',
   
   // Verse Typography (Invariable Tanzil Standard)
-  verseFont: 'font-quran leading-[2.4] tracking-normal text-text-primary',
+  verseFont: 'font-quran tracking-normal',
 } as const;
 

@@ -761,7 +761,7 @@ export const AddVersesToPositionModal: React.FC<AddVersesToPositionModalProps> =
                     <p
                       dir="rtl"
                       lang="ar"
-                      className="font-quran text-sm sm:text-base leading-relaxed text-text-primary text-start"
+                      className="font-quran-compact text-start"
                     >
                       {verse.uthmaniText}{' '}
                       <span className="ayah-number-badge text-primary font-bold text-xs inline-block">

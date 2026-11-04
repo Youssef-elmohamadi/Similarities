@@ -6,6 +6,7 @@ import { persistQueryClient } from '@tanstack/query-persist-client-core';
 import { createIndexedDbPersister } from './offline/queryPersister';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { AppearanceProvider } from './context/AppearanceContext';
 import { PwaProvider } from './context/PwaContext';
 import { DatasetProvider } from './context/DatasetContext';
 import { ToastProvider } from './components/common/Toast';
@@ -46,15 +47,17 @@ export const App: React.FC = () => {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <LanguageProvider>
-            <AuthProvider>
-              <DatasetProvider>
-                <PwaProvider>
-                  <ToastProvider>
-                    <AppRoutes />
-                  </ToastProvider>
-                </PwaProvider>
-              </DatasetProvider>
-            </AuthProvider>
+            <AppearanceProvider>
+              <AuthProvider>
+                <DatasetProvider>
+                  <PwaProvider>
+                    <ToastProvider>
+                      <AppRoutes />
+                    </ToastProvider>
+                  </PwaProvider>
+                </DatasetProvider>
+              </AuthProvider>
+            </AppearanceProvider>
           </LanguageProvider>
         </BrowserRouter>
       </QueryClientProvider>

@@ -57,7 +57,7 @@ export const VersePreviewModal: React.FC<VersePreviewModalProps> = ({ verse, onC
           <p
             dir="rtl"
             lang="ar"
-            className="font-quran text-2xl md:text-3xl text-text-primary leading-[2.6] py-2 selection:bg-accent-tint"
+            className="font-quran py-2 selection:bg-accent-tint"
           >
             {verse.uthmaniText}{' '}
             <span className="ayah-number-badge text-primary font-bold">

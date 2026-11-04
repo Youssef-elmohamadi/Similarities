@@ -549,7 +549,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
                             <p
                               dir="rtl"
                               lang="ar"
-                              className="font-quran text-base text-text-primary leading-[2.4] text-start"
+                              className="font-quran text-start"
                             >
                               {anchorVerse.uthmaniText}{' '}
                               <span className="ayah-number-badge text-primary font-bold text-xs inline-block">
@@ -569,7 +569,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
                             <p
                               dir="rtl"
                               lang="ar"
-                              className="font-quran text-base text-text-primary leading-[2.4] text-start"
+                              className="font-quran text-start"
                             >
                               {v.uthmaniText}{' '}
                               <span className="ayah-number-badge text-primary font-bold text-xs inline-block">
@@ -814,7 +814,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
                             <p
                               dir="rtl"
                               lang="ar"
-                              className="font-quran text-base sm:text-lg text-text-primary text-start leading-[2.2] py-0.5"
+                              className="font-quran text-start py-0.5"
                             >
                               {anchorVerse.uthmaniText}{' '}
                               <span className="ayah-number-badge text-primary font-bold text-sm">
@@ -851,7 +851,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
                                 <p
                                   dir="rtl"
                                   lang="ar"
-                                  className="font-quran text-sm sm:text-base text-text-primary text-start leading-[2.1]"
+                                  className="font-quran text-start"
                                 >
                                   {compVerse.uthmaniText}{' '}
                                   <span className="ayah-number-badge text-primary font-bold text-xs">
@@ -1045,7 +1045,7 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
                     </span>
                   </span>
                 </div>
-                <p dir="rtl" lang="ar" className="font-quran text-base sm:text-lg text-text-primary text-start leading-loose">
+                <p dir="rtl" lang="ar" className="font-quran text-start">
                   {activeAnchorPreview.uthmaniText}{' '}
                   <span className="ayah-number-badge text-primary font-bold">
                     {formatAyahOrnament(activeAnchorPreview.ayahNumber)}

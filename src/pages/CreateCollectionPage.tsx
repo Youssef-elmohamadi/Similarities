@@ -527,7 +527,7 @@ export const CreateCollectionPage: React.FC = () => {
                       <p
                         dir="rtl"
                         lang="ar"
-                        className="font-quran text-lg md:text-xl text-text-primary text-start leading-[2.5] py-1 selection:bg-accent-tint"
+                        className="font-quran text-start py-1 selection:bg-accent-tint"
                       >
                         {verse.uthmaniText}{' '}
                         <span className="ayah-number-badge text-primary font-bold">
@@ -675,7 +675,7 @@ export const CreateCollectionPage: React.FC = () => {
                       <p
                         dir="rtl"
                         lang="ar"
-                        className="font-quran text-base text-text-primary truncate"
+                        className="font-quran-compact text-text-primary truncate"
                       >
                         {v.uthmaniText}
                       </p>

@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --quran-font-family: 'Scheherazade New', 'Amiri Quran', 'Noto Naskh Arabic', serif;
+  --quran-font-size-mobile: 1.35rem;
+  --quran-font-size-tablet: 1.5rem;
+  --quran-font-size-desktop: 1.65rem;
+  --quran-font-size-compact: 1.2rem;
+  --quran-line-height: 2.3;
+  --quran-text-color: #2D3748;
+}
+
 @layer base {
   html {
     font-family: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
@@ -30,15 +40,44 @@
 
 /* Quranic verse styling */
 .font-quran {
-  font-family: 'Amiri Quran', 'Amiri', 'Noto Naskh Arabic', serif;
+  font-family: var(--quran-font-family);
+  font-size: var(--quran-font-size-mobile);
+  line-height: var(--quran-line-height);
+  color: var(--quran-text-color);
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 2.5;
-  word-spacing: 0.1em;
   letter-spacing: 0;
   text-rendering: optimizeLegibility;
+  text-align: right;
+  overflow: visible;
   padding-block: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .font-quran {
+    font-size: var(--quran-font-size-tablet);
+  }
+}
+
+@media (min-width: 1024px) {
+  .font-quran {
+    font-size: var(--quran-font-size-desktop);
+  }
+}
+
+.font-quran-compact {
+  font-family: var(--quran-font-family);
+  font-size: var(--quran-font-size-compact);
+  line-height: var(--quran-line-height);
+  color: var(--quran-text-color);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: 0;
+  text-rendering: optimizeLegibility;
+  text-align: right;
+  overflow: visible;
 }
 
 .font-ui {
@@ -83,13 +122,22 @@
 }
 
 /* Soft gold search mark highlight without breaking script flow */
-mark.quran-highlight {
+mark.quran-highlight,
+.font-quran mark {
   background-color: #F6EEDC;
-  color: #1F2937;
-  border-radius: 0.25rem;
+  color: var(--quran-text-color, #2D3748);
+  border-radius: 0.2rem;
   padding-inline: 0.15rem;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
+  font-family: inherit;
+  font-weight: inherit;
+}
+
+.dark mark.quran-highlight,
+.dark .font-quran mark {
+  background-color: rgba(120, 53, 15, 0.35);
+  color: inherit;
 }
 
 /* Motion reduction */

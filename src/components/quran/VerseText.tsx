@@ -49,7 +49,7 @@ export const VerseText: React.FC<VerseTextProps> = ({
       dir="rtl"
       lang="ar"
       className={cn(
-        'font-quran text-lg md:text-xl text-text-primary leading-[2.5] selection:bg-accent-tint text-start inline',
+        'font-quran selection:bg-accent-tint text-start inline',
         className
       )}
     >
@@ -59,12 +59,12 @@ export const VerseText: React.FC<VerseTextProps> = ({
           return isHighlighted ? (
             <mark
               key={idx}
-              className="bg-[#F6EEDC] dark:bg-amber-950/40 text-text-primary px-1 py-0.5 rounded border-b-2 border-primary/70 font-quran inline-block mx-0.5 shadow-2xs"
+              className="bg-[#F6EEDC] dark:bg-amber-950/40 text-inherit px-1 py-0.5 rounded border-b border-primary/50 inline mx-0.5"
             >
               {word}
             </mark>
           ) : (
-            <span key={idx} className="mx-0.5 inline-block">
+            <span key={idx} className="mx-0.5 inline">
               {word}
             </span>
           );
@@ -75,7 +75,7 @@ export const VerseText: React.FC<VerseTextProps> = ({
 
       {showOrnament && typeof ayahNumber === 'number' && (
         <span
-          className="ayah-number-badge text-primary font-bold ms-1 select-none inline-block text-base md:text-lg align-baseline"
+          className="ayah-number-badge text-primary font-bold ms-1 select-none inline text-base md:text-lg align-baseline"
           aria-label={`آية ${ayahNumber}`}
         >
           {formatAyahOrnament(ayahNumber)}

@@ -98,8 +98,8 @@ export function generateCollectionPrintHtml(collection: CollectionDetail, option
   const { color, fontSize, selectedComparisonIds } = options;
   const isLarge = fontSize === 'large';
 
-  const quranFontSize = isLarge ? '22pt' : '18pt';
-  const quranLineHeight = isLarge ? '2.7' : '2.4';
+  const quranFontSize = isLarge ? '20pt' : '16pt';
+  const quranLineHeight = isLarge ? '2.5' : '2.3';
   const bodyFontSize = isLarge ? '11pt' : '10pt';
   const heading1Size = isLarge ? '21pt' : '18pt';
   const heading2Size = isLarge ? '14pt' : '13pt';
@@ -207,10 +207,10 @@ h1, h2, h3, .subcol-title, .toc-header, .section-title {
 }
 
 .quran-text {
-  font-family: 'Amiri Quran', 'Amiri', serif;
+  font-family: 'Scheherazade New', 'Amiri Quran', 'Noto Naskh Arabic', serif;
   font-size: ${quranFontSize};
   line-height: ${quranLineHeight};
-  color: ${color ? '#0F172A' : '#000000'};
+  color: ${color ? '#2D3748' : '#000000'};
   text-align: right;
   overflow: visible;
   font-synthesis: none;
@@ -219,7 +219,7 @@ h1, h2, h3, .subcol-title, .toc-header, .section-title {
 }
 
 .ayah-ornament {
-  font-family: 'Amiri Quran', 'Amiri', serif;
+  font-family: 'Scheherazade New', 'Amiri Quran', 'Amiri', serif;
   color: ${color ? '#0F5C4A' : '#000000'};
   font-weight: bold;
   display: inline-block;

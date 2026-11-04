@@ -1722,7 +1722,7 @@ export const CollectionDetailsPage: React.FC = () => {
                       <p
                         dir="rtl"
                         lang="ar"
-                        className="font-quran text-base text-text-primary truncate"
+                        className="font-quran-compact text-text-primary truncate"
                       >
                         {v.uthmaniText}
                       </p>

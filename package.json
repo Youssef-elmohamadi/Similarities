@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@fontsource/scheherazade-new": "^5.3.0",
     "@hookform/resolvers": "^3.9.1",
     "@tanstack/query-persist-client-core": "^5.105.1",
     "@tanstack/react-query": "^5.62.0",

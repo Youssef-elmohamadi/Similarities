@@ -97,7 +97,7 @@ const VerseCardComponent: React.FC<VerseCardProps> = ({
 
             if (!isMatch) {
               return (
-                <span key={idx} className="mx-0.5 inline-block">
+                <span key={idx} className="mx-0.5 inline">
                   {word}
                 </span>
               );
@@ -111,8 +111,8 @@ const VerseCardComponent: React.FC<VerseCardProps> = ({
                 key={idx}
                 className={
                   isExact
-                    ? "bg-amber-200/90 dark:bg-amber-900/60 text-text-primary px-1.5 py-0.5 rounded border-b-2 border-amber-600 dark:border-amber-400 font-semibold inline-block mx-0.5 shadow-2xs"
-                    : "bg-[#F6EEDC] dark:bg-amber-950/40 text-text-primary px-1 py-0.5 rounded border-b border-primary/50 inline-block mx-0.5 shadow-2xs"
+                    ? "bg-[#F3E5C8] dark:bg-amber-900/40 text-inherit px-1 py-0.5 rounded border-b border-amber-600/60 inline mx-0.5"
+                    : "bg-[#F6EEDC] dark:bg-amber-950/40 text-inherit px-1 py-0.5 rounded border-b border-primary/40 inline mx-0.5"
                 }
                 title={isExact ? t('تطابق تام', 'Exact match') : t('تطابق جزئي', 'Partial match')}
               >
@@ -364,7 +364,7 @@ const VerseCardComponent: React.FC<VerseCardProps> = ({
       <p
         dir="rtl"
         lang="ar"
-        className="font-quran text-xl md:text-2xl text-text-primary text-start leading-[2.5] selection:bg-accent-tint py-2"
+        className="font-quran text-start selection:bg-accent-tint py-1.5"
       >
         {verseContent}
       </p>
@@ -390,7 +390,7 @@ const VerseCardComponent: React.FC<VerseCardProps> = ({
                       {t('السابقة', 'Previous')} {isRtl ? toArabicDigits(prev.ayahNumber) : prev.ayahNumber}
                     </span>
                   </div>
-                  <p dir="rtl" lang="ar" className="font-quran text-lg md:text-xl text-text-secondary leading-[2.3]">
+                  <p dir="rtl" lang="ar" className="font-quran-compact text-text-secondary">
                     {prev.uthmaniText}{' '}
                     <span className="ayah-number-badge text-text-secondary/70 select-none">
                       {formatAyahOrnament(prev.ayahNumber)}
@@ -412,7 +412,7 @@ const VerseCardComponent: React.FC<VerseCardProps> = ({
                       {t('التالية', 'Next')} {isRtl ? toArabicDigits(next.ayahNumber) : next.ayahNumber}
                     </span>
                   </div>
-                  <p dir="rtl" lang="ar" className="font-quran text-lg md:text-xl text-text-secondary leading-[2.3]">
+                  <p dir="rtl" lang="ar" className="font-quran-compact text-text-secondary">
                     {next.uthmaniText}{' '}
                     <span className="ayah-number-badge text-text-secondary/70 select-none">
                       {formatAyahOrnament(next.ayahNumber)}
