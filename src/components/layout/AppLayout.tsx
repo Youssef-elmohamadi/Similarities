@@ -21,7 +21,7 @@ export const AppLayout: React.FC = () => {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 md:py-8 pb-28 md:pb-12 min-w-0 flex flex-col justify-between">
+        <main className="flex-1 px-3 sm:px-6 lg:px-8 py-3 sm:py-6 md:py-8 pb-28 md:pb-12 min-w-0 flex flex-col justify-between">
           <div className="flex-1">
             <Outlet />
           </div>

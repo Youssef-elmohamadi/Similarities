@@ -139,7 +139,7 @@ export const VerseCard: React.FC<VerseCardProps> = ({
   return (
     <div
       onClick={() => onToggleSelect && onToggleSelect(verse)}
-      className={`group relative rounded-xl border p-5 md:p-6 transition-all duration-150 cursor-pointer ${
+      className={`group relative rounded-xl border p-3 md:p-6 transition-all duration-150 cursor-pointer ${
         isSelected
           ? 'bg-primary-tint/30 border-primary shadow-xs ring-1 ring-primary/30'
           : 'bg-surface border-border hover:border-primary/40 hover:shadow-sm'
@@ -147,14 +147,16 @@ export const VerseCard: React.FC<VerseCardProps> = ({
     >
       {/* Direct reference banner if matched by exact number reference */}
       {searchResult.isDirectReference && (
-        <div className="mb-3 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-xs text-primary font-medium flex items-center gap-2">
+        <div className="mb-2 md:mb-3 px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-[11px] md:text-xs text-primary font-medium flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-accent shrink-0" />
           <span>{t('نتيجة مطابقة مباشرة لرقم الآية والسورة', 'Direct match for Surah and Ayah reference')}</span>
         </div>
       )}
 
-      {/* Header with Surah/Ayah badges and actions */}
-      <div className="flex items-center justify-between gap-3 mb-3">
+      {/* ========================================================= */}
+      {/* Desktop Header (>= 768px): 100% Unchanged Layout          */}
+      {/* ========================================================= */}
+      <div className="hidden md:flex items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2 flex-wrap">
           {onToggleSelect && (
             <label
@@ -260,6 +262,88 @@ export const VerseCard: React.FC<VerseCardProps> = ({
             title={t('نسخ الآية مع التوثيق', 'Copy verse with reference')}
             aria-label={t('نسخ الآية مع التوثيق', 'Copy verse with reference')}
             className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-primary hover:bg-primary-tint transition"
+          >
+            {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* Mobile Compact Header (< 768px): One Muted Reference Line */}
+      {/* ========================================================= */}
+      <div className="md:hidden flex items-center justify-between gap-2 mb-1.5 pb-1.5 border-b border-border/50">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          {onToggleSelect && (
+            <label
+              className="min-w-[40px] min-h-[40px] -ms-2 flex items-center justify-center cursor-pointer touch-manipulation shrink-0"
+              onClick={e => e.stopPropagation()}
+            >
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => onToggleSelect(verse)}
+                className="w-4 h-4 rounded text-primary focus:ring-primary border-border cursor-pointer accent-primary"
+                aria-label={t(
+                  `تحديد الآية ${verse.ayahNumber} من سورة ${verse.surahNameArabic}`,
+                  `Select verse ${verse.ayahNumber} of Surah ${verse.surahNameEnglish}`
+                )}
+              />
+            </label>
+          )}
+
+          <div className="flex items-center gap-1.5 text-xs text-text-secondary font-medium truncate">
+            <span className="font-bold text-text-primary">
+              {t('سورة', 'Surah')} {verse.surahNameArabic}: {isRtl ? toArabicDigits(verse.ayahNumber) : verse.ayahNumber}
+            </span>
+            {verse.juzNumber && (
+              <>
+                <span className="text-text-secondary/40 select-none">·</span>
+                <span>{t('الجزء', 'Juz')} {isRtl ? toArabicDigits(verse.juzNumber) : verse.juzNumber}</span>
+              </>
+            )}
+            {searchResult.bestMatchKind && (
+              <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.2 rounded font-semibold ms-1 shrink-0">
+                {searchResult.bestMatchKind === 'exact' ? t('تام', 'Exact') : t('جزئي', 'Partial')}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Action Icons (min 40px touch targets, single row) */}
+        <div className="flex items-center gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={handleToggleContext}
+            title={t('عرض السياق', 'Show context')}
+            aria-label={t('عرض سياق الآية', 'Show verse context')}
+            className={`min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg transition ${
+              showContext ? 'bg-primary text-white' : 'text-text-secondary hover:text-primary'
+            }`}
+          >
+            <BookOpen className="w-4 h-4" />
+          </button>
+
+          {onPreview && (
+            <button
+              type="button"
+              onClick={e => {
+                e.stopPropagation();
+                onPreview(verse);
+              }}
+              title={t('عرض الآية بالكامل', 'View Full Verse')}
+              aria-label={t('عرض الآية بالكامل', 'View Full Verse')}
+              className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-text-secondary hover:text-primary transition"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleCopy}
+            title={t('نسخ الآية مع التوثيق', 'Copy verse')}
+            aria-label={t('نسخ الآية مع التوثيق', 'Copy verse')}
+            className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-text-secondary hover:text-primary transition"
           >
             {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
           </button>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { CollectionSummary } from '@/types/collection';
@@ -9,10 +9,15 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { CollectionCardSkeleton } from '@/components/common/Skeleton';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { ListRow } from '@/components/common/ListRow';
+import { OverflowMenu } from '@/components/common/OverflowMenu';
+import { FAB } from '@/components/common/FAB';
+import { BottomSheet } from '@/components/common/BottomSheet';
 import { useToast } from '@/components/common/Toast';
 import { Seo } from '@/components/common/Seo';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
+import { toArabicDigits, formatRelativeTime } from '@/lib/utils';
 import {
   getCachedUserCollections,
   setCachedUserCollections,
@@ -20,17 +25,20 @@ import {
   getUserDB,
 } from '@/offline/userDataDb';
 import { outboxSyncManager } from '@/offline/outboxSyncManager';
-import { Search, PlusCircle, ArrowUpDown, BookmarkCheck } from 'lucide-react';
+import { Search, PlusCircle, ArrowUpDown, BookmarkCheck, Edit2, Trash2, Check, X } from 'lucide-react';
 
 export const MyLibraryPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, direction } = useLanguage();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const toast = useToast();
+  const navigate = useNavigate();
+
+  const isRtl = direction === 'rtl';
 
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('updated');
-
+  const [isSortSheetOpen, setIsSortSheetOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
 
   // Auto sync on mount if online
@@ -148,16 +156,26 @@ export const MyLibraryPage: React.FC = () => {
     }
   };
 
+  const sortOptions = [
+    { value: 'updated', label: t('الأحدث تحديثاً', 'Recently Updated') },
+    { value: 'created', label: t('الأحدث إنشاءً', 'Recently Created') },
+    { value: 'title', label: t('حسب العنوان (أبجدياً)', 'By Title (Alphabetical)') },
+  ];
+
+  const totalCountText = collections ? `${collections.length} ${t('مجموعات', 'collections')}` : '';
+
   return (
-    <div className="space-y-6 pb-12 text-start animate-fade-in">
+    <div className="space-y-4 md:space-y-6 pb-20 text-start animate-fade-in">
       <Seo title="مكتبتي الخاصة" robots="noindex, nofollow" />
-      {/* Header */}
+
+      {/* Header (Desktop + Compact Mobile) */}
       <PageHeader
         title={t('مكتبتي القرآنية الخاصة', 'My Quranic Library')}
         description={t(
           'استعرض وأدر جميع مجموعات المتشابهات التي وثقتها شخصياً ورتبها حسب رغبتك.',
           'Browse, edit, and expand all your private Quranic similarity collections.'
         )}
+        stats={totalCountText ? [totalCountText] : undefined}
         actions={
           <Link to="/collections/new">
             <Button variant="primary" icon={<PlusCircle className="w-4 h-4" />}>
@@ -167,8 +185,11 @@ export const MyLibraryPage: React.FC = () => {
         }
       />
 
-      {/* Search and Sort Toolbar */}
-      <div className="bg-surface p-3.5 sm:p-4 rounded-xl border border-border shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+      {/* ========================================================= */}
+      {/* Search and Sort Toolbar                                   */}
+      {/* ========================================================= */}
+      {/* Desktop Toolbar (>= 768px) */}
+      <div className="hidden md:flex bg-surface p-3.5 sm:p-4 rounded-xl border border-border shadow-xs flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="relative flex-1">
           <Search className="absolute inset-y-0 start-3.5 my-auto w-4 h-4 text-text-secondary/70 pointer-events-none" />
           <input
@@ -187,30 +208,150 @@ export const MyLibraryPage: React.FC = () => {
             onChange={e => setSortBy(e.target.value)}
             className="w-full sm:w-auto h-11 px-3.5 text-sm bg-background border border-border rounded-lg text-text-primary focus:outline-none focus:bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 transition cursor-pointer text-start"
           >
-            <option value="updated">{t('الأحدث تحديثاً', 'Recently Updated')}</option>
-            <option value="created">{t('الأحدث إنشاءً', 'Recently Created')}</option>
-            <option value="title">{t('حسب العنوان (أبجدياً)', 'By Title (Alphabetical)')}</option>
+            {sortOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
           </select>
         </div>
       </div>
 
-      {/* Collections Grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <CollectionCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : collections && collections.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {collections.map(col => (
-            <CollectionCard
-              key={col.id}
-              collection={col}
-              onDelete={(id, title) => setDeleteTarget({ id, title })}
+      {/* Mobile Sticky Search & Sort (< 768px) */}
+      <div className="md:hidden sticky top-14 z-20 bg-background/95 backdrop-blur-xs py-1">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute inset-y-0 start-3 my-auto w-4 h-4 text-text-secondary/70 pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={t('ابحث في المجموعات...', 'Search collections...')}
+              className="w-full h-10 ps-9 pe-8 text-xs bg-surface border border-border rounded-lg text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:border-primary transition text-start"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                aria-label={t('مسح البحث', 'Clear')}
+                className="absolute inset-y-0 end-2 my-auto w-6 h-6 flex items-center justify-center text-text-secondary hover:text-text-primary"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsSortSheetOpen(true)}
+            aria-label={t('ترتيب المجموعات', 'Sort collections')}
+            className="min-w-[40px] h-10 px-2.5 rounded-lg border border-border bg-surface text-text-secondary hover:text-text-primary flex items-center justify-center gap-1.5 text-xs font-medium shrink-0"
+          >
+            <ArrowUpDown className="w-4 h-4" />
+            <span className="hidden xs:inline">
+              {sortOptions.find(o => o.value === sortBy)?.label.split(' ')[0]}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Sort Bottom Sheet (Mobile) */}
+      <BottomSheet
+        isOpen={isSortSheetOpen}
+        onClose={() => setIsSortSheetOpen(false)}
+        title={t('ترتيب المجموعات حسب', 'Sort Collections By')}
+      >
+        <div className="space-y-1">
+          {sortOptions.map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                setSortBy(opt.value);
+                setIsSortSheetOpen(false);
+              }}
+              className="w-full min-h-[48px] px-3 py-2.5 flex items-center justify-between rounded-lg hover:bg-background transition text-start"
+            >
+              <span className={`text-sm ${sortBy === opt.value ? 'font-bold text-primary' : 'text-text-primary'}`}>
+                {opt.label}
+              </span>
+              {sortBy === opt.value && <Check className="w-4 h-4 text-primary shrink-0" />}
+            </button>
           ))}
         </div>
+      </BottomSheet>
+
+      {/* ========================================================= */}
+      {/* Collections List: Desktop Cards vs Mobile ListRows        */}
+      {/* ========================================================= */}
+      {isLoading ? (
+        <>
+          {/* Desktop Skeleton */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <CollectionCardSkeleton key={i} />
+            ))}
+          </div>
+          {/* Mobile Skeleton */}
+          <div className="md:hidden divide-y divide-border border border-border rounded-xl bg-surface overflow-hidden">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="min-h-[52px] p-3 flex items-center justify-between">
+                <div className="space-y-1.5">
+                  <div className="h-4 w-40 bg-charcoal-100 rounded animate-pulse" />
+                  <div className="h-3 w-24 bg-charcoal-50 rounded animate-pulse" />
+                </div>
+                <div className="h-6 w-6 rounded-full bg-charcoal-100 animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </>
+      ) : collections && collections.length > 0 ? (
+        <>
+          {/* Desktop Cards Grid (>= 768px) - 100% Unchanged */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {collections.map(col => (
+              <CollectionCard
+                key={col.id}
+                collection={col}
+                onDelete={(id, title) => setDeleteTarget({ id, title })}
+              />
+            ))}
+          </div>
+
+          {/* Mobile High-Density ListRows (< 768px) */}
+          <div className="md:hidden divide-y divide-border border border-border rounded-xl bg-surface overflow-hidden">
+            {collections.map((col, idx) => {
+              const countText = `${isRtl ? toArabicDigits(col.verseCount || 0) : col.verseCount || 0} ${t('آيات', 'ayahs')}`;
+              const timeText = col.updatedAt ? formatRelativeTime(col.updatedAt) : '';
+
+              return (
+                <ListRow
+                  key={col.id}
+                  index={idx + 1}
+                  title={col.title}
+                  subtitle={col.baseSurahNameArabic ? `${t('سورة', 'Surah')} ${col.baseSurahNameArabic}` : undefined}
+                  meta={`${countText} · ${timeText}`}
+                  onClick={() => navigate(`/collections/${col.id}`)}
+                  actions={
+                    <OverflowMenu
+                      items={[
+                        {
+                          label: t('تعديل المجموعة', 'Edit Collection'),
+                          icon: <Edit2 className="w-4 h-4" />,
+                          onClick: () => navigate(`/collections/${col.id}/edit`),
+                        },
+                        {
+                          label: t('حذف المجموعة', 'Delete Collection'),
+                          icon: <Trash2 className="w-4 h-4" />,
+                          variant: 'danger',
+                          onClick: () => setDeleteTarget({ id: col.id, title: col.title }),
+                        },
+                      ]}
+                    />
+                  }
+                />
+              );
+            })}
+          </div>
+        </>
       ) : (
         <EmptyState
           icon={<BookmarkCheck className="w-8 h-8 text-primary" />}
@@ -256,6 +397,12 @@ export const MyLibraryPage: React.FC = () => {
         confirmText={t('نعم، احذف نهائياً', 'Yes, Delete Permanently')}
         cancelText={t('إلغاء', 'Cancel')}
         isLoading={deleteMutation.isPending}
+      />
+
+      {/* Mobile Floating Action Button */}
+      <FAB
+        to="/collections/new"
+        ariaLabel={t('إنشاء مجموعة جديدة', 'Create new collection')}
       />
     </div>
   );

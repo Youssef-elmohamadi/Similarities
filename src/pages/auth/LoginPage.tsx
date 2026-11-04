@@ -53,31 +53,31 @@ export const LoginPage: React.FC = () => {
 
       <div className="w-full max-w-md">
         {/* Brand Header */}
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-xl bg-primary text-white flex items-center justify-center shadow-sm mx-auto mb-3.5">
-            <BookOpen className="w-7 h-7" />
+        <div className="text-center mb-3 md:mb-8">
+          <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-primary text-white flex items-center justify-center shadow-xs mx-auto mb-2 md:mb-3.5">
+            <BookOpen className="w-5 h-5 md:w-7 md:h-7" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-text-primary tracking-tight leading-snug">
+          <h1 className="text-lg md:text-3xl font-bold text-text-primary tracking-tight leading-snug">
             {t('منصة المتشابهات القرآنية', 'Quranic Similarities Platform')}
           </h1>
-          <p className="text-sm text-text-secondary mt-1">
+          <p className="text-xs md:text-sm text-text-secondary mt-0.5 md:mt-1">
             {t('مساحتك الخاصة لتدوين المتشابهات وتثبيت الحفظ', 'Your personal workspace for Quran memorization')}
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-surface rounded-xl border border-border shadow-xs p-6 sm:p-8 text-start">
-          <h2 className="text-xl font-semibold text-text-primary mb-5 text-center leading-snug">
+        <div className="bg-surface rounded-xl border border-border shadow-none md:shadow-xs p-4 sm:p-8 text-start">
+          <h2 className="text-base md:text-xl font-semibold text-text-primary mb-3 md:mb-5 text-center leading-snug">
             {t('تسجيل الدخول إلى حسابك', 'Sign in to your account')}
           </h2>
 
           {error && (
-            <div className="mb-5 p-3.5 rounded-lg bg-danger-subtle border border-danger/25 text-xs sm:text-sm text-danger leading-relaxed">
+            <div className="mb-3 md:mb-5 p-2.5 md:p-3.5 rounded-lg bg-danger-subtle border border-danger/25 text-xs sm:text-sm text-danger leading-relaxed">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
             <Input
               type="email"
               label={t('البريد الإلكتروني', 'Email Address')}

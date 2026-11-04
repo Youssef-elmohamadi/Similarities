@@ -5,6 +5,9 @@ import { Input, Textarea } from '@/components/common/Input';
 import { Modal } from '@/components/common/Modal';
 import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
+import { SectionToolbar } from '@/components/common/SectionToolbar';
+import { ListRow } from '@/components/common/ListRow';
+import { OverflowMenu } from '@/components/common/OverflowMenu';
 import { Sparkles, Plus, Trash2, Edit2, ChevronUp, ChevronDown, Lightbulb, Link2, BookMarked, HelpCircle } from 'lucide-react';
 import { formatRelativeTime, toArabicDigits } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
@@ -28,6 +31,16 @@ export const MemorizationConnectionsEditor: React.FC<MemorizationConnectionsEdit
   const { t, direction } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingConnectionId, setEditingConnectionId] = useState<string | null>(null);
+  const [expandedConnIds, setExpandedConnIds] = useState<Set<string>>(new Set());
+
+  const toggleConnExpand = (id: string) => {
+    setExpandedConnIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   // Form state
   const [title, setTitle] = useState('');
@@ -110,9 +123,9 @@ export const MemorizationConnectionsEditor: React.FC<MemorizationConnectionsEdit
   };
 
   return (
-    <div className="space-y-6 text-start">
-      {/* Top Banner and Action */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-xl bg-accent-tint/50 border border-accent/25">
+    <div className="space-y-4 md:space-y-6 text-start">
+      {/* Top Banner and Action (Desktop >= 768px) */}
+      <div className="hidden md:flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-xl bg-accent-tint/50 border border-accent/25">
         <div className="space-y-1">
           <h3 className="font-semibold text-base text-accent flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-accent" />
@@ -137,14 +150,28 @@ export const MemorizationConnectionsEditor: React.FC<MemorizationConnectionsEdit
         </Button>
       </div>
 
+      {/* Mobile Toolbar (< 768px) */}
+      <div className="md:hidden">
+        <SectionToolbar
+          icon={<Sparkles className="w-4 h-4 text-accent" />}
+          title={t('روابط وتقنيات الحفظ', 'Memorization Links')}
+          count={connections.length}
+          action={{
+            label: t('+ إضافة رابط', '+ Add Link'),
+            onClick: handleOpenAddModal,
+            variant: 'primary',
+          }}
+        />
+      </div>
+
       {/* Connections List */}
       {connections.length === 0 ? (
-        <div className="text-center py-12 px-4 rounded-xl border border-dashed border-border bg-surface">
-          <Sparkles className="w-10 h-10 text-text-secondary/40 mx-auto mb-3" />
-          <h4 className="font-semibold text-base text-text-primary mb-1">
+        <div className="text-center py-8 md:py-12 px-4 rounded-xl border border-dashed border-border bg-surface">
+          <Sparkles className="w-8 h-8 md:w-10 md:h-10 text-text-secondary/40 mx-auto mb-2 md:mb-3" />
+          <h4 className="font-semibold text-sm md:text-base text-text-primary mb-1">
             {t('لا توجد روابط حفظ مدونة حتى الآن', 'No memorization connections documented yet')}
           </h4>
-          <p className="text-sm text-text-secondary max-w-md mx-auto mb-5 leading-relaxed">
+          <p className="text-xs md:text-sm text-text-secondary max-w-md mx-auto mb-4 leading-relaxed">
             {t(
               'اكتب طريقة الربط أو العلامة الذهنية التي تعتمد عليها شخصياً للتفريق بين الآيات المتشابهة.',
               'Write your personal mnemonic anchors to distinguish between the similar verses.'
@@ -155,94 +182,172 @@ export const MemorizationConnectionsEditor: React.FC<MemorizationConnectionsEdit
           </Button>
         </div>
       ) : (
-        <div className="space-y-4">
-          {connections.map((conn, index) => {
-            const typeConfig = connectionTypeOptions.find(o => o.value === conn.type) || connectionTypeOptions[0];
+        <>
+          {/* Desktop Cards (>= 768px) - 100% Unchanged */}
+          <div className="hidden md:block space-y-4">
+            {connections.map((conn, index) => {
+              const typeConfig = connectionTypeOptions.find(o => o.value === conn.type) || connectionTypeOptions[0];
 
-            return (
-              <Card
-                key={conn.id}
-                className="p-5 md:p-6 space-y-3 border-border hover:border-primary/40 transition duration-150"
-              >
-                {/* Header with Type & Order & Actions */}
-                <div className="flex items-center justify-between gap-3 pb-3 border-b border-border/80">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="w-6 h-6 rounded-md bg-accent text-white text-xs font-bold flex items-center justify-center shrink-0">
-                      {isRtl ? toArabicDigits(index + 1) : index + 1}
-                    </span>
-
-                    <Badge variant={typeConfig.color} size="sm">
-                      <span className="flex items-center gap-1.5">
-                        {typeConfig.icon}
-                        <span>{t(typeConfig.labelAr, typeConfig.labelEn)}</span>
+              return (
+                <Card
+                  key={conn.id}
+                  className="p-5 md:p-6 space-y-3 border-border hover:border-primary/40 transition duration-150"
+                >
+                  <div className="flex items-center justify-between gap-3 pb-3 border-b border-border/80">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="w-6 h-6 rounded-md bg-accent text-white text-xs font-bold flex items-center justify-center shrink-0">
+                        {isRtl ? toArabicDigits(index + 1) : index + 1}
                       </span>
-                    </Badge>
 
-                    {conn.title && (
-                      <h4 className="font-semibold text-base text-text-primary ms-1">
-                        {conn.title}
-                      </h4>
-                    )}
+                      <Badge variant={typeConfig.color} size="sm">
+                        <span className="flex items-center gap-1.5">
+                          {typeConfig.icon}
+                          <span>{t(typeConfig.labelAr, typeConfig.labelEn)}</span>
+                        </span>
+                      </Badge>
+
+                      {conn.title && (
+                        <h4 className="font-semibold text-base text-text-primary ms-1">
+                          {conn.title}
+                        </h4>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveUp(index)}
+                        disabled={index === 0}
+                        className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
+                        title={t('تحريك لأعلى', 'Move Up')}
+                        aria-label={t('تحريك لأعلى', 'Move Up')}
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleMoveDown(index)}
+                        disabled={index === connections.length - 1}
+                        className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
+                        title={t('تحريك لأسفل', 'Move Down')}
+                        aria-label={t('تحريك لأسفل', 'Move Down')}
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditModal(conn)}
+                        className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-primary hover:bg-primary-tint transition"
+                        title={t('تعديل الرابط', 'Edit')}
+                        aria-label={t('تعديل الرابط', 'Edit')}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => onDeleteConnection(conn.id)}
+                        className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-danger hover:bg-danger-subtle transition"
+                        title={t('حذف الرابط', 'Delete')}
+                        aria-label={t('حذف الرابط', 'Delete')}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleMoveUp(index)}
-                      disabled={index === 0}
-                      className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
-                      title={t('تحريك لأعلى', 'Move Up')}
-                      aria-label={t('تحريك لأعلى', 'Move Up')}
-                    >
-                      <ChevronUp className="w-4 h-4" />
-                    </button>
+                  <p className="text-base md:text-[17px] text-text-primary leading-[1.9] whitespace-pre-wrap ps-1 py-1">
+                    {conn.content}
+                  </p>
 
-                    <button
-                      type="button"
-                      onClick={() => handleMoveDown(index)}
-                      disabled={index === connections.length - 1}
-                      className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
-                      title={t('تحريك لأسفل', 'Move Down')}
-                      aria-label={t('تحريك لأسفل', 'Move Down')}
-                    >
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEditModal(conn)}
-                      className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-primary hover:bg-primary-tint transition"
-                      title={t('تعديل الرابط', 'Edit')}
-                      aria-label={t('تعديل الرابط', 'Edit')}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => onDeleteConnection(conn.id)}
-                      className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-danger hover:bg-danger-subtle transition"
-                      title={t('حذف الرابط', 'Delete')}
-                      aria-label={t('حذف الرابط', 'Delete')}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <div className="pt-2.5 border-t border-border/60 flex items-center justify-end text-xs text-text-secondary">
+                    <span>{formatRelativeTime(conn.updatedAt)}</span>
                   </div>
-                </div>
+                </Card>
+              );
+            })}
+          </div>
 
-                {/* Content body: comfortable Arabic text with 17-18px and leading-loose */}
-                <p className="text-base md:text-[17px] text-text-primary leading-[1.9] whitespace-pre-wrap ps-1 py-1">
-                  {conn.content}
-                </p>
+          {/* Mobile High-Density ListRows (< 768px) */}
+          <div className="md:hidden divide-y divide-border border border-border rounded-xl bg-surface overflow-hidden">
+            {connections.map((conn, index) => {
+              const typeConfig = connectionTypeOptions.find(o => o.value === conn.type) || connectionTypeOptions[0];
 
-                {/* Timestamp */}
-                <div className="pt-2.5 border-t border-border/60 flex items-center justify-end text-xs text-text-secondary">
-                  <span>{formatRelativeTime(conn.updatedAt)}</span>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+              return (
+                <ListRow
+                  key={conn.id}
+                  index={index + 1}
+                  title={conn.title || t(typeConfig.labelAr, typeConfig.labelEn)}
+                  subtitle={conn.content}
+                  meta={formatRelativeTime(conn.updatedAt)}
+                  isExpanded={expandedConnIds.has(conn.id)}
+                  onToggleExpand={() => toggleConnExpand(conn.id)}
+                  actions={
+                    <OverflowMenu
+                      items={[
+                        {
+                          label: t('تعديل الرابط', 'Edit'),
+                          icon: <Edit2 className="w-4 h-4" />,
+                          onClick: () => handleOpenEditModal(conn),
+                        },
+                        {
+                          label: t('تحريك لأعلى', 'Move Up'),
+                          icon: <ChevronUp className="w-4 h-4" />,
+                          disabled: index === 0,
+                          onClick: () => handleMoveUp(index),
+                        },
+                        {
+                          label: t('تحريك لأسفل', 'Move Down'),
+                          icon: <ChevronDown className="w-4 h-4" />,
+                          disabled: index === connections.length - 1,
+                          onClick: () => handleMoveDown(index),
+                        },
+                        {
+                          label: t('حذف الرابط', 'Delete'),
+                          icon: <Trash2 className="w-4 h-4" />,
+                          variant: 'danger',
+                          onClick: () => onDeleteConnection(conn.id),
+                        },
+                      ]}
+                    />
+                  }
+                >
+                  <div className="space-y-2 pt-1 text-xs">
+                    <div className="flex items-center gap-1.5 text-accent font-semibold">
+                      {typeConfig.icon}
+                      <span>{t(typeConfig.labelAr, typeConfig.labelEn)}</span>
+                    </div>
+                    <p className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap">
+                      {conn.content}
+                    </p>
+                    <div className="pt-2 flex items-center justify-end gap-2 border-t border-border/40">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs"
+                        icon={<Edit2 className="w-3.5 h-3.5" />}
+                        onClick={() => handleOpenEditModal(conn)}
+                      >
+                        {t('تعديل', 'Edit')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 text-xs text-danger"
+                        icon={<Trash2 className="w-3.5 h-3.5" />}
+                        onClick={() => onDeleteConnection(conn.id)}
+                      >
+                        {t('حذف', 'Delete')}
+                      </Button>
+                    </div>
+                  </div>
+                </ListRow>
+              );
+            })}
+          </div>
+        </>
       )}
 
       {/* Modal: Create or Edit Connection */}

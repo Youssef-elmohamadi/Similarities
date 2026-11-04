@@ -192,31 +192,15 @@ export const EditCollectionPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-3.5 sm:space-y-6 pb-16 text-start animate-fade-in">
+    <div className="max-w-2xl mx-auto space-y-3.5 sm:space-y-6 pb-28 md:pb-16 text-start animate-fade-in">
       <Seo title="تعديل المجموعة" robots="noindex, nofollow" />
+
       {/* Top Header: Compact on Mobile */}
-      <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
-        <div className="space-y-0.5 min-w-0">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(`/collections/${id}`)}
-              className="p-1 -ms-1 text-text-secondary hover:text-text-primary shrink-0"
-              title={t('رجوع', 'Back')}
-              aria-label={t('رجوع', 'Back')}
-            >
-              {isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-            </Button>
-            <h1 className="text-base sm:text-2xl font-bold text-text-primary truncate">
-              {t('تعديل بيانات المجموعة', 'Edit Collection')}
-            </h1>
-          </div>
-          <p className="hidden sm:block text-xs sm:text-sm text-text-secondary leading-relaxed ps-6">
-            {t('تحديث عنوان ووصف المجموعة القرآنية', 'Update collection title and description')}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title={t('تعديل بيانات المجموعة', 'Edit Collection')}
+        description={t('تحديث عنوان ووصف المجموعة القرآنية', 'Update collection title and description')}
+        onBack={() => navigate(`/collections/${id}`)}
+      />
 
       <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-6">
         {/* Collection Type Selector */}
@@ -306,7 +290,8 @@ export const EditCollectionPage: React.FC = () => {
           />
         </Card>
 
-        <div className="flex items-center justify-end gap-3 pt-2">
+        {/* Desktop Buttons (>= 768px) */}
+        <div className="hidden md:flex items-center justify-end gap-3 pt-2">
           <Button
             type="button"
             variant="secondary"
@@ -318,6 +303,30 @@ export const EditCollectionPage: React.FC = () => {
           <Button
             type="submit"
             variant="primary"
+            isLoading={updateMutation.isPending}
+            disabled={!title.trim()}
+          >
+            {t('حفظ التعديلات', 'Save Changes')}
+          </Button>
+        </div>
+
+        {/* Mobile Sticky Save Bar (< 768px) */}
+        <div className="md:hidden fixed bottom-14 inset-x-0 z-20 bg-surface/95 backdrop-blur-md border-t border-border p-2.5 flex items-center gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="flex-1 min-h-[44px]"
+            onClick={() => navigate(`/collections/${id}`)}
+          >
+            {t('إلغاء', 'Cancel')}
+          </Button>
+
+          <Button
+            type="submit"
+            variant="primary"
+            size="sm"
+            className="flex-1 min-h-[44px]"
             isLoading={updateMutation.isPending}
             disabled={!title.trim()}
           >

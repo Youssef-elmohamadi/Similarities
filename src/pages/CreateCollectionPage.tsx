@@ -9,6 +9,7 @@ import { Card } from '@/components/common/Card';
 import { Badge } from '@/components/common/Badge';
 import { Modal } from '@/components/common/Modal';
 import { PageHeader } from '@/components/common/PageHeader';
+import { ListRow } from '@/components/common/ListRow';
 import { Skeleton } from '@/components/common/Skeleton';
 import { useToast } from '@/components/common/Toast';
 import { Seo } from '@/components/common/Seo';
@@ -303,31 +304,14 @@ export const CreateCollectionPage: React.FC = () => {
     <div className="max-w-4xl mx-auto space-y-3.5 sm:space-y-6 pb-16 text-start animate-fade-in">
       <Seo title="إنشاء مجموعة جديدة" robots="noindex, nofollow" />
       {/* Top Header: Compact on Mobile */}
-      <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
-        <div className="space-y-0.5 min-w-0">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="p-1 -ms-1 text-text-secondary hover:text-text-primary shrink-0"
-              title={t('رجوع', 'Back')}
-              aria-label={t('رجوع', 'Back')}
-            >
-              {isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-            </Button>
-            <h1 className="text-base sm:text-2xl font-bold text-text-primary truncate">
-              {t('إنشاء مجموعة متشابهات جديدة', 'Create Similarity Collection')}
-            </h1>
-          </div>
-          <p className="hidden sm:block text-xs sm:text-sm text-text-secondary leading-relaxed ps-6">
-            {t(
-              'اكتب عنواناً معبراً للمجموعة، ورتب الآيات المتشابهة لتتمكن لاحقاً من مقارنتها وتدوين روابطها.',
-              'Name your collection, arrange the verses, and document relationships.'
-            )}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title={t('إنشاء مجموعة متشابهات جديدة', 'Create Similarity Collection')}
+        description={t(
+          'اكتب عنواناً معبراً للمجموعة، ورتب الآيات المتشابهة لتتمكن لاحقاً من مقارنتها وتدوين روابطها.',
+          'Name your collection, arrange the verses, and document relationships.'
+        )}
+        onBack={() => navigate(-1)}
+      />
 
       <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-6">
         {/* Collection Type Selector: Side-by-side on mobile */}
@@ -498,78 +482,123 @@ export const CreateCollectionPage: React.FC = () => {
               </Button>
             </Card>
           ) : (
-            <div className="space-y-3">
-              {selectedVerses.map((verse, index) => (
-                <Card
-                  key={verse.id}
-                  className="p-4 md:p-5 border-border hover:border-primary/40 transition duration-150"
-                >
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="w-6 h-6 rounded-md bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0">
-                        {isRtl ? toArabicDigits(index + 1) : index + 1}
-                      </span>
-                      <Badge variant="primary" size="sm">
-                        {t('سورة', 'Surah')} {verse.surahNameArabic}
-                      </Badge>
-                      <Badge variant="charcoal" size="sm">
-                        {t('الآية', 'Ayah')} {toArabicDigits(verse.ayahNumber)}
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => handleMoveUp(index)}
-                        disabled={index === 0}
-                        className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
-                        title={t('تحريك لأعلى', 'Move Up')}
-                        aria-label={t('تحريك لأعلى', 'Move Up')}
-                      >
-                        <ChevronUp className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleMoveDown(index)}
-                        disabled={index === selectedVerses.length - 1}
-                        className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
-                        title={t('تحريك لأسفل', 'Move Down')}
-                        aria-label={t('تحريك لأسفل', 'Move Down')}
-                      >
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveVerse(verse.id)}
-                        className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-danger hover:bg-danger-subtle transition"
-                        title={t('حذف من القائمة', 'Remove')}
-                        aria-label={t('حذف من القائمة', 'Remove')}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <p
-                    dir="rtl"
-                    lang="ar"
-                    className="font-quran text-lg md:text-xl text-text-primary text-start leading-[2.5] py-1 selection:bg-accent-tint"
+            <>
+              {/* Desktop Cards (>= 768px) - 100% Unchanged */}
+              <div className="hidden md:block space-y-3">
+                {selectedVerses.map((verse, index) => (
+                  <Card
+                    key={verse.id}
+                    className="p-4 md:p-5 border-border hover:border-primary/40 transition duration-150"
                   >
-                    {verse.uthmaniText}{' '}
-                    <span className="ayah-number-badge text-primary font-bold">
-                      {formatAyahOrnament(verse.ayahNumber)}
-                    </span>
-                  </p>
-                </Card>
-              ))}
-            </div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="w-6 h-6 rounded-md bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0">
+                          {isRtl ? toArabicDigits(index + 1) : index + 1}
+                        </span>
+                        <Badge variant="primary" size="sm">
+                          {t('سورة', 'Surah')} {verse.surahNameArabic}
+                        </Badge>
+                        <Badge variant="charcoal" size="sm">
+                          {t('الآية', 'Ayah')} {toArabicDigits(verse.ayahNumber)}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveUp(index)}
+                          disabled={index === 0}
+                          className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
+                          title={t('تحريك لأعلى', 'Move Up')}
+                          aria-label={t('تحريك لأعلى', 'Move Up')}
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleMoveDown(index)}
+                          disabled={index === selectedVerses.length - 1}
+                          className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
+                          title={t('تحريك لأسفل', 'Move Down')}
+                          aria-label={t('تحريك لأسفل', 'Move Down')}
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveVerse(verse.id)}
+                          className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-danger hover:bg-danger-subtle transition"
+                          title={t('حذف من القائمة', 'Remove')}
+                          aria-label={t('حذف من القائمة', 'Remove')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <p
+                      dir="rtl"
+                      lang="ar"
+                      className="font-quran text-lg md:text-xl text-text-primary text-start leading-[2.5] py-1 selection:bg-accent-tint"
+                    >
+                      {verse.uthmaniText}{' '}
+                      <span className="ayah-number-badge text-primary font-bold">
+                        {formatAyahOrnament(verse.ayahNumber)}
+                      </span>
+                    </p>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Mobile High-Density ListRows (< 768px) */}
+              <div className="md:hidden divide-y divide-border border border-border rounded-xl bg-surface overflow-hidden">
+                {selectedVerses.map((verse, index) => (
+                  <ListRow
+                    key={verse.id}
+                    index={index + 1}
+                    title={`${t('سورة', 'Surah')} ${verse.surahNameArabic} (${isRtl ? toArabicDigits(verse.ayahNumber) : verse.ayahNumber})`}
+                    subtitle={verse.uthmaniText}
+                    actions={
+                      <div className="flex items-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveUp(index)}
+                          disabled={index === 0}
+                          className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary disabled:opacity-20"
+                          aria-label={t('تحريك لأعلى', 'Move Up')}
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveDown(index)}
+                          disabled={index === selectedVerses.length - 1}
+                          className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary disabled:opacity-20"
+                          aria-label={t('تحريك لأسفل', 'Move Down')}
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveVerse(verse.id)}
+                          className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-danger hover:bg-danger-subtle"
+                          aria-label={t('حذف من القائمة', 'Remove')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    }
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="pt-4 flex items-center justify-end gap-3 border-t border-border">
+        {/* Action Buttons: Desktop bottom vs Mobile sticky */}
+        <div className="hidden md:flex pt-4 items-center justify-end gap-3 border-t border-border">
           <Button
             type="button"
             variant="secondary"
@@ -581,6 +610,30 @@ export const CreateCollectionPage: React.FC = () => {
           <Button
             type="submit"
             variant="primary"
+            isLoading={createMutation.isPending}
+            disabled={!title.trim()}
+          >
+            {t('حفظ وإنشاء المجموعة', 'Save Collection')}
+          </Button>
+        </div>
+
+        {/* Mobile Sticky Bottom Save Bar */}
+        <div className="md:hidden fixed bottom-14 inset-x-0 z-20 bg-surface/95 backdrop-blur-md border-t border-border p-2.5 flex items-center gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="flex-1 min-h-[44px]"
+            onClick={() => navigate('/library')}
+          >
+            {t('إلغاء', 'Cancel')}
+          </Button>
+
+          <Button
+            type="submit"
+            variant="primary"
+            size="sm"
+            className="flex-1 min-h-[44px]"
             isLoading={createMutation.isPending}
             disabled={!title.trim()}
           >
