@@ -8,6 +8,7 @@ import { Seo } from '../common/Seo';
 import { prefetchRouteChunks } from '../../routes/routePrefetch';
 import { useAuth } from '../../context/AuthContext';
 import { Loader2, AlertTriangle, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export const AppLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,7 +22,7 @@ export const AppLayout: React.FC = () => {
   const isChat = location.pathname.startsWith('/chat');
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-text-primary">
+    <div className={cn("flex flex-col bg-background text-text-primary", isChat ? "h-screen h-[100dvh] overflow-hidden" : "min-h-screen")}>
       <Seo robots="noindex, nofollow" />
       <Navbar
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}

@@ -310,94 +310,98 @@ export const ChatPage: React.FC = () => {
         {/* Chat Thread Panel */}
         <div className="flex-1 flex flex-col min-w-0 bg-background h-full overflow-hidden">
           {/* Header Permanent Disclaimers */}
-          <div className="px-3 sm:px-4 py-1.5 shrink-0 bg-surface/60 border-b border-border/70">
-            <ChatDisclaimers compact={true} />
+          <div className="px-3 sm:px-6 py-1.5 shrink-0 bg-surface/75 border-b border-border/70">
+            <div className="max-w-3xl lg:max-w-4xl mx-auto w-full">
+              <ChatDisclaimers compact={true} />
+            </div>
           </div>
 
           {/* Messages Area (with Infinite scroll up) */}
           <div
             ref={messagesContainerRef}
             onScroll={handleScroll}
-            className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 space-y-1 min-h-0"
+            className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 min-h-0"
           >
-            {hasMoreMessages && (
-              <div className="text-center py-2">
-                <span className="text-xs text-text-muted">
-                  اسحب للأعلى لتحميل المحادثات السابقة...
-                </span>
-              </div>
-            )}
-
-            {isMessagesLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <Loader2 className="w-6 h-6 text-primary animate-spin" />
-              </div>
-            ) : allMessages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto p-6 space-y-4 text-text-secondary">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
-                  <Sparkles className="w-6 h-6" />
+            <div className="max-w-3xl lg:max-w-4xl mx-auto w-full space-y-3.5">
+              {hasMoreMessages && (
+                <div className="text-center py-2">
+                  <span className="text-xs text-text-muted">
+                    اسحب للأعلى لتحميل المحادثات السابقة...
+                  </span>
                 </div>
-                <div>
-                  <h3 className="font-bold text-text-primary text-base md:text-lg mb-1">
-                    أهلاً بك في مساعد المتشابهات القرآنية
-                  </h3>
-                  <p className="text-xs md:text-sm text-text-muted leading-relaxed">
-                    مساعد بحثي تجريبي يستحضر الآيات بالرسم العثماني ويقارن الفروق اللفظية
-                    بدقة وموضوعية. اختر من النماذج التالية أو اكتب سؤالك:
-                  </p>
+              )}
+
+              {isMessagesLoading ? (
+                <div className="h-full flex items-center justify-center py-16">
+                  <Loader2 className="w-6 h-6 text-primary animate-spin" />
                 </div>
-
-                {/* 4 Starter Prompts */}
-                <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2 text-start text-xs pt-2">
-                  {STARTER_PROMPTS.map((prompt, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleSend(prompt)}
-                      className="p-3 rounded-xl border border-border bg-surface hover:border-primary/50 hover:bg-primary/5 transition text-text-primary text-start leading-snug cursor-pointer shadow-2xs"
-                    >
-                      «{prompt}»
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <>
-                {visibleMessages.map((msg) => (
-                  <ChatMessageItem key={msg.id} message={msg} />
-                ))}
-
-                {/* Live streaming bubble & Tool activity */}
-                {sendMutation.isPending && (
-                  <div className="space-y-2 my-2" aria-live="polite">
-                    {/* Small muted tool activity line */}
-                    {activeToolActivity && (
-                      <div className="flex items-center gap-2 text-xs text-text-muted py-1 px-3 bg-surface/50 rounded-lg border border-border/60 w-fit">
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
-                        <span>{activeToolActivity}</span>
-                      </div>
-                    )}
-
-                    {/* Streaming Text Delta */}
-                    {streamingDelta ? (
-                      <div className="flex gap-2.5 my-2">
-                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-600/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                          <Sparkles className="w-4 h-4" />
-                        </div>
-                        <div className="bg-surface border border-border text-text-primary rounded-2xl rounded-ts-xs px-4 py-3 text-sm md:text-base leading-relaxed whitespace-pre-wrap select-text max-w-[85%] shadow-2xs">
-                          {streamingDelta}
-                        </div>
-                      </div>
-                    ) : !activeToolActivity ? (
-                      <div className="flex items-center gap-2 text-xs text-text-muted py-2 px-1">
-                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                        <span>المساعد يستحضر محرك البحث القرآني...</span>
-                      </div>
-                    ) : null}
+              ) : allMessages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center text-center max-w-lg mx-auto py-12 px-4 space-y-4 text-text-secondary">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
+                    <Sparkles className="w-6 h-6" />
                   </div>
-                )}
-                <div ref={messagesEndRef} />
-              </>
-            )}
+                  <div>
+                    <h3 className="font-bold text-text-primary text-base md:text-lg mb-1">
+                      أهلاً بك في مساعد المتشابهات القرآنية
+                    </h3>
+                    <p className="text-xs md:text-sm text-text-muted leading-relaxed">
+                      مساعد بحثي تجريبي يستحضر الآيات بالرسم العثماني ويقارن الفروق اللفظية
+                      بدقة وموضوعية. اختر من النماذج التالية أو اكتب سؤالك:
+                    </p>
+                  </div>
+
+                  {/* 4 Starter Prompts */}
+                  <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2 text-start text-xs pt-2">
+                    {STARTER_PROMPTS.map((prompt, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSend(prompt)}
+                        className="p-3 rounded-xl border border-border bg-surface hover:border-primary/50 hover:bg-primary/5 transition text-text-primary text-start leading-snug cursor-pointer shadow-2xs"
+                      >
+                        «{prompt}»
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {visibleMessages.map((msg) => (
+                    <ChatMessageItem key={msg.id} message={msg} />
+                  ))}
+
+                  {/* Live streaming bubble & Tool activity */}
+                  {sendMutation.isPending && (
+                    <div className="space-y-2 my-2" aria-live="polite">
+                      {/* Small muted tool activity line */}
+                      {activeToolActivity && (
+                        <div className="flex items-center gap-2 text-xs text-text-muted py-1 px-3 bg-surface/50 rounded-lg border border-border/60 w-fit">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                          <span>{activeToolActivity}</span>
+                        </div>
+                      )}
+
+                      {/* Streaming Text Delta */}
+                      {streamingDelta ? (
+                        <div className="flex gap-2.5 my-2">
+                          <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-600/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                            <Sparkles className="w-4 h-4" />
+                          </div>
+                          <div className="bg-surface border border-border text-text-primary rounded-2xl rounded-ts-xs px-4 py-3 text-sm md:text-base leading-relaxed whitespace-pre-wrap select-text max-w-[85%] shadow-2xs">
+                            {streamingDelta}
+                          </div>
+                        </div>
+                      ) : !activeToolActivity ? (
+                        <div className="flex items-center gap-2 text-xs text-text-muted py-2 px-1">
+                          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                          <span>المساعد يستحضر محرك البحث القرآني...</span>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </>
+              )}
+            </div>
           </div>
 
           {/* Error Banner with Retry button */}
@@ -436,84 +440,86 @@ export const ChatPage: React.FC = () => {
             </div>
           )}
 
-          {/* Chat Composer / Input Bar */}
-          <div className="p-2.5 sm:p-3 md:p-4 bg-surface border-t border-border shrink-0 space-y-1.5 pb-safe">
-            {/* Meta indicator bar */}
-            <div className="flex items-center justify-between text-[11px] text-text-muted px-1">
-              <div className="flex items-center gap-2">
-                {!isOnline ? (
-                  <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
-                    <WifiOff className="w-3.5 h-3.5" />
-                    <span>غير متصل - يمكنك تصفح المحادثات السابقة محلياً</span>
-                  </span>
-                ) : (
-                  <span className="text-text-muted hidden sm:inline">
-                    اضغط Enter للإرسال، Shift + Enter لسطر جديد
-                  </span>
-                )}
+          {/* Chat Composer / Input Bar - STICKY & ANCHORED AT BOTTOM */}
+          <div className="bg-surface/95 backdrop-blur-md border-t border-border/80 px-3 sm:px-6 py-2.5 sm:py-3 pb-safe shrink-0 z-10 shadow-xs">
+            <div className="max-w-3xl lg:max-w-4xl mx-auto w-full space-y-1.5">
+              {/* Meta indicator bar */}
+              <div className="flex items-center justify-between text-[11px] text-text-muted px-1">
+                <div className="flex items-center gap-2">
+                  {!isOnline ? (
+                    <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                      <WifiOff className="w-3.5 h-3.5" />
+                      <span>غير متصل - يمكنك تصفح المحادثات السابقة محلياً</span>
+                    </span>
+                  ) : (
+                    <span className="text-text-muted hidden sm:inline">
+                      اضغط Enter للإرسال، Shift + Enter لسطر جديد
+                    </span>
+                  )}
+                </div>
+                <span
+                  className={cn(
+                    'font-medium',
+                    isQuotaExceeded ? 'text-red-500 font-bold' : 'text-text-muted'
+                  )}
+                >
+                  {isQuotaExceeded
+                    ? 'تم استهلاك رصيد اليوم بالكامل'
+                    : `الرصيد المتبقي: ${remainingMessages} رسائل اليوم`}
+                </span>
               </div>
-              <span
-                className={cn(
-                  'font-medium',
-                  isQuotaExceeded ? 'text-red-500 font-bold' : 'text-text-muted'
-                )}
+
+              {/* Input Form with Multi-line textarea and Stop Streaming button */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSend();
+                }}
+                className="flex items-end gap-2"
               >
-                {isQuotaExceeded
-                  ? 'تم استهلاك رصيد اليوم بالكامل'
-                  : `الرصيد المتبقي: ${remainingMessages} رسائل اليوم`}
-              </span>
-            </div>
-
-            {/* Input Form with Multi-line textarea and Stop Streaming button */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSend();
-              }}
-              className="flex items-end gap-2"
-            >
-              <textarea
-                ref={textareaRef}
-                value={inputContent}
-                onChange={(e) => setInputContent(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={
-                  !isOnline
-                    ? 'أنت في وضع غير متصل...'
-                    : isQuotaExceeded
-                    ? 'لقد استهلكت رصيدك اليومي من الرسائل'
-                    : 'اكتب سؤالك حول المتشابهات اللفظية والآيات هنا...'
-                }
-                disabled={!isOnline || isQuotaExceeded || sendMutation.isPending}
-                rows={2}
-                className="flex-1 resize-none rounded-xl border border-border bg-background px-3.5 py-2 text-xs md:text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 transition leading-relaxed min-h-[44px] max-h-36"
-              />
-
-              {sendMutation.isPending ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleStopStreaming}
-                  className="h-10 px-3.5 rounded-xl shrink-0 gap-1.5 border-red-500/30 text-red-600 hover:bg-red-500/10"
-                  title="إيقاف الرد"
-                >
-                  <Square className="w-3.5 h-3.5 fill-current" />
-                  <span className="text-xs font-semibold">إيقاف</span>
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  variant="primary"
-                  disabled={
-                    !inputContent.trim() || !isOnline || isQuotaExceeded || sendMutation.isPending
+                <textarea
+                  ref={textareaRef}
+                  value={inputContent}
+                  onChange={(e) => setInputContent(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={
+                    !isOnline
+                      ? 'أنت في وضع غير متصل...'
+                      : isQuotaExceeded
+                      ? 'لقد استهلكت رصيدك اليومي من الرسائل'
+                      : 'اكتب سؤالك حول المتشابهات اللفظية والآيات هنا...'
                   }
-                  className="h-10 px-4 rounded-xl shrink-0 gap-1.5"
-                >
-                  <Send className="w-4 h-4 rtl:rotate-180" />
-                  <span className="hidden sm:inline">إرسال</span>
-                </Button>
-              )}
-            </form>
+                  disabled={!isOnline || isQuotaExceeded || sendMutation.isPending}
+                  rows={2}
+                  className="flex-1 resize-none rounded-xl border border-border bg-background px-3.5 py-2 text-xs md:text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 transition leading-relaxed min-h-[44px] max-h-36"
+                />
+
+                {sendMutation.isPending ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={handleStopStreaming}
+                    className="h-10 px-3.5 rounded-xl shrink-0 gap-1.5 border-red-500/30 text-red-600 hover:bg-red-500/10"
+                    title="إيقاف الرد"
+                  >
+                    <Square className="w-3.5 h-3.5 fill-current" />
+                    <span className="text-xs font-semibold">إيقاف</span>
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={
+                      !inputContent.trim() || !isOnline || isQuotaExceeded || sendMutation.isPending
+                    }
+                    className="h-10 px-4 rounded-xl shrink-0 gap-1.5"
+                  >
+                    <Send className="w-4 h-4 rtl:rotate-180" />
+                    <span className="hidden sm:inline">إرسال</span>
+                  </Button>
+                )}
+              </form>
+            </div>
           </div>
         </div>
       </div>

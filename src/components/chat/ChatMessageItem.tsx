@@ -57,10 +57,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
       {/* Bubble Content */}
       <div
         className={cn(
-          'rounded-2xl leading-relaxed shadow-2xs transition-all box-border break-words',
+          'rounded-2xl leading-relaxed shadow-2xs transition-all box-border break-words w-fit',
           isUser
-            ? 'min-w-[140px] max-w-[88%] md:max-w-[75%] px-4 py-2.5 bg-gradient-to-br from-emerald-700 via-emerald-750 to-emerald-800 dark:from-emerald-800 dark:to-emerald-900 text-white rounded-tr-xs shadow-xs text-sm md:text-[15px]'
-            : 'w-full max-w-[95%] md:max-w-[85%] px-3.5 sm:px-4 py-3 bg-surface border border-border/80 text-text-primary rounded-tl-xs overflow-hidden text-sm md:text-base'
+            ? 'min-w-[90px] max-w-[85%] md:max-w-[70%] px-4 py-2.5 bg-gradient-to-br from-emerald-750 to-emerald-850 dark:from-emerald-800 dark:to-emerald-900 text-white rounded-tr-xs shadow-xs text-sm md:text-[15px]'
+            : 'max-w-[95%] md:max-w-[85%] px-3.5 sm:px-4 py-3 bg-surface border border-border/80 text-text-primary rounded-tl-xs overflow-hidden text-sm md:text-base'
         )}
       >
         {/* Tool activity line (assistant only) */}
