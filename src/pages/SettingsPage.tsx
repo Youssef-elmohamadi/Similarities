@@ -9,6 +9,7 @@ import { Badge } from '@/components/common/Badge';
 import { PageHeader } from '@/components/common/PageHeader';
 import { ListRow } from '@/components/common/ListRow';
 import { SyncStatusPanel } from '@/components/settings/SyncStatusPanel';
+import { SessionsPanel } from '@/components/settings/SessionsPanel';
 import { Seo } from '@/components/common/Seo';
 import { User, Globe, ShieldCheck, Database, LogOut, Smartphone, Check, HardDrive } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -137,6 +138,9 @@ export const SettingsPage: React.FC = () => {
 
         {/* Sync Status & Offline Queue Management */}
         <SyncStatusPanel />
+
+        {/* Devices & Active Sessions Management */}
+        <SessionsPanel />
 
         {/* Language Preference Card */}
         <Card className="space-y-4">
@@ -412,6 +416,9 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Sessions & Devices (Mobile) */}
+        <SessionsPanel />
 
         {/* Logout Button (At the bottom) */}
         <div className="pt-2">

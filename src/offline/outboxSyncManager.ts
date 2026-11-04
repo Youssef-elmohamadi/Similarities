@@ -1,4 +1,4 @@
-import { api, API_BASE_URL } from '@/lib/api';
+import { api, API_BASE_URL, requestTokenRefresh } from '@/lib/api';
 import axios from 'axios';
 import { connectivity } from './connectivity';
 import {
@@ -35,17 +35,9 @@ export class OutboxSyncManager {
   }
 
   public async tryRefreshToken(): Promise<boolean> {
-    const refreshToken = typeof localStorage !== 'undefined' ? localStorage.getItem('refresh_token') : null;
-    if (!refreshToken) return false;
-
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('access_token', accessToken);
-        localStorage.setItem('refresh_token', newRefreshToken);
-      }
-      return true;
+      const token = await requestTokenRefresh();
+      return !!token;
     } catch {
       return false;
     }

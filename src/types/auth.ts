@@ -25,3 +25,12 @@ export interface RegisterPayload {
   password: string;
 }
 
+export interface UserSession {
+  id: string;
+  deviceLabel: string;
+  ipAddress?: string;
+  createdAt: string;
+  lastUsedAt: string;
+  isCurrent: boolean;
+}
+
