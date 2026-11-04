@@ -19,7 +19,7 @@ import { Modal } from '@/components/common/Modal';
 import { useToast } from '@/components/common/Toast';
 import { Seo } from '@/components/common/Seo';
 import { useLanguage } from '@/context/LanguageContext';
-import { formatRelativeTime, toArabicDigits } from '@/lib/utils';
+import { formatRelativeTime, toArabicDigits, cn } from '@/lib/utils';
 import {
   BookMarked,
   BookOpen,
@@ -36,6 +36,7 @@ import {
   CheckCircle2,
   Loader2,
   FileDown,
+  MoreVertical,
 } from 'lucide-react';
 import { QuranVerse } from '@/types/quran';
 import { useAuth } from '@/context/AuthContext';
@@ -58,6 +59,8 @@ export const CollectionDetailsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'comparisons' | 'connections' | 'notes'>('comparisons');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isCreateComparisonOpen, setIsCreateComparisonOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileDescExpanded, setIsMobileDescExpanded] = useState(false);
 
   // Add Verse Quick Search Modal
   const [isAddVerseModalOpen, setIsAddVerseModalOpen] = useState(false);
@@ -918,15 +921,15 @@ export const CollectionDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-2.5 sm:space-y-3.5 pb-16 text-start animate-fade-in">
+    <div className="space-y-2 md:space-y-3.5 pb-28 md:pb-16 text-start animate-fade-in">
       <Seo
         title={collection?.title ? `${collection.title} | تفاصيل المجموعة` : 'تفاصيل المجموعة'}
         robots="noindex, nofollow"
       />
       {/* Header Info Card */}
-      <Card className="p-3 sm:p-5 space-y-2.5 sm:space-y-3">
-        {/* Desktop Layout (>= sm) */}
-        <div className="hidden sm:flex items-center justify-between gap-3">
+      <Card className="p-3 md:p-5 space-y-2.5 md:space-y-3 shadow-none md:shadow-card">
+        {/* Desktop Layout (>= md) */}
+        <div className="hidden md:flex items-center justify-between gap-3">
           <div className="space-y-1.5 flex-1 text-start">
             <div className="flex items-center gap-2 flex-wrap">
               <Button
@@ -1030,124 +1033,148 @@ export const CollectionDetailsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Layout (< sm): Ultra-compact & space-efficient */}
-        <div className="flex sm:hidden flex-col gap-2">
-          {/* Mobile Row 1: Back + Title + Anchor Surah + Utility Icons */}
+        {/* Mobile Layout (< md): Ultra-compact & space-efficient */}
+        <div className="flex md:hidden flex-col gap-1.5">
+          {/* Mobile Row 1: Back + Title + Base Surah + Single (⋯) Menu */}
           <div className="flex items-center justify-between gap-1.5">
             <div className="flex items-center gap-1.5 min-w-0 flex-1">
               <button
                 type="button"
                 onClick={() => navigate('/library')}
-                className="p-1 -ms-1 text-text-secondary hover:text-text-primary shrink-0"
+                className="p-1 -ms-1 text-text-secondary hover:text-text-primary shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
                 title={t('رجوع للمكتبة', 'Back')}
                 aria-label={t('رجوع للمكتبة', 'Back')}
               >
-                {isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+                {isRtl ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
               </button>
-              <h1 className="text-base font-bold text-text-primary truncate">
+              <h1
+                className="text-base font-bold text-text-primary truncate"
+                title={collection.title}
+                aria-label={collection.title}
+              >
                 {collection.title}
               </h1>
               {collection.baseSurahNameArabic && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary-tint text-primary border border-primary/20 shrink-0">
-                  <BookOpen className="w-3 h-3" />
-                  <span>{collection.baseSurahNameArabic}</span>
+                <span className="shrink-0 text-[10px] font-semibold text-primary bg-primary-tint px-1.5 py-0.5 rounded border border-primary/20">
+                  سورة {collection.baseSurahNameArabic}
                 </span>
               )}
             </div>
 
-            {/* Quick Actions Toolbar */}
-            <div className="flex items-center gap-1 shrink-0">
-              <div className="text-[10px] px-1.5 py-0.5 rounded-full border flex items-center gap-1 bg-surface font-medium">
-                {isAnySaving ? (
-                  <>
-                    <Loader2 className="w-3 h-3 text-accent animate-spin" />
-                    <span className="text-accent">{t('حفظ...', 'Saving...')}</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-3 h-3 text-success" />
-                    <span className="text-text-secondary">{t('محفوظ', 'Saved')}</span>
-                  </>
-                )}
-              </div>
-
-              <Link to={`/collections/${collection.id}/edit`}>
-                <button
-                  type="button"
-                  className="p-1.5 rounded-lg border border-border bg-surface text-text-secondary hover:text-text-primary text-xs"
-                  title={t('تعديل المجموعة', 'Edit')}
-                >
-                  <Edit3 className="w-3.5 h-3.5" />
-                </button>
-              </Link>
-
-              {/* Mobile Export PDF */}
+            {/* Single (⋯) More Menu button */}
+            <div className="relative shrink-0">
               <button
                 type="button"
-                onClick={() => {
-                  setExportComparisonId(undefined);
-                  setIsExportPdfOpen(true);
-                }}
-                className="p-1.5 rounded-lg border border-border bg-surface text-text-secondary hover:text-text-primary text-xs"
-                title={t('تصدير PDF', 'Export PDF')}
-                aria-label={t('تصدير PDF', 'Export PDF')}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-text-secondary hover:text-text-primary rounded-lg hover:bg-background transition"
+                title={t('خيارات المجموعة', 'Collection Options')}
+                aria-label={t('خيارات المجموعة', 'Collection Options')}
+                aria-expanded={isMobileMenuOpen}
               >
-                <FileDown className="w-3.5 h-3.5 text-primary" />
+                <MoreVertical className="w-4 h-4" />
               </button>
 
-              <button
-                type="button"
-                onClick={() => setIsDeleteDialogOpen(true)}
-                className="p-1.5 rounded-lg text-danger hover:bg-danger-subtle text-xs"
-                title={t('حذف المجموعة', 'Delete')}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              {isMobileMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                  <div className="absolute end-0 top-full mt-1 w-44 bg-surface rounded-xl border border-border shadow-lg py-1 z-40 text-xs animate-fadeIn">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setExportComparisonId(undefined);
+                        setIsExportPdfOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-text-primary hover:bg-background transition min-h-[44px] text-start"
+                    >
+                      <FileDown className="w-4 h-4 text-primary" />
+                      <span>{t('تصدير PDF', 'Export PDF')}</span>
+                    </button>
+
+                    <Link
+                      to={`/collections/${collection.id}/edit`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-text-primary hover:bg-background transition min-h-[44px] text-start"
+                    >
+                      <Edit3 className="w-4 h-4 text-text-secondary" />
+                      <span>{t('تعديل المجموعة', 'Edit Collection')}</span>
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-danger hover:bg-danger-subtle transition min-h-[44px] text-start"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>{t('حذف المجموعة', 'Delete Collection')}</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Mobile Row 2: Description (if present) */}
-          {collection.description && (
-            <p className="text-[11px] text-text-secondary leading-tight line-clamp-1 ps-4">
-              {collection.description}
-            </p>
-          )}
-
-          {/* Mobile Row 3: Primary Action Button + Inline Stats Bar */}
-          <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-border/60">
-            {activeTab === 'comparisons' ? (
-              <Button
-                size="sm"
-                variant="primary"
-                icon={<Plus className="w-3.5 h-3.5" />}
-                onClick={() => setIsCreateComparisonOpen(true)}
-                className="font-bold shadow-sm text-xs py-1 px-2.5 h-7 min-h-0"
+          {/* Mobile Row 2: Description (expandable, omitted if repeats title) */}
+          {collection.description &&
+            collection.description.trim() !== collection.title.trim() && (
+              <p
+                onClick={() => setIsMobileDescExpanded(!isMobileDescExpanded)}
+                className={cn(
+                  'text-xs text-text-secondary cursor-pointer leading-tight ps-8 select-none',
+                  !isMobileDescExpanded && 'line-clamp-1'
+                )}
+                title={t('انقر لعرض الوصف كاملاً', 'Click to toggle full description')}
               >
-                {t('+ إضافة موضع', '+ Add Position')}
-              </Button>
-            ) : (
-              <div />
+                {collection.description}
+              </p>
             )}
 
-            {/* Compact Mobile Stats */}
-            <div className="flex items-center gap-1.5 text-[11px] text-text-secondary font-medium">
-              <span className="px-1.5 py-0.5 rounded bg-primary-tint text-primary font-bold">
-                {isRtl ? toArabicDigits(collection.comparisons.length) : collection.comparisons.length} {t('مواضع', 'positions')}
-              </span>
-              <span>·</span>
-              <span>
-                {isRtl ? toArabicDigits(collection.connections.length) : collection.connections.length} {t('روابط', 'links')}
-              </span>
-              <span>·</span>
-              <span>
-                {isRtl ? toArabicDigits(collection.notes.length) : collection.notes.length} {t('ملاحظات', 'notes')}
-              </span>
+          {/* Mobile Row 3: ONE muted inline stats line + tiny save status */}
+          <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/50 ps-8 text-xs text-text-secondary">
+            <span className="text-[11px] font-medium text-text-secondary">
+              {isRtl ? toArabicDigits(collection.comparisons.length) : collection.comparisons.length}{' '}
+              {t('مواضع', 'positions')} ·{' '}
+              {isRtl ? toArabicDigits(collection.connections.length) : collection.connections.length}{' '}
+              {t('روابط', 'links')} ·{' '}
+              {isRtl ? toArabicDigits(collection.notes.length) : collection.notes.length}{' '}
+              {t('ملاحظات', 'notes')}
+            </span>
+
+            <div className="flex items-center gap-1 shrink-0">
+              {isAnySaving ? (
+                <span className="inline-flex items-center gap-1 text-[11px] text-accent">
+                  <Loader2 className="w-3 h-3 text-accent animate-spin" />
+                  <span className="text-[10px]">{t('جارٍ الحفظ...', 'Saving...')}</span>
+                </span>
+              ) : id?.startsWith('temp-') ? (
+                <span
+                  className="inline-flex items-center gap-1 text-[11px] text-amber-600"
+                  title={t('محفوظ محلياً', 'Saved locally')}
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span className="text-[10px]">{t('محفوظ محلياً', 'Saved locally')}</span>
+                </span>
+              ) : (
+                <span
+                  className="inline-flex items-center text-success"
+                  title={t('محفوظ', 'Saved')}
+                  aria-label={t('محفوظ', 'Saved')}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+                </span>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Desktop Metadata Footer */}
-        <div className="hidden sm:flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-border text-xs text-text-secondary">
+        {/* Desktop Metadata Footer (>= md) */}
+        <div className="hidden md:flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-border text-xs text-text-secondary">
           <div className="flex flex-wrap items-center gap-2.5">
             <Badge variant="primary">
               <GitCompare className="w-3.5 h-3.5 me-1" />
@@ -1172,8 +1199,55 @@ export const CollectionDetailsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Tabs Navigation: 3 Focused Pillars */}
-      <div className="flex items-center gap-1 sm:gap-2 border-b border-border overflow-x-auto pb-px no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      {/* Mobile Sticky Tab Bar (md:hidden): h-10 with plain muted counts */}
+      <div className="md:hidden sticky top-14 z-20 bg-background/95 backdrop-blur-md py-1.5 -mx-4 px-4 border-b border-border">
+        <div className="h-10 flex items-center gap-1 bg-surface p-1 rounded-xl border border-border text-xs">
+          <button
+            type="button"
+            onClick={() => setActiveTab('comparisons')}
+            className={cn(
+              'flex-1 h-8 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition',
+              activeTab === 'comparisons'
+                ? 'bg-primary text-white shadow-xs'
+                : 'text-text-secondary hover:text-text-primary'
+            )}
+          >
+            <GitCompare className="w-3.5 h-3.5" />
+            <span>{t('المواضع', 'Positions')} ({isRtl ? toArabicDigits(collection.comparisons.length) : collection.comparisons.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('connections')}
+            className={cn(
+              'flex-1 h-8 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition',
+              activeTab === 'connections'
+                ? 'bg-primary text-white shadow-xs'
+                : 'text-text-secondary hover:text-text-primary'
+            )}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{t('الروابط', 'Links')} ({isRtl ? toArabicDigits(collection.connections.length) : collection.connections.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('notes')}
+            className={cn(
+              'flex-1 h-8 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition',
+              activeTab === 'notes'
+                ? 'bg-primary text-white shadow-xs'
+                : 'text-text-secondary hover:text-text-primary'
+            )}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>{t('ملاحظات', 'Notes')} ({isRtl ? toArabicDigits(collection.notes.length) : collection.notes.length})</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop Tabs Navigation (>= md): 3 Focused Pillars */}
+      <div className="hidden md:flex items-center gap-1 sm:gap-2 border-b border-border overflow-x-auto pb-px no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <button
           onClick={() => setActiveTab('comparisons')}
           className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-semibold border-b-2 transition whitespace-nowrap min-h-[38px] sm:min-h-[44px] ${
@@ -1342,6 +1416,19 @@ export const CollectionDetailsPage: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Floating Action Button (FAB) on Mobile: + إضافة موضع */}
+      {activeTab === 'comparisons' && (
+        <button
+          type="button"
+          onClick={() => setIsCreateComparisonOpen(true)}
+          className="fixed bottom-20 end-4 z-20 w-12 h-12 rounded-full bg-primary text-white shadow-lg flex items-center justify-center hover:bg-primary-hover active:scale-95 transition min-w-[48px] min-h-[48px] md:hidden"
+          title={t('+ إضافة موضع', '+ Add Position')}
+          aria-label={t('إضافة موضع تشابه جديد', 'Add new position')}
+        >
+          <Plus className="w-6 h-6 text-white" />
+        </button>
+      )}
 
       {/* Delete Collection Confirmation */}
       <ConfirmDialog

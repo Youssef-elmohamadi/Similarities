@@ -8,8 +8,8 @@ import { Button } from '@/components/common/Button';
 import { Input, Textarea, Select } from '@/components/common/Input';
 import { Modal } from '@/components/common/Modal';
 import { Card } from '@/components/common/Card';
-import { GitCompare, Plus, Trash2, Edit2, Sparkles, AlertCircle, Search, Check, X, Layers, BookOpen, ChevronDown, ChevronUp, Printer } from 'lucide-react';
-import { toArabicDigits, formatAyahOrnament } from '@/lib/utils';
+import { GitCompare, Plus, Trash2, Edit2, Sparkles, AlertCircle, Search, Check, X, Layers, BookOpen, ChevronDown, ChevronUp, ChevronsDown, ChevronsUp, Printer } from 'lucide-react';
+import { toArabicDigits, formatAyahOrnament, cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { getVersesBySurahId, isOfflineDatasetAvailable, CompactVerse } from '@/offline/quranDb';
 import { searchLocalWorker } from '@/offline/searchWorkerClient';
@@ -340,9 +340,51 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
 
   return (
     <div className="space-y-2 sm:space-y-3 text-start">
-      {/* Sub-header Bar: Position Count + Collapse / Expand All */}
+      {/* Mobile Section Toolbar (md:hidden): Single compact row */}
       {sortedComparisons.length > 0 && (
-        <div className="flex items-center justify-between gap-1.5 sm:gap-2 px-1 pb-0.5">
+        <div className="md:hidden flex items-center justify-between gap-2 px-1 py-1">
+          <span className="text-sm font-semibold text-text-primary flex items-center gap-1.5 truncate">
+            <Layers className="w-4 h-4 text-primary shrink-0" />
+            <span className="truncate">
+              {baseSurahNameArabic
+                ? t(`مواضع سورة ${baseSurahNameArabic}`, `Positions in Surah ${baseSurahNameArabic}`)
+                : t('مواضع المتشابهات', 'Similar Positions')}{' '}
+              <span className="text-xs text-text-secondary font-normal">
+                ({isRtl ? toArabicDigits(sortedComparisons.length) : sortedComparisons.length})
+              </span>
+            </span>
+          </span>
+
+          {sortedComparisons.length > 1 && (
+            <button
+              type="button"
+              onClick={expandedIds.size === sortedComparisons.length ? collapseAll : expandAll}
+              aria-label={
+                expandedIds.size === sortedComparisons.length
+                  ? t('طي الكل', 'Collapse All')
+                  : t('فتح الكل', 'Expand All')
+              }
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-text-secondary hover:text-text-primary border border-border bg-surface rounded-lg min-h-[36px] shrink-0 active:bg-background transition"
+            >
+              {expandedIds.size === sortedComparisons.length ? (
+                <>
+                  <ChevronsUp className="w-3.5 h-3.5" />
+                  <span>{t('طي الكل', 'Collapse All')}</span>
+                </>
+              ) : (
+                <>
+                  <ChevronsDown className="w-3.5 h-3.5" />
+                  <span>{t('فتح الكل', 'Expand All')}</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Desktop Sub-header Bar (>= md) */}
+      {sortedComparisons.length > 0 && (
+        <div className="hidden md:flex items-center justify-between gap-1.5 sm:gap-2 px-1 pb-0.5">
           <div className="flex items-center gap-1.5 sm:gap-2">
             <span className="text-xs sm:text-sm font-bold text-text-primary flex items-center gap-1 sm:gap-1.5">
               <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
@@ -411,8 +453,208 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
           </Button>
         </div>
       ) : (
-        <div className="space-y-3">
-          {sortedComparisons.map((comparison, idx) => {
+        <>
+          {/* Mobile Accordion List (md:hidden): High-density calm list, collapsed by default */}
+          <div className="md:hidden rounded-xl border border-border bg-surface divide-y divide-border overflow-hidden shadow-none">
+            {sortedComparisons.map((comparison, idx) => {
+              const anchorVerse = comparison.anchorQuranVerseId
+                ? comparison.verses.find(v => v.quranVerseId === comparison.anchorQuranVerseId)
+                : (baseSurahNameArabic
+                    ? comparison.verses.find(v => v.surahNameArabic === baseSurahNameArabic)
+                    : comparison.verses[0]);
+
+              const otherVerses = comparison.verses.filter(v => v !== anchorVerse);
+              const isExpanded = expandedIds.has(comparison.id);
+              const verseSummary = [
+                anchorVerse ? `${anchorVerse.surahNameArabic} ${toArabicDigits(anchorVerse.ayahNumber)}` : '',
+                ...otherVerses.map(v => `${v.surahNameArabic} ${toArabicDigits(v.ayahNumber)}`),
+              ]
+                .filter(Boolean)
+                .join(' · ');
+
+              return (
+                <div key={comparison.id} className="transition-colors">
+                  {/* Collapsed Row: 52px min-h, py-2 px-3, keyboard accessible */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isExpanded}
+                    aria-controls={`mob-comp-panel-${comparison.id}`}
+                    onClick={() => toggleExpand(comparison.id)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleExpand(comparison.id);
+                      }
+                    }}
+                    className="w-full flex items-center justify-between gap-2.5 min-h-[52px] py-2 px-3 text-start hover:bg-background/60 active:bg-background transition-colors cursor-pointer select-none"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      {/* 24px small number badge */}
+                      <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
+                        {isRtl ? toArabicDigits(idx + 1) : idx + 1}
+                      </span>
+
+                      {/* Title + Muted Verses Reference Summary */}
+                      <div className="min-w-0 flex-1">
+                        <span
+                          className="block text-xs font-bold text-text-primary truncate"
+                          title={comparison.title}
+                          aria-label={comparison.title}
+                        >
+                          {comparison.title}
+                        </span>
+                        {verseSummary && (
+                          <span className="block text-[11px] text-text-secondary truncate mt-0.5">
+                            {verseSummary}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Chevron on end */}
+                    <div className="shrink-0 flex items-center justify-center min-w-[28px] min-h-[28px]">
+                      <ChevronDown
+                        className={cn(
+                          'w-4 h-4 text-text-secondary transition-transform duration-150 motion-reduce:transition-none',
+                          isExpanded && 'rotate-180'
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Expanded Content: In-place accordion with 150ms transition */}
+                  {isExpanded && (
+                    <div
+                      id={`mob-comp-panel-${comparison.id}`}
+                      className="p-3 bg-surface border-t border-border/40 space-y-2.5 transition-all duration-150 motion-reduce:transition-none"
+                    >
+                      {/* Shared Phrases if present */}
+                      {comparison.sharedPhrases && (
+                        <div className="p-2 rounded-lg bg-accent-tint/40 border border-accent/20">
+                          <span className="text-[10px] font-bold text-accent uppercase block mb-0.5">
+                            {t('الألفاظ والعبارات المشتركة في هذا الموضع:', 'Shared Wording in this Position:')}
+                          </span>
+                          <p className="text-sm font-semibold text-text-primary font-quran">
+                            « {comparison.sharedPhrases} »
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Verses Section: Amiri Quran font, unchanged size and line-height */}
+                      <div className="space-y-2">
+                        {anchorVerse && (
+                          <div className="p-2.5 rounded-lg bg-surface border border-primary/25">
+                            <div className="flex items-center justify-between gap-1 mb-1">
+                              <span className="text-[11px] font-bold text-primary">
+                                {t('موضع الأساس:', 'Base Verse:')} سورة {anchorVerse.surahNameArabic} [{toArabicDigits(anchorVerse.ayahNumber)}]
+                              </span>
+                            </div>
+                            <p
+                              dir="rtl"
+                              lang="ar"
+                              className="font-quran text-base text-text-primary leading-[2.4] text-start"
+                            >
+                              {anchorVerse.uthmaniText}{' '}
+                              <span className="ayah-number-badge text-primary font-bold text-xs inline-block">
+                                {formatAyahOrnament(anchorVerse.ayahNumber)}
+                              </span>
+                            </p>
+                          </div>
+                        )}
+
+                        {otherVerses.map(v => (
+                          <div key={v.quranVerseId} className="p-2.5 rounded-lg bg-background border border-border">
+                            <div className="flex items-center justify-between gap-1 mb-1">
+                              <span className="text-[11px] font-semibold text-text-secondary">
+                                {t('الموضع المقابل:', 'Parallel Verse:')} سورة {v.surahNameArabic} [{toArabicDigits(v.ayahNumber)}]
+                              </span>
+                            </div>
+                            <p
+                              dir="rtl"
+                              lang="ar"
+                              className="font-quran text-base text-text-primary leading-[2.4] text-start"
+                            >
+                              {v.uthmaniText}{' '}
+                              <span className="ayah-number-badge text-primary font-bold text-xs inline-block">
+                                {formatAyahOrnament(v.ayahNumber)}
+                              </span>
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Recorded Differences if any */}
+                      {comparison.differences && comparison.differences.length > 0 && (
+                        <div className="space-y-1.5 pt-1">
+                          <span className="text-[11px] font-bold text-accent flex items-center gap-1">
+                            <Sparkles className="w-3 h-3" />
+                            <span>{t('الفوارق المرصودة:', 'Recorded Differences:')}</span>
+                          </span>
+                          <div className="space-y-1">
+                            {comparison.differences.map(diff => (
+                              <div key={diff.id} className="p-2 rounded-lg bg-surface border border-border text-xs">
+                                <span className="font-bold text-accent font-quran me-1">«{diff.selectedText}»</span>
+                                <span className="text-text-secondary">{diff.explanation}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Description if present */}
+                      {comparison.description && (
+                        <p className="text-xs text-text-secondary leading-relaxed pt-1">
+                          {comparison.description}
+                        </p>
+                      )}
+
+                      {/* Expanded Actions Bar */}
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          icon={<Plus className="w-3.5 h-3.5 text-primary" />}
+                          onClick={() => handleOpenDiffModal(comparison.id)}
+                          className="h-8 text-xs px-2.5 min-h-[36px]"
+                        >
+                          {t('رصد فارق', 'Add Diff')}
+                        </Button>
+
+                        <div className="flex items-center gap-1">
+                          {onExportComparison && (
+                            <button
+                              type="button"
+                              onClick={() => onExportComparison(comparison.id)}
+                              className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-primary hover:bg-primary-tint/30 transition"
+                              title={t('تصدير هذا الموضع كـ PDF', 'Export Position PDF')}
+                              aria-label={t('تصدير هذا الموضع كـ PDF', 'Export Position PDF')}
+                            >
+                              <Printer className="w-4 h-4" />
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => onDeleteComparison(comparison.id)}
+                            className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg text-danger hover:bg-danger-subtle transition"
+                            title={t('حذف هذا الموضع', 'Delete Position')}
+                            aria-label={t('حذف هذا الموضع', 'Delete Position')}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Cards List (>= md): UNCHANGED */}
+          <div className="hidden md:block space-y-3">
+            {sortedComparisons.map((comparison, idx) => {
             const anchorVerse = comparison.anchorQuranVerseId
               ? comparison.verses.find(v => v.quranVerseId === comparison.anchorQuranVerseId)
               : (baseSurahNameArabic
@@ -688,7 +930,8 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
             );
           })}
         </div>
-      )}
+      </>
+    )}
 
       {/* Modal: Create Position Cluster */}
       <Modal

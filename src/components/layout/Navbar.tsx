@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useDataset } from '@/context/DatasetContext';
 import { BookOpen, LogOut, Globe, Menu, X, PlusCircle, User, Settings, WifiOff, CheckCircle2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface NavbarProps {
   onToggleSidebar?: () => void;
@@ -16,6 +17,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
   const { isOffline, isOfflineReady } = useDataset();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isCollectionDetailPage = location.pathname.startsWith('/collections/') && location.pathname !== '/collections/new';
 
   const handleLogout = async () => {
     setIsUserMenuOpen(false);
@@ -39,14 +43,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
           )}
 
           <Link to="/dashboard" className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg p-1">
-            <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-primary text-white flex items-center justify-center shadow-xs group-hover:bg-primary-hover transition-colors">
+            <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-primary text-white flex items-center justify-center shadow-xs group-hover:bg-primary-hover transition-colors shrink-0">
               <BookOpen className="w-4 h-4 md:w-5 md:h-5" />
             </div>
-            <div>
+            <div className={cn(isCollectionDetailPage && 'hidden md:block')}>
               <span className="font-bold text-sm md:text-base text-text-primary leading-tight block">
                 {t('متشابهات القرآن', 'Quranic Similarities')}
               </span>
-              <span className="text-[10px] md:text-[11px] text-primary font-medium block">
+              <span className="text-[10px] md:text-[11px] text-primary font-medium hidden sm:block">
                 {t('منصة الحفاظ الخاصة', 'Memorizer Workspace')}
               </span>
             </div>
@@ -77,7 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
           <Link
             to="/collections/new"
             aria-label={t('مجموعة جديدة', 'New Collection')}
-            className="inline-flex items-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-lg bg-primary-tint text-primary hover:bg-primary-tint/80 border border-primary/20 text-xs font-semibold transition min-h-[38px] min-w-[38px] justify-center"
+            className="inline-flex items-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-lg bg-primary-tint text-primary hover:bg-primary-tint/80 border border-primary/20 text-xs font-semibold transition min-h-[44px] min-w-[44px] justify-center"
           >
             <PlusCircle className="w-4 h-4 text-primary" />
             <span className="hidden sm:inline">{t('مجموعة جديدة', 'New Collection')}</span>
@@ -87,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
           <button
             onClick={toggleLanguage}
             aria-label={t('تغيير اللغة', 'Toggle Language')}
-            className="min-h-[38px] min-w-[38px] p-2 sm:px-3 inline-flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-background border border-border transition"
+            className="min-h-[44px] min-w-[44px] p-2 sm:px-3 inline-flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-background border border-border transition"
             title={t('تغيير اللغة', 'Toggle Language')}
           >
             <Globe className="w-4 h-4 text-text-secondary" />
@@ -99,7 +103,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
             <div className="relative">
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="min-h-[40px] flex items-center gap-2 p-1.5 rounded-lg hover:bg-background border border-transparent hover:border-border transition text-start"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-2 p-1 rounded-lg hover:bg-background border border-transparent hover:border-border transition text-start"
                 aria-expanded={isUserMenuOpen}
                 aria-label={t('قائمة المستخدم', 'User Menu')}
               >
