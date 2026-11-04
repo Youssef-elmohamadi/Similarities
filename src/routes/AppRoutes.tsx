@@ -14,6 +14,7 @@ const CreateCollectionPage = React.lazy(() => import('../pages/CreateCollectionP
 const CollectionDetailsPage = React.lazy(() => import('../pages/CollectionDetailsPage').then(m => ({ default: m.CollectionDetailsPage })));
 const EditCollectionPage = React.lazy(() => import('../pages/EditCollectionPage').then(m => ({ default: m.EditCollectionPage })));
 const SettingsPage = React.lazy(() => import('../pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const ChatPage = React.lazy(() => import('../pages/ChatPage').then(m => ({ default: m.ChatPage })));
 
 const RouteLoadingFallback: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center bg-background" aria-busy="true">
@@ -128,6 +129,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/collections/new" element={<CreateCollectionPage />} />
         <Route path="/collections/:id" element={<CollectionDetailsPage />} />
         <Route path="/collections/:id/edit" element={<EditCollectionPage />} />
+        <Route path="/chat" element={<ChatPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
 

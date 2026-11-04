@@ -16,6 +16,7 @@ export const prefetchRouteChunks = () => {
     () => import('../pages/MyLibraryPage'),
     () => import('../pages/CollectionDetailsPage'),
     () => import('../pages/SettingsPage'),
+    () => import('../pages/ChatPage'),
     () => import('../pages/DashboardPage'),
     () => import('../pages/CreateCollectionPage'),
     () => import('../pages/EditCollectionPage'),

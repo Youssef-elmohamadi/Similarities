@@ -1,7 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Search, BookmarkCheck, PlusSquare, Settings, X, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Search, BookmarkCheck, PlusSquare, Settings, X, BookOpen, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useChatStatus } from '@/hooks/useAiChat';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -11,6 +12,9 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { t } = useLanguage();
+  const { data: chatStatus } = useChatStatus();
+
+  const isChatEnabled = chatStatus?.enabled !== false;
 
   const navItems = [
     {
@@ -29,6 +33,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       label: t('مكتبتي الخاصة', 'My Library'),
       icon: BookmarkCheck,
     },
+    ...(isChatEnabled
+      ? [
+          {
+            to: '/chat',
+            label: t('المساعد', 'Assistant'),
+            badge: t('تجريبي', 'Beta'),
+            icon: Sparkles,
+          },
+        ]
+      : []),
     {
       to: '/collections/new',
       label: t('إنشاء مجموعة جديدة', 'New Collection'),
@@ -115,7 +129,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   }
                 >
                   <Icon className="w-4 h-4 shrink-0" />
-                  <span>{item.label}</span>
+                  <span className="flex-1">{item.label}</span>
+                  {'badge' in item && item.badge && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                      {item.badge}
+                    </span>
+                  )}
                 </NavLink>
               );
             })}

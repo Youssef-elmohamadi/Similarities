@@ -74,6 +74,29 @@ export interface TempIdMapping {
   createdAt: number;
 }
 
+export interface CachedChatConversation {
+  id: string;
+  userId: string;
+  title: string;
+  summary?: string;
+  isArchived: boolean;
+  messageCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CachedChatMessage {
+  id: string;
+  conversationId: string;
+  userId: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  toolCallsJson?: string;
+  proposalsJson?: string;
+  tokenCount: number;
+  createdAt: string;
+}
+
 interface UserDBSchema extends DBSchema {
   collections: {
     key: string; // id
@@ -103,10 +126,27 @@ interface UserDBSchema extends DBSchema {
     value: TempIdMapping;
     indexes: { 'by-user': string };
   };
+  chatConversations: {
+    key: string; // id
+    value: CachedChatConversation;
+    indexes: {
+      'by-user': string;
+      'by-user-updated': [string, string];
+    };
+  };
+  chatMessages: {
+    key: string; // id
+    value: CachedChatMessage;
+    indexes: {
+      'by-user': string;
+      'by-conversation': string;
+      'by-created': string;
+    };
+  };
 }
 
 const USER_DB_NAME = 'QuranUserOfflineDB';
-const USER_DB_VERSION = 3;
+const USER_DB_VERSION = 4;
 
 let userDbPromise: Promise<IDBPDatabase<UserDBSchema>> | null = null;
 
@@ -150,6 +190,17 @@ export function getUserDB(): Promise<IDBPDatabase<UserDBSchema>> {
         if (!db.objectStoreNames.contains('tempIdMappings')) {
           const s = db.createObjectStore('tempIdMappings', { keyPath: 'tempId' });
           s.createIndex('by-user', 'userId');
+        }
+        if (!db.objectStoreNames.contains('chatConversations')) {
+          const s = db.createObjectStore('chatConversations', { keyPath: 'id' });
+          s.createIndex('by-user', 'userId');
+          s.createIndex('by-user-updated', ['userId', 'updatedAt']);
+        }
+        if (!db.objectStoreNames.contains('chatMessages')) {
+          const s = db.createObjectStore('chatMessages', { keyPath: 'id' });
+          s.createIndex('by-user', 'userId');
+          s.createIndex('by-conversation', 'conversationId');
+          s.createIndex('by-created', 'createdAt');
         }
       },
     });
@@ -726,4 +777,123 @@ export async function wipeUserDataOnLogout(userId: string): Promise<void> {
     await tx5.store.delete(m.tempId);
   }
   await tx5.done;
+
+  // 6. Chat Conversations
+  try {
+    const convs = await db.getAllFromIndex('chatConversations', 'by-user', userId);
+    const tx6 = db.transaction('chatConversations', 'readwrite');
+    for (const c of convs) {
+      await tx6.store.delete(c.id);
+    }
+    await tx6.done;
+  } catch (err) {
+    console.warn('Failed to wipe chat conversations on logout:', err);
+  }
+
+  // 7. Chat Messages
+  try {
+    const msgs = await db.getAllFromIndex('chatMessages', 'by-user', userId);
+    const tx7 = db.transaction('chatMessages', 'readwrite');
+    for (const m of msgs) {
+      await tx7.store.delete(m.id);
+    }
+    await tx7.done;
+  } catch (err) {
+    console.warn('Failed to wipe chat messages on logout:', err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 7. Chat History Offline Persistence
+// ---------------------------------------------------------------------------
+export async function saveChatConversationsToCache(
+  userId: string,
+  convs: Array<Partial<CachedChatConversation> & { id: string; title: string; createdAt: string; updatedAt: string }>
+): Promise<void> {
+  try {
+    const db = await getUserDB();
+    const tx = db.transaction('chatConversations', 'readwrite');
+    for (const c of convs) {
+      await tx.store.put({
+        id: c.id,
+        userId,
+        title: c.title,
+        summary: c.summary,
+        isArchived: Boolean(c.isArchived),
+        messageCount: c.messageCount ?? 0,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+      });
+    }
+    await tx.done;
+  } catch (err) {
+    console.warn('Failed to cache chat conversations:', err);
+  }
+}
+
+export async function getCachedChatConversations(userId: string): Promise<CachedChatConversation[]> {
+  try {
+    const db = await getUserDB();
+    const convs = await db.getAllFromIndex('chatConversations', 'by-user', userId);
+    return convs.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  } catch (err) {
+    console.warn('Failed to retrieve cached chat conversations:', err);
+    return [];
+  }
+}
+
+export async function deleteCachedChatConversation(userId: string, conversationId: string): Promise<void> {
+  try {
+    const db = await getUserDB();
+    const tx1 = db.transaction('chatConversations', 'readwrite');
+    await tx1.store.delete(conversationId);
+    await tx1.done;
+
+    const msgs = await db.getAllFromIndex('chatMessages', 'by-conversation', conversationId);
+    const tx2 = db.transaction('chatMessages', 'readwrite');
+    for (const m of msgs) {
+      await tx2.store.delete(m.id);
+    }
+    await tx2.done;
+  } catch (err) {
+    console.warn('Failed to delete cached conversation:', err);
+  }
+}
+
+export async function saveChatMessagesToCache(
+  userId: string,
+  conversationId: string,
+  messages: Array<Partial<CachedChatMessage> & { id: string; role: any; content: string; createdAt: string }>
+): Promise<void> {
+  try {
+    const db = await getUserDB();
+    const tx = db.transaction('chatMessages', 'readwrite');
+    for (const m of messages) {
+      await tx.store.put({
+        id: m.id,
+        conversationId,
+        userId,
+        role: m.role || 'user',
+        content: m.content || '',
+        toolCallsJson: m.toolCallsJson,
+        proposalsJson: m.proposalsJson,
+        tokenCount: m.tokenCount ?? 0,
+        createdAt: m.createdAt,
+      });
+    }
+    await tx.done;
+  } catch (err) {
+    console.warn('Failed to cache chat messages:', err);
+  }
+}
+
+export async function getCachedChatMessages(conversationId: string): Promise<CachedChatMessage[]> {
+  try {
+    const db = await getUserDB();
+    const msgs = await db.getAllFromIndex('chatMessages', 'by-conversation', conversationId);
+    return msgs.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  } catch (err) {
+    console.warn('Failed to retrieve cached chat messages:', err);
+    return [];
+  }
 }
