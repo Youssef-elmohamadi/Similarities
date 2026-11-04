@@ -97,9 +97,10 @@ const VerseCardComponent: React.FC<VerseCardProps> = ({
 
             if (!isMatch) {
               return (
-                <span key={idx} className="mx-0.5 inline">
+                <React.Fragment key={idx}>
+                  {idx > 0 && ' '}
                   {word}
-                </span>
+                </React.Fragment>
               );
             }
 
@@ -107,17 +108,19 @@ const VerseCardComponent: React.FC<VerseCardProps> = ({
             const isExact = kind === 'exact';
 
             return (
-              <mark
-                key={idx}
-                className={
-                  isExact
-                    ? "bg-[#F3E5C8] dark:bg-amber-900/40 text-inherit px-1 py-0.5 rounded border-b border-amber-600/60 inline mx-0.5"
-                    : "bg-[#F6EEDC] dark:bg-amber-950/40 text-inherit px-1 py-0.5 rounded border-b border-primary/40 inline mx-0.5"
-                }
-                title={isExact ? t('تطابق تام', 'Exact match') : t('تطابق جزئي', 'Partial match')}
-              >
-                {word}
-              </mark>
+              <React.Fragment key={idx}>
+                {idx > 0 && ' '}
+                <mark
+                  className={
+                    isExact
+                      ? "bg-[#F3E5C8] dark:bg-amber-900/40 text-inherit px-1 py-0.5 rounded border-b border-amber-600/60 inline"
+                      : "bg-[#F6EEDC] dark:bg-amber-950/40 text-inherit px-1 py-0.5 rounded border-b border-primary/40 inline"
+                  }
+                  title={isExact ? t('تطابق تام', 'Exact match') : t('تطابق جزئي', 'Partial match')}
+                >
+                  {word}
+                </mark>
+              </React.Fragment>
             );
           })}
           <span className="ayah-number-badge text-primary font-bold ms-1 select-none">

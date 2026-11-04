@@ -56,17 +56,17 @@ export const VerseText: React.FC<VerseTextProps> = ({
       {effectiveIndices.length > 0 ? (
         words.map((word, idx) => {
           const isHighlighted = effectiveIndices.includes(idx + 1);
-          return isHighlighted ? (
-            <mark
-              key={idx}
-              className="bg-[#F6EEDC] dark:bg-amber-950/40 text-inherit px-1 py-0.5 rounded border-b border-primary/50 inline mx-0.5"
-            >
-              {word}
-            </mark>
-          ) : (
-            <span key={idx} className="mx-0.5 inline">
-              {word}
-            </span>
+          return (
+            <React.Fragment key={idx}>
+              {idx > 0 && ' '}
+              {isHighlighted ? (
+                <mark className="bg-[#F6EEDC] dark:bg-amber-950/40 text-inherit px-1 py-0.5 rounded border-b border-primary/50 inline">
+                  {word}
+                </mark>
+              ) : (
+                word
+              )}
+            </React.Fragment>
           );
         })
       ) : (

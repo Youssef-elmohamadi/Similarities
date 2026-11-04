@@ -39,7 +39,7 @@ export const VerseTokenChip: React.FC<VerseTokenChipProps> = ({
   const surahLabel = verse?.surahNameArabic || `سورة ${surahNumber}`;
 
   return (
-    <span className="inline-block my-1 align-middle">
+    <span className={cn('my-1 align-middle', isExpanded ? 'block w-full max-w-full' : 'inline-block')}>
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -67,12 +67,12 @@ export const VerseTokenChip: React.FC<VerseTokenChipProps> = ({
         )}
       </button>
 
-      {/* Expanded Verse Box */}
+      {/* Expanded Verse Box (strictly bounded within container width) */}
       {isExpanded && (
-        <div className="block mt-2 mb-2 p-3.5 rounded-xl border border-primary/30 bg-primary/5 shadow-xs text-text-primary">
-          <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-primary/15 text-xs text-primary font-semibold">
+        <div className="block mt-2 mb-2 p-2.5 sm:p-3.5 rounded-xl border border-primary/25 bg-primary/5 dark:bg-primary/10 shadow-xs text-text-primary w-full max-w-full box-border overflow-hidden">
+          <div className="flex items-center justify-between gap-1.5 pb-1.5 mb-2 border-b border-primary/15 text-xs text-primary font-semibold flex-wrap">
             <span className="flex items-center gap-1">
-              <BookOpen className="w-3.5 h-3.5" />
+              <BookOpen className="w-3.5 h-3.5 shrink-0" />
               <span>{surahLabel} - الآية {ayahNumber}</span>
             </span>
             {wordRange && (
@@ -88,7 +88,7 @@ export const VerseTokenChip: React.FC<VerseTokenChipProps> = ({
               <span>جاري استدعاء نص الآية من المصحف الشريف...</span>
             </div>
           ) : verse ? (
-            <div className="text-start leading-[2.4]">
+            <div className="text-start leading-[2.4] w-full max-w-full overflow-x-hidden break-words">
               <VerseText
                 uthmaniText={verse.uthmaniText}
                 ayahNumber={ayahNumber}

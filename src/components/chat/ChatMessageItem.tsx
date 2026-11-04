@@ -45,10 +45,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
       {/* Avatar */}
       <div
         className={cn(
-          'w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs select-none',
+          'w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs select-none shadow-2xs',
           isUser
-            ? 'bg-primary text-white'
-            : 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20'
+            ? 'bg-emerald-700 dark:bg-emerald-600 text-white'
+            : 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25'
         )}
       >
         {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -57,10 +57,10 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
       {/* Bubble Content */}
       <div
         className={cn(
-          'max-w-[90%] md:max-w-[80%] rounded-2xl px-4 py-3 text-sm md:text-base leading-relaxed shadow-2xs',
+          'rounded-2xl leading-relaxed shadow-2xs transition-all box-border break-words',
           isUser
-            ? 'bg-primary text-white rounded-te-xs'
-            : 'bg-surface border border-border text-text-primary rounded-ts-xs'
+            ? 'min-w-[140px] max-w-[88%] md:max-w-[75%] px-4 py-2.5 bg-gradient-to-br from-emerald-700 via-emerald-750 to-emerald-800 dark:from-emerald-800 dark:to-emerald-900 text-white rounded-tr-xs shadow-xs text-sm md:text-[15px]'
+            : 'w-full max-w-[95%] md:max-w-[85%] px-3.5 sm:px-4 py-3 bg-surface border border-border/80 text-text-primary rounded-tl-xs overflow-hidden text-sm md:text-base'
         )}
       >
         {/* Tool activity line (assistant only) */}
@@ -98,7 +98,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
 
         {/* Message Content: Sanitized Markdown with [[v:...]] VerseText integration */}
         {isUser ? (
-          <div className="whitespace-pre-wrap select-text leading-relaxed">
+          <div className="whitespace-pre-wrap select-text leading-relaxed tracking-normal py-0.5">
             {message.content}
           </div>
         ) : (
@@ -117,14 +117,16 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
         {/* Timestamp */}
         <div
           className={cn(
-            'text-[10px] mt-1.5 select-none',
-            isUser ? 'text-white/75 text-end' : 'text-text-muted text-start'
+            'text-[10px] mt-1 select-none flex items-center',
+            isUser ? 'text-emerald-100/75 justify-end' : 'text-text-muted justify-start'
           )}
         >
-          {new Date(message.createdAt).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
+          <span>
+            {new Date(message.createdAt).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </span>
         </div>
       </div>
     </div>
