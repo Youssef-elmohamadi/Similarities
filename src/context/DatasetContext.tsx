@@ -9,6 +9,7 @@ import {
   QuranDataset,
 } from '@/offline/quranDb';
 import { initLocalWorker } from '@/offline/searchWorkerClient';
+import { connectivity } from '@/offline/connectivity';
 import { Database, CheckCircle2, Download, WifiOff, AlertTriangle } from 'lucide-react';
 
 interface DatasetContextType {
@@ -32,21 +33,14 @@ export const DatasetProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [downloadStage, setDownloadStage] = useState('');
   const [datasetVersion, setDatasetVersion] = useState<string | null>(null);
-  const [isOffline, setIsOffline] = useState(!window.navigator.onLine);
+  const [isOffline, setIsOffline] = useState(!connectivity.isOnline());
   const [showProgressModal, setShowProgressModal] = useState(false);
 
-  // Monitor network connectivity
+  // Monitor network connectivity passively (events + request status, zero polling)
   useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
+    return connectivity.subscribe(online => {
+      setIsOffline(!online);
+    });
   }, []);
 
   // Check initial dataset readiness (deferred to idle/load for anonymous landing visitors)
@@ -87,7 +81,7 @@ export const DatasetProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   // Check version on startup & auto-download on first login if online
   useEffect(() => {
-    if (!user || isOffline) return;
+    if (!user || isOffline || !connectivity.isOnline()) return;
 
     const checkAndDownload = async () => {
       try {

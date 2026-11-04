@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, AuthResponse, LoginPayload, RegisterPayload } from '../types/auth';
-import { api } from '../lib/api';
+import { api, setCachedAccessToken } from '../lib/api';
 import { wipeUserDataOnLogout, getPendingOutboxOperations } from '../offline/userDataDb';
+import { connectivity } from '../offline/connectivity';
 
 interface AuthContextType {
   user: User | null;
@@ -16,10 +17,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('user');
-    return saved ? JSON.parse(saved) : null;
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+    try {
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Never block initial render if user data is already cached in localStorage or no token exists
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    const token = localStorage.getItem('access_token');
+    const saved = localStorage.getItem('user');
+    if (!token) return false;
+    return !saved;
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,13 +43,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      if (typeof window !== 'undefined' && !window.navigator.onLine) {
-        const saved = localStorage.getItem('user');
-        if (saved) {
-          try {
-            setUser(JSON.parse(saved));
-          } catch {}
-        }
+      // If user exists in localStorage, render immediately and verify in background
+      const saved = localStorage.getItem('user');
+      if (saved) {
+        try {
+          setUser(JSON.parse(saved));
+        } catch {}
+        setIsLoading(false);
+      }
+
+      if (!connectivity.isOnline()) {
         setIsLoading(false);
         return;
       }
@@ -46,13 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(response.data);
         localStorage.setItem('user', JSON.stringify(response.data));
       } catch {
-        // Interceptor handles refresh or clear
-        const saved = localStorage.getItem('user');
-        if (saved && typeof window !== 'undefined' && !window.navigator.onLine) {
-          try {
-            setUser(JSON.parse(saved));
-          } catch {}
-        }
+        // Interceptor handles refresh or 401; keep cached user on network failure
       } finally {
         setIsLoading(false);
       }
@@ -70,21 +80,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }
 
-    if (typeof window !== 'undefined') {
-      const handleOnline = () => {
-        if (user?.id) {
-          import('../offline/outboxSyncManager').then(({ outboxSyncManager }) => {
-            outboxSyncManager.reconcileAndCleanup(user.id).catch(() => {});
-          });
-        }
-      };
-      window.addEventListener('online', handleOnline);
-      return () => window.removeEventListener('online', handleOnline);
-    }
+    const unsubscribe = connectivity.subscribe(online => {
+      if (online && user?.id) {
+        import('../offline/outboxSyncManager').then(({ outboxSyncManager }) => {
+          outboxSyncManager.reconcileAndCleanup(user.id).catch(() => {});
+        });
+      }
+    });
+    return () => unsubscribe();
   }, [user?.id]);
 
   const handleAuthSuccess = (data: AuthResponse) => {
-    localStorage.setItem('access_token', data.accessToken);
+    setCachedAccessToken(data.accessToken);
     localStorage.setItem('refresh_token', data.refreshToken);
     const userInfo: User = {
       id: data.id,
@@ -118,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      if (window.navigator.onLine) {
+      if (connectivity.isOnline()) {
         await api.post('/auth/logout');
       }
     } catch {
@@ -127,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (user) {
         await wipeUserDataOnLogout(user.id);
       }
-      localStorage.removeItem('access_token');
+      setCachedAccessToken(null);
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
       setUser(null);

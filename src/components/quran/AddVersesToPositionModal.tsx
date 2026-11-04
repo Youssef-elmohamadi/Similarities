@@ -32,6 +32,8 @@ import {
   setCachedCollectionDetail,
   enqueueOutboxOperation,
 } from '@/offline/userDataDb';
+import { outboxSyncManager } from '@/offline/outboxSyncManager';
+import { connectivity } from '@/offline/connectivity';
 import { getFullVersesByIds, getQuranDB, CompactSurah } from '@/offline/quranDb';
 
 export interface AddVersesToPositionModalProps {
@@ -136,17 +138,30 @@ export const AddVersesToPositionModal: React.FC<AddVersesToPositionModalProps> =
         }));
       };
 
-      if (!navigator.onLine) {
-        const cached = await getCachedUserCollections(user.id);
+      const cached = await getCachedUserCollections(user.id);
+
+      // Non-blocking background sync if online
+      if (connectivity.isOnline()) {
+        (async () => {
+          try {
+            const res = await api.get<CollectionSummary[]>('/collections');
+            await setCachedUserCollections(user.id, res.data || []);
+            queryClient.setQueryData(['collectionsForModal', user.id], res.data || []);
+          } catch {
+            // background failure ignored
+          }
+        })();
+      }
+
+      if (cached.length > 0 || !connectivity.isOnline()) {
         return mapCachedToSummary(cached);
       }
+
       try {
         const res = await api.get<CollectionSummary[]>('/collections');
         await setCachedUserCollections(user.id, res.data || []);
         return res.data || [];
-      } catch (err) {
-        console.warn('Failed to fetch collections from network, loading cached:', err);
-        const cached = await getCachedUserCollections(user.id);
+      } catch {
         return mapCachedToSummary(cached);
       }
     },
@@ -167,7 +182,7 @@ export const AddVersesToPositionModal: React.FC<AddVersesToPositionModalProps> =
       } catch (e) {
         console.warn('Failed to load local surahs', e);
       }
-      if (navigator.onLine) {
+      if (connectivity.isOnline()) {
         try {
           const res = await api.get<any[]>('/quran/surahs');
           return res.data;
@@ -279,7 +294,7 @@ export const AddVersesToPositionModal: React.FC<AddVersesToPositionModalProps> =
           quranVerseIds,
         };
 
-        if (!navigator.onLine) {
+        if (!connectivity.isOnline()) {
           const tempColId = `temp-${crypto.randomUUID()}`;
           const now = new Date().toISOString();
           const collectionDetail: any = {
@@ -350,7 +365,7 @@ export const AddVersesToPositionModal: React.FC<AddVersesToPositionModalProps> =
       }
 
       // 2. Create the comparison position inside targetCollectionId
-      if (!navigator.onLine) {
+      if (!connectivity.isOnline()) {
         const tempCompId = crypto.randomUUID();
         const current = await getCachedCollectionDetail(user.id, targetCollectionId);
         if (current) {

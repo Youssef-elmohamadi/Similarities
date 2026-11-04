@@ -8,6 +8,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { api } from '@/lib/api';
 import { isOfflineDatasetAvailable } from '@/offline/quranDb';
 import { getLocalVerseContext } from '@/offline/searchWorkerClient';
+import { connectivity } from '@/offline/connectivity';
 
 export interface VerseCardProps {
   verse: VerseSearchResult | QuranVerse;
@@ -17,7 +18,7 @@ export interface VerseCardProps {
   searchQuery?: string;
 }
 
-export const VerseCard: React.FC<VerseCardProps> = ({
+const VerseCardComponent: React.FC<VerseCardProps> = ({
   verse,
   isSelected = false,
   onToggleSelect,
@@ -52,7 +53,7 @@ export const VerseCard: React.FC<VerseCardProps> = ({
     if (!showContext && !contextData) {
       setIsLoadingContext(true);
       try {
-        const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+        const isOffline = !connectivity.isOnline();
         const hasLocal = await isOfflineDatasetAvailable();
         if (hasLocal) {
           try {
@@ -80,18 +81,19 @@ export const VerseCard: React.FC<VerseCardProps> = ({
     setShowContext(!showContext);
   };
 
-  // Safe word-by-word highlight based on inverted index matchedWordIndexes
-  const renderVerseContent = () => {
+  // Safe word-by-word highlight based on inverted index matchedWordIndexes (memoized)
+  const verseContent = React.useMemo(() => {
     const rawWords = tokenizeQuranText(verse.uthmaniText);
     const ornament = formatAyahOrnament(verse.ayahNumber);
     const matchedKinds = searchResult.matchedWordKinds || {};
 
     if (matchedIndexes.length > 0) {
+      const matchedSet = new Set(matchedIndexes);
       return (
         <>
           {rawWords.map((word, idx) => {
             const wordPosition = idx + 1; // 1-based index
-            const isMatch = matchedIndexes.includes(wordPosition);
+            const isMatch = matchedSet.has(wordPosition);
 
             if (!isMatch) {
               return (
@@ -125,7 +127,6 @@ export const VerseCard: React.FC<VerseCardProps> = ({
       );
     }
 
-    // Fallback: simple text rendering with Ayah ornament
     return (
       <>
         {verse.uthmaniText}{' '}
@@ -134,7 +135,7 @@ export const VerseCard: React.FC<VerseCardProps> = ({
         </span>
       </>
     );
-  };
+  }, [verse.uthmaniText, verse.ayahNumber, matchedIndexes, searchResult.matchedWordKinds, t]);
 
   return (
     <div
@@ -365,7 +366,7 @@ export const VerseCard: React.FC<VerseCardProps> = ({
         lang="ar"
         className="font-quran text-xl md:text-2xl text-text-primary text-start leading-[2.5] selection:bg-accent-tint py-2"
       >
-        {renderVerseContent()}
+        {verseContent}
       </p>
 
       {/* Neighbor Verses Context Accordion */}
@@ -426,3 +427,14 @@ export const VerseCard: React.FC<VerseCardProps> = ({
     </div>
   );
 };
+
+export const VerseCard = React.memo<VerseCardProps>(
+  VerseCardComponent,
+  (prev, next) =>
+    prev.isSelected === next.isSelected &&
+    prev.verse.id === next.verse.id &&
+    prev.verse.uthmaniText === next.verse.uthmaniText &&
+    prev.searchQuery === next.searchQuery &&
+    (prev.verse as VerseSearchResult).matchedWordIndexes?.length ===
+      (next.verse as VerseSearchResult).matchedWordIndexes?.length
+);

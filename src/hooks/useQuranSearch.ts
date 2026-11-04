@@ -36,7 +36,6 @@ export function useQuranSearch(params: QuranSearchParams) {
     networkMode: 'always', // Essential: never pause offline search; served from Web Worker
     queryKey: [
       'quranSearch',
-      isLocalSource ? 'local' : 'remote',
       trimmedQuery,
       params.surahId,
       params.juz,

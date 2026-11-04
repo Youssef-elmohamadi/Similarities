@@ -1,5 +1,6 @@
 import { api, API_BASE_URL } from '@/lib/api';
 import axios from 'axios';
+import { connectivity } from './connectivity';
 import {
   OutboxOperation,
   getPendingOutboxOperations,
@@ -30,10 +31,7 @@ export class OutboxSyncManager {
   private isSyncing = false;
 
   private isOnline(): boolean {
-    if (typeof window !== 'undefined' && window.navigator) {
-      return window.navigator.onLine;
-    }
-    return true;
+    return connectivity.isOnline();
   }
 
   public async tryRefreshToken(): Promise<boolean> {
@@ -53,6 +51,18 @@ export class OutboxSyncManager {
     }
   }
 
+  public scheduleIdleSync(userId: string): void {
+    if (!this.isOnline() || this.isSyncing) return;
+    const run = () => {
+      this.sync(userId).catch(err => console.warn('Background idle outbox sync:', err));
+    };
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(run, { timeout: 5000 });
+    } else {
+      setTimeout(run, 500);
+    }
+  }
+
   public async sync(
     userId: string,
     onConflict?: (conflict: { op: OutboxOperation; serverRecord: any }) => void
@@ -67,16 +77,6 @@ export class OutboxSyncManager {
     let pausedOnAuth = false;
 
     try {
-      // Lightweight connectivity / health check
-      try {
-        await api.get('/health', { timeout: 4000 });
-      } catch (healthErr: any) {
-        if (!healthErr.response) {
-          // Complete network outage
-          return { synced: 0, failed: 0 };
-        }
-      }
-
       const pendingOps = await getPendingOutboxOperations(userId);
       const now = Date.now();
 
@@ -474,3 +474,18 @@ export class OutboxSyncManager {
 }
 
 export const outboxSyncManager = new OutboxSyncManager();
+
+// Automatically resume outbox sync on the online event (zero polling, zero retry storms while offline)
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    try {
+      const stored = localStorage.getItem('user');
+      if (stored) {
+        const u = JSON.parse(stored);
+        if (u?.id) {
+          outboxSyncManager.scheduleIdleSync(u.id);
+        }
+      }
+    } catch {}
+  });
+}

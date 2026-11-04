@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { usePwa } from '@/context/PwaContext';
+import { useToast } from '@/components/common/Toast';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
@@ -9,14 +10,50 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { ListRow } from '@/components/common/ListRow';
 import { SyncStatusPanel } from '@/components/settings/SyncStatusPanel';
 import { Seo } from '@/components/common/Seo';
-import { User, Globe, ShieldCheck, Database, LogOut, Smartphone, Check } from 'lucide-react';
+import { User, Globe, ShieldCheck, Database, LogOut, Smartphone, Check, HardDrive } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getStorageReport, requestPersistentStorage, formatBytes, StorageReport } from '@/offline/storageManager';
 
 export const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
   const { language, toggleLanguage, t } = useLanguage();
   const { isInstallable, isIOS, installApp } = usePwa();
+  const toast = useToast();
   const navigate = useNavigate();
+
+  const [storageReport, setStorageReport] = useState<StorageReport | null>(null);
+  const [isRequestingPersist, setIsRequestingPersist] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    getStorageReport().then(report => {
+      if (mounted) setStorageReport(report);
+      // Auto-request persistence if supported and not yet granted
+      if (report.supported && !report.isPersisted) {
+        requestPersistentStorage().then(res => {
+          if (res.persisted && mounted) {
+            getStorageReport().then(r => mounted && setStorageReport(r));
+          }
+        });
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleRequestPersist = async () => {
+    setIsRequestingPersist(true);
+    const res = await requestPersistentStorage();
+    setIsRequestingPersist(false);
+    if (res.persisted) {
+      toast.success(t('تم تفعيل التخزين الدائم بنجاح.', 'Persistent storage enabled successfully.'));
+      const r = await getStorageReport();
+      setStorageReport(r);
+    } else {
+      toast.info(res.reason || t('تعذر تفعيل التخزين الدائم.', 'Failed to enable persistent storage.'));
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -178,6 +215,63 @@ export const SettingsPage: React.FC = () => {
             </a>
           </div>
         </Card>
+
+        {/* Storage Persistence & Capacity Report (Desktop) */}
+        <Card className="space-y-4">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="font-semibold text-base text-text-primary flex items-center gap-2">
+              <HardDrive className="w-5 h-5 text-primary" />
+              <span>{t('المساحة التخزينية وحماية البيانات', 'Storage & Persistence')}</span>
+            </h2>
+            {storageReport?.isPersisted ? (
+              <Badge variant="primary" className="flex items-center gap-1">
+                <Check className="w-3 h-3" />
+                <span>{t('محفوظ ضد الحذف التلقائي', 'Persistent')}</span>
+              </Badge>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRequestPersist}
+                disabled={isRequestingPersist || !storageReport?.supported}
+                className="text-xs"
+              >
+                {t('تفعيل التخزين الدائم', 'Enable Persistence')}
+              </Button>
+            )}
+          </div>
+
+          <p className="text-sm text-text-secondary leading-relaxed">
+            {storageReport?.isPersisted
+              ? t(
+                  'بيانات المصحف الشريف ومجموعاتك الشخصية محمية ضد الحذف التلقائي من قبل المتصفح حتى في حالات امتلاء الذاكرة.',
+                  'Your Quran dataset and personal collections are protected against automatic browser eviction.'
+                )
+              : t(
+                  'التخزين الدائم يضمن عدم قيام المتصفح بحذف المصحف والمجموعات المحفوظة عند انخفاض مساحة الهاتف.',
+                  'Persistent storage prevents the browser from evicting offline data under low storage.'
+                )}
+          </p>
+
+          {storageReport && (
+            <div className="p-3 bg-background rounded-xl border border-border space-y-2 text-xs">
+              <div className="flex items-center justify-between text-text-secondary">
+                <span>{t('المساحة المستخدمة', 'Storage Used')}</span>
+                <span className="font-medium text-text-primary">
+                  {storageReport.usageMB} MB {storageReport.quotaMB > 0 ? `(${storageReport.percent}%)` : ''}
+                </span>
+              </div>
+              {storageReport.quotaMB > 0 && (
+                <div className="w-full bg-border/60 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-primary h-full rounded-full transition-all duration-300"
+                    style={{ width: `${Math.min(100, Math.max(1, storageReport.percent))}%` }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </Card>
       </div>
 
       {/* ========================================================= */}
@@ -203,6 +297,53 @@ export const SettingsPage: React.FC = () => {
 
         {/* Sync Status Panel */}
         <SyncStatusPanel />
+
+        {/* Storage Persistence & Capacity Report (Mobile) */}
+        <div className="space-y-1">
+          <span className="text-[11px] font-bold text-text-secondary uppercase px-1">
+            {t('التخزين والمساحة', 'Storage & Persistence')}
+          </span>
+          <div className="p-3 border border-border rounded-xl bg-surface space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-text-primary">
+                <HardDrive className="w-4 h-4 text-primary" />
+                <span>{t('حماية البيانات من الحذف', 'Persistence')}</span>
+              </div>
+              {storageReport?.isPersisted ? (
+                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Check className="w-3 h-3" />
+                  <span>{t('محفوظ دائم', 'Persisted')}</span>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleRequestPersist}
+                  disabled={isRequestingPersist || !storageReport?.supported}
+                  className="text-[11px] font-medium text-primary bg-primary-tint/50 px-2 py-1 rounded-lg border border-primary/30 active:scale-95 transition"
+                >
+                  {t('تفعيل التخزين', 'Enable')}
+                </button>
+              )}
+            </div>
+
+            {storageReport && (
+              <div className="space-y-1 pt-1">
+                <div className="flex items-center justify-between text-[11px] text-text-secondary">
+                  <span>{t('المستخدم:', 'Used:')} {storageReport.usageMB} MB</span>
+                  {storageReport.quotaMB > 0 && <span>{formatBytes(storageReport.quotaBytes)}</span>}
+                </div>
+                {storageReport.quotaMB > 0 && (
+                  <div className="w-full bg-border/60 rounded-full h-1 overflow-hidden">
+                    <div
+                      className="bg-primary h-full rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min(100, Math.max(1, storageReport.percent))}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Preferences Section */}
         <div className="space-y-1">

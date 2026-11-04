@@ -12,7 +12,7 @@ export interface CollectionCardProps {
   onDelete?: (id: string, title: string) => void;
 }
 
-export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onDelete }) => {
+export const CollectionCard: React.FC<CollectionCardProps> = React.memo(({ collection, onDelete }) => {
   const { t, direction } = useLanguage();
   const isRtl = direction === 'rtl';
   const isOfflinePending = collection.id.startsWith('temp-');
@@ -122,4 +122,4 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onDe
       </div>
     </Card>
   );
-};
+});

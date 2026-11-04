@@ -17,6 +17,7 @@ import {
   OutboxOperation,
 } from '@/offline/userDataDb';
 import { outboxSyncManager } from '@/offline/outboxSyncManager';
+import { connectivity } from '@/offline/connectivity';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   RefreshCw,
@@ -68,8 +69,10 @@ export const SyncStatusPanel: React.FC = () => {
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 5000);
-    return () => clearInterval(interval);
+    const unsubscribe = connectivity.subscribe(() => {
+      loadData();
+    });
+    return () => unsubscribe();
   }, [loadData]);
 
   const handleSyncNow = async () => {

@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { connectivity } from '../offline/connectivity';
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -10,6 +11,16 @@ export const api = axios.create({
 });
 
 let isRefreshing = false;
+let cachedAccessToken: string | null = typeof localStorage !== 'undefined' ? localStorage.getItem('access_token') : null;
+
+export function setCachedAccessToken(token: string | null): void {
+  cachedAccessToken = token;
+  if (typeof localStorage !== 'undefined') {
+    if (token) localStorage.setItem('access_token', token);
+    else localStorage.removeItem('access_token');
+  }
+}
+
 let failedQueue: Array<{
   resolve: (value?: unknown) => void;
   reject: (reason?: unknown) => void;
@@ -28,7 +39,11 @@ const processQueue = (error: Error | null, token: string | null = null) => {
 
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('access_token');
+    // Zero network waiting / attempting when offline
+    if (!connectivity.isOnline()) {
+      return Promise.reject(new AxiosError('Network Offline', 'ERR_NETWORK', config));
+    }
+    const token = cachedAccessToken;
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -38,12 +53,16 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  response => response,
+  response => {
+    connectivity.recordRequestSuccess();
+    return response;
+  },
   async (error: AxiosError) => {
+    connectivity.recordRequestFailure(error);
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (typeof window !== 'undefined' && !window.navigator.onLine) {
+      if (!connectivity.isOnline()) {
         // Offline: do not invalidate session or redirect to login
         return Promise.reject(error);
       }
@@ -93,7 +112,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError as Error, null);
-        if (typeof window !== 'undefined' && window.navigator.onLine) {
+        if (connectivity.isOnline()) {
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           localStorage.removeItem('user');

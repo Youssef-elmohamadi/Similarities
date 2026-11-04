@@ -46,7 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
             <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-primary text-white flex items-center justify-center shadow-xs group-hover:bg-primary-hover transition-colors shrink-0">
               <BookOpen className="w-4 h-4 md:w-5 md:h-5" />
             </div>
-            <div className={cn(isCollectionDetailPage && 'hidden md:block')}>
+            <div className={cn(isCollectionDetailPage ? 'hidden md:block' : 'hidden sm:block')}>
               <span className="font-bold text-sm md:text-base text-text-primary leading-tight block">
                 {t('متشابهات القرآن', 'Quranic Similarities')}
               </span>
@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
         </div>
 
         {/* End: Actions, Language & Profile */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Online / Offline Status Badge */}
           {isOffline ? (
             <span
@@ -81,7 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
           <Link
             to="/collections/new"
             aria-label={t('مجموعة جديدة', 'New Collection')}
-            className="inline-flex items-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-lg bg-primary-tint text-primary hover:bg-primary-tint/80 border border-primary/20 text-xs font-semibold transition min-h-[44px] min-w-[44px] justify-center"
+            className="hidden sm:inline-flex items-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-lg bg-primary-tint text-primary hover:bg-primary-tint/80 border border-primary/20 text-xs font-semibold transition min-h-[44px] min-w-[44px] justify-center"
           >
             <PlusCircle className="w-4 h-4 text-primary" />
             <span className="hidden sm:inline">{t('مجموعة جديدة', 'New Collection')}</span>

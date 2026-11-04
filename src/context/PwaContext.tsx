@@ -26,6 +26,7 @@ export const PwaProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isIOS, setIsIOS] = useState(false);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [showIosModal, setShowIosModal] = useState(false);
+  const [showUpdateToast, setShowUpdateToast] = useState(false);
 
   const {
     offlineReady: [offlineReady, setOfflineReady],
@@ -40,6 +41,41 @@ export const PwaProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       console.error('SW registration error', error);
     },
   });
+
+  // Defer SW update notification until the page is fully loaded and idle
+  // to guarantee zero startup delay or UI disruption
+  useEffect(() => {
+    if (needRefresh) {
+      const schedulePrompt = () => {
+        if ('requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(() => setShowUpdateToast(true), { timeout: 4000 });
+        } else {
+          setTimeout(() => setShowUpdateToast(true), 2000);
+        }
+      };
+
+      if (document.readyState === 'complete') {
+        schedulePrompt();
+      } else {
+        window.addEventListener('load', schedulePrompt, { once: true });
+      }
+    } else {
+      setShowUpdateToast(false);
+    }
+  }, [needRefresh]);
+
+  // Clean old/stale caches when idle
+  useEffect(() => {
+    if ('caches' in window) {
+      caches.keys().then(cacheNames => {
+        cacheNames.forEach(name => {
+          if (name.startsWith('legacy-') || name.includes('temp-')) {
+            caches.delete(name).catch(() => {});
+          }
+        });
+      }).catch(() => {});
+    }
+  }, []);
 
   useEffect(() => {
     // Check if running on iOS Safari
@@ -100,8 +136,8 @@ export const PwaProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     >
       {children}
 
-      {/* SW Update Toast Notification */}
-      {needRefresh && (
+      {/* SW Update Toast Notification - shown strictly after load & idle */}
+      {showUpdateToast && needRefresh && (
         <div
           role="alert"
           aria-live="polite"

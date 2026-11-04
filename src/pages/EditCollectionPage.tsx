@@ -21,6 +21,8 @@ import {
   setCachedUserCollections,
   enqueueOutboxOperation,
 } from '@/offline/userDataDb';
+import { outboxSyncManager } from '@/offline/outboxSyncManager';
+import { connectivity } from '@/offline/connectivity';
 import { ArrowRight, ArrowLeft, BookOpen, Layers, Sparkles } from 'lucide-react';
 
 export const EditCollectionPage: React.FC = () => {
@@ -52,7 +54,7 @@ export const EditCollectionPage: React.FC = () => {
       } catch (e) {
         console.warn('Failed to get surahs from indexedDB', e);
       }
-      if (navigator.onLine) {
+      if (connectivity.isOnline()) {
         try {
           const res = await api.get<any[]>('/quran/surahs');
           return res.data;
@@ -66,27 +68,41 @@ export const EditCollectionPage: React.FC = () => {
 
   const { data: collection, isLoading } = useQuery<CollectionDetail>({
     queryKey: ['collection', id, user?.id],
+    networkMode: 'always',
     queryFn: async () => {
       if (!id) throw new Error('Missing ID');
-      if (!navigator.onLine) {
-        if (!user) throw new Error('Not logged in');
-        const cached = await getCachedCollectionDetail(user.id, id);
-        if (!cached) throw new Error('Collection not found');
+      if (!user) throw new Error('Not logged in');
+
+      const cached = await getCachedCollectionDetail(user.id, id);
+
+      // Trigger background revalidation if online
+      if (connectivity.isOnline()) {
+        (async () => {
+          try {
+            const res = await api.get<CollectionDetail>(`/collections/${id}`);
+            if (user) {
+              await setCachedCollectionDetail(user.id, res.data);
+              queryClient.setQueryData(['collection', id, user.id], res.data);
+            }
+          } catch {
+            // background network failure ignored; local data authoritative
+          }
+        })();
+      }
+
+      if (cached) {
         return cached as unknown as CollectionDetail;
       }
-      try {
+
+      if (connectivity.isOnline()) {
         const res = await api.get<CollectionDetail>(`/collections/${id}`);
         if (user) {
           await setCachedCollectionDetail(user.id, res.data);
         }
         return res.data;
-      } catch (err) {
-        if (user) {
-          const cached = await getCachedCollectionDetail(user.id, id);
-          if (cached) return cached as unknown as CollectionDetail;
-        }
-        throw err;
       }
+
+      throw new Error('Collection not found in offline cache');
     },
     enabled: !!id && !!user,
   });
@@ -105,7 +121,10 @@ export const EditCollectionPage: React.FC = () => {
   }, [collection]);
 
   const updateMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async () => {
+      if (!user || !id) throw new Error('Not logged in');
+      const online = connectivity.isOnline();
       const selectedSurah = surahs.find(s => s.id === Number(selectedSurahId) || s.number === Number(selectedSurahId));
       const baseSurahId = collectionType === 'surah' ? (selectedSurah?.id || Number(selectedSurahId)) : null;
       const baseSurahNameArabic = collectionType === 'surah' ? selectedSurah?.nameArabic : undefined;
@@ -116,50 +135,46 @@ export const EditCollectionPage: React.FC = () => {
         baseSurahId: baseSurahId,
       };
 
-      if (!navigator.onLine) {
-        if (!user || !id) throw new Error('Not logged in');
-        const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
-        if (current) {
-          const baseUpdatedAt = current.updatedAt;
-          current.title = payload.title;
-          current.description = payload.description;
-          current.baseSurahId = payload.baseSurahId || undefined;
-          current.baseSurahNameArabic = baseSurahNameArabic;
-          current.updatedAt = new Date().toISOString();
-          await setCachedCollectionDetail(user.id, current);
+      const current = (await getCachedCollectionDetail(user.id, id)) as unknown as CollectionDetail;
+      if (current) {
+        const baseUpdatedAt = current.updatedAt;
+        current.title = payload.title;
+        current.description = payload.description;
+        current.baseSurahId = payload.baseSurahId || undefined;
+        current.baseSurahNameArabic = baseSurahNameArabic;
+        current.updatedAt = new Date().toISOString();
+        await setCachedCollectionDetail(user.id, current);
 
-          const list = await getCachedUserCollections(user.id);
-          const idx = list.findIndex(c => c.id === id);
-          if (idx !== -1) {
-            list[idx].title = payload.title;
-            list[idx].description = payload.description;
-            list[idx].baseSurahId = payload.baseSurahId || undefined;
-            list[idx].baseSurahNameArabic = baseSurahNameArabic;
-            list[idx].updatedAt = current.updatedAt;
-            await setCachedUserCollections(user.id, list);
-          }
-
-          if (!id.startsWith('temp-')) {
-            await enqueueOutboxOperation({
-              id: crypto.randomUUID(),
-              userId: user.id,
-              type: 'UPDATE_COLLECTION',
-              entityId: id,
-              payload,
-              baseUpdatedAt,
-              timestamp: Date.now(),
-              status: 'PENDING',
-            });
-          }
+        const list = await getCachedUserCollections(user.id);
+        const idx = list.findIndex(c => c.id === id);
+        if (idx !== -1) {
+          list[idx].title = payload.title;
+          list[idx].description = payload.description;
+          list[idx].baseSurahId = payload.baseSurahId || undefined;
+          list[idx].baseSurahNameArabic = baseSurahNameArabic;
+          list[idx].updatedAt = current.updatedAt;
+          await setCachedUserCollections(user.id, list);
         }
-        return { isOffline: true };
+
+        if (!id.startsWith('temp-')) {
+          await enqueueOutboxOperation({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            type: 'UPDATE_COLLECTION',
+            entityId: id,
+            payload,
+            baseUpdatedAt,
+            timestamp: Date.now(),
+            status: 'PENDING',
+          });
+        }
       }
 
-      const res = await api.put(`/collections/${id}`, payload);
-      if (user) {
-        await setCachedCollectionDetail(user.id, res.data);
+      if (online) {
+        outboxSyncManager.scheduleIdleSync(user.id);
       }
-      return res.data;
+
+      return { isOffline: !online };
     },
     onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['collection', id] });

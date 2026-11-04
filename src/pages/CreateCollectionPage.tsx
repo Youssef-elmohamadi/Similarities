@@ -26,6 +26,8 @@ import {
   getCachedUserCollections,
   enqueueOutboxOperation,
 } from '@/offline/userDataDb';
+import { outboxSyncManager } from '@/offline/outboxSyncManager';
+import { connectivity } from '@/offline/connectivity';
 
 export const CreateCollectionPage: React.FC = () => {
   const { t, direction } = useLanguage();
@@ -62,7 +64,7 @@ export const CreateCollectionPage: React.FC = () => {
       } catch (e) {
         console.warn('Failed to get surahs from indexedDB', e);
       }
-      if (navigator.onLine) {
+      if (connectivity.isOnline()) {
         try {
           const res = await api.get<any[]>('/quran/surahs');
           return res.data;
@@ -101,34 +103,25 @@ export const CreateCollectionPage: React.FC = () => {
       const ids = versesParam.split(',').map(Number).filter(id => !isNaN(id) && id > 0);
       if (ids.length > 0) {
         setIsLoadingInitialVerses(true);
-        if (!navigator.onLine) {
-          getFullVersesByIds(ids)
-            .then(loadedVerses => {
+        getFullVersesByIds(ids)
+          .then(async loadedVerses => {
+            if (loadedVerses.length === ids.length || !connectivity.isOnline()) {
               setSelectedVerses(loadedVerses);
-            })
-            .catch(() => {
-              toast.error(t('تعذر تحميل بعض الآيات المحددة.', 'Failed to load some selected verses.'));
-            })
-            .finally(() => {
-              setIsLoadingInitialVerses(false);
-            });
-        } else {
-          Promise.all(ids.map(id => api.get<QuranVerse>(`/quran/verses/${id}`).then(res => res.data)))
-            .then(loadedVerses => {
-              setSelectedVerses(loadedVerses);
-            })
-            .catch(async () => {
-              const localVerses = await getFullVersesByIds(ids);
-              if (localVerses.length > 0) {
-                setSelectedVerses(localVerses);
-              } else {
-                toast.error(t('تعذر تحميل بعض الآيات المحددة.', 'Failed to load some selected verses.'));
+            } else {
+              try {
+                const apiVerses = await Promise.all(ids.map(id => api.get<QuranVerse>(`/quran/verses/${id}`).then(res => res.data)));
+                setSelectedVerses(apiVerses);
+              } catch {
+                setSelectedVerses(loadedVerses);
               }
-            })
-            .finally(() => {
-              setIsLoadingInitialVerses(false);
-            });
-        }
+            }
+          })
+          .catch(() => {
+            toast.error(t('تعذر تحميل بعض الآيات المحددة.', 'Failed to load some selected verses.'));
+          })
+          .finally(() => {
+            setIsLoadingInitialVerses(false);
+          });
       }
     }
   }, [searchParams]);
@@ -139,31 +132,27 @@ export const CreateCollectionPage: React.FC = () => {
     queryKey: ['modalVerseSearch', modalSearchQuery],
     queryFn: async () => {
       if (!modalSearchQuery.trim()) return [];
-      const hasLocal = await isOfflineDatasetAvailable();
-      if (hasLocal) {
+      try {
+        const localRes = await searchLocalWorker({ q: modalSearchQuery.trim(), pageSize: 10 });
+        return localRes.items;
+      } catch (e) {
+        console.warn('Local search in modal failed:', e);
+      }
+      if (connectivity.isOnline()) {
         try {
-          const localRes = await searchLocalWorker({ q: modalSearchQuery.trim(), pageSize: 10 });
-          return localRes.items;
-        } catch (e) {
-          console.warn('Local search in modal failed:', e);
+          const res = await api.get<{ items: QuranVerse[] }>(`/quran/search?q=${encodeURIComponent(modalSearchQuery.trim())}&pageSize=10`);
+          return res.data.items;
+        } catch {
+          // ignore
         }
       }
-      if (!navigator.onLine) {
-        const localRes = await searchLocalWorker({ q: modalSearchQuery.trim(), pageSize: 10 });
-        return localRes.items;
-      }
-      try {
-        const res = await api.get<{ items: QuranVerse[] }>(`/quran/search?q=${encodeURIComponent(modalSearchQuery.trim())}&pageSize=10`);
-        return res.data.items;
-      } catch {
-        const localRes = await searchLocalWorker({ q: modalSearchQuery.trim(), pageSize: 10 });
-        return localRes.items;
-      }
+      return [];
     },
     enabled: isSearchModalOpen && modalSearchQuery.trim().length > 1,
   });
 
   const createMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async () => {
       const selectedSurah = surahs.find(s => s.id === Number(selectedSurahId) || s.number === Number(selectedSurahId));
       const baseSurahId = collectionType === 'surah' ? (selectedSurah?.id || Number(selectedSurahId)) : undefined;
@@ -176,74 +165,71 @@ export const CreateCollectionPage: React.FC = () => {
         quranVerseIds: selectedVerses.map(v => v.id),
       };
 
-      if (!navigator.onLine) {
-        if (!user) throw new Error(t('يرجى تسجيل الدخول أولاً', 'Please sign in first'));
-        const tempId = `temp-${crypto.randomUUID()}`;
-        const now = new Date().toISOString();
-        const collectionDetail: any = {
-          id: tempId,
-          userId: user.id,
-          title: payload.title,
-          description: payload.description,
-          baseSurahId: payload.baseSurahId,
-          baseSurahNameArabic: baseSurahNameArabic,
-          createdAt: now,
-          updatedAt: now,
-          verses: selectedVerses.map((v, idx) => ({
-            id: `temp-v-${crypto.randomUUID()}`,
-            collectionId: tempId,
-            quranVerseId: v.id,
-            displayOrder: idx + 1,
-            addedAt: now,
-            surahId: v.surahId,
-            surahNumber: (v as any).surahNumber || v.surahId,
-            surahNameArabic: v.surahNameArabic,
-            surahNameEnglish: v.surahNameEnglish,
-            ayahNumber: v.ayahNumber,
-            uthmaniText: v.uthmaniText,
-          })),
-          comparisons: [],
-          connections: [],
-          notes: [],
-        };
+      if (!user) throw new Error(t('يرجى تسجيل الدخول أولاً', 'Please sign in first'));
+      const online = connectivity.isOnline();
+      const tempId = `temp-${crypto.randomUUID()}`;
+      const now = new Date().toISOString();
+      const collectionDetail: any = {
+        id: tempId,
+        userId: user.id,
+        title: payload.title,
+        description: payload.description,
+        baseSurahId: payload.baseSurahId,
+        baseSurahNameArabic: baseSurahNameArabic,
+        createdAt: now,
+        updatedAt: now,
+        verses: selectedVerses.map((v, idx) => ({
+          id: `temp-v-${crypto.randomUUID()}`,
+          collectionId: tempId,
+          quranVerseId: v.id,
+          displayOrder: idx + 1,
+          addedAt: now,
+          surahId: v.surahId,
+          surahNumber: (v as any).surahNumber || v.surahId,
+          surahNameArabic: v.surahNameArabic,
+          surahNameEnglish: v.surahNameEnglish,
+          ayahNumber: v.ayahNumber,
+          uthmaniText: v.uthmaniText,
+        })),
+        comparisons: [],
+        connections: [],
+        notes: [],
+      };
 
-        const collectionSummary: any = {
-          id: tempId,
-          userId: user.id,
-          title: payload.title,
-          description: payload.description,
-          baseSurahId: payload.baseSurahId,
-          baseSurahNameArabic: baseSurahNameArabic,
-          verseCount: selectedVerses.length,
-          comparisonCount: 0,
-          connectionCount: 0,
-          createdAt: now,
-          updatedAt: now,
-          surahNames: Array.from(new Set(selectedVerses.map(v => v.surahNameArabic))),
-        };
+      const collectionSummary: any = {
+        id: tempId,
+        userId: user.id,
+        title: payload.title,
+        description: payload.description,
+        baseSurahId: payload.baseSurahId,
+        baseSurahNameArabic: baseSurahNameArabic,
+        verseCount: selectedVerses.length,
+        comparisonCount: 0,
+        connectionCount: 0,
+        createdAt: now,
+        updatedAt: now,
+        surahNames: Array.from(new Set(selectedVerses.map(v => v.surahNameArabic))),
+      };
 
-        await setCachedCollectionDetail(user.id, collectionDetail);
-        const existingColls = await getCachedUserCollections(user.id);
-        await setCachedUserCollections(user.id, [collectionSummary, ...existingColls]);
+      await setCachedCollectionDetail(user.id, collectionDetail);
+      const existingColls = await getCachedUserCollections(user.id);
+      await setCachedUserCollections(user.id, [collectionSummary, ...existingColls]);
 
-        await enqueueOutboxOperation({
-          id: crypto.randomUUID(),
-          userId: user.id,
-          type: 'CREATE_COLLECTION',
-          entityId: tempId,
-          payload,
-          timestamp: Date.now(),
-          status: 'PENDING',
-        });
+      await enqueueOutboxOperation({
+        id: crypto.randomUUID(),
+        userId: user.id,
+        type: 'CREATE_COLLECTION',
+        entityId: tempId,
+        payload,
+        timestamp: Date.now(),
+        status: 'PENDING',
+      });
 
-        return { id: tempId, isOffline: true };
+      if (online) {
+        outboxSyncManager.scheduleIdleSync(user.id);
       }
 
-      const res = await api.post('/collections', payload);
-      if (user) {
-        await setCachedCollectionDetail(user.id, res.data);
-      }
-      return res.data;
+      return { id: tempId, isOffline: !online };
     },
     onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['collections'] });
@@ -486,111 +472,113 @@ export const CreateCollectionPage: React.FC = () => {
               {/* Desktop Cards (>= 768px) - 100% Unchanged */}
               <div className="hidden md:block space-y-3">
                 {selectedVerses.map((verse, index) => (
-                  <Card
-                    key={verse.id}
-                    className="p-4 md:p-5 border-border hover:border-primary/40 transition duration-150"
-                  >
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="w-6 h-6 rounded-md bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0">
-                          {isRtl ? toArabicDigits(index + 1) : index + 1}
-                        </span>
-                        <Badge variant="primary" size="sm">
-                          {t('سورة', 'Surah')} {verse.surahNameArabic}
-                        </Badge>
-                        <Badge variant="charcoal" size="sm">
-                          {t('الآية', 'Ayah')} {toArabicDigits(verse.ayahNumber)}
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => handleMoveUp(index)}
-                          disabled={index === 0}
-                          className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
-                          title={t('تحريك لأعلى', 'Move Up')}
-                          aria-label={t('تحريك لأعلى', 'Move Up')}
-                        >
-                          <ChevronUp className="w-4 h-4" />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleMoveDown(index)}
-                          disabled={index === selectedVerses.length - 1}
-                          className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
-                          title={t('تحريك لأسفل', 'Move Down')}
-                          aria-label={t('تحريك لأسفل', 'Move Down')}
-                        >
-                          <ChevronDown className="w-4 h-4" />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveVerse(verse.id)}
-                          className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-danger hover:bg-danger-subtle transition"
-                          title={t('حذف من القائمة', 'Remove')}
-                          aria-label={t('حذف من القائمة', 'Remove')}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <p
-                      dir="rtl"
-                      lang="ar"
-                      className="font-quran text-lg md:text-xl text-text-primary text-start leading-[2.5] py-1 selection:bg-accent-tint"
+                  <div key={verse.id} style={{ contentVisibility: 'auto', containIntrinsicSize: '150px' }}>
+                    <Card
+                      className="p-4 md:p-5 border-border hover:border-primary/40 transition duration-150"
                     >
-                      {verse.uthmaniText}{' '}
-                      <span className="ayah-number-badge text-primary font-bold">
-                        {formatAyahOrnament(verse.ayahNumber)}
-                      </span>
-                    </p>
-                  </Card>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="w-6 h-6 rounded-md bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0">
+                            {isRtl ? toArabicDigits(index + 1) : index + 1}
+                          </span>
+                          <Badge variant="primary" size="sm">
+                            {t('سورة', 'Surah')} {verse.surahNameArabic}
+                          </Badge>
+                          <Badge variant="charcoal" size="sm">
+                            {t('الآية', 'Ayah')} {toArabicDigits(verse.ayahNumber)}
+                          </Badge>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleMoveUp(index)}
+                            disabled={index === 0}
+                            className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
+                            title={t('تحريك لأعلى', 'Move Up')}
+                            aria-label={t('تحريك لأعلى', 'Move Up')}
+                          >
+                            <ChevronUp className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleMoveDown(index)}
+                            disabled={index === selectedVerses.length - 1}
+                            className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-background disabled:opacity-20 transition"
+                            title={t('تحريك لأسفل', 'Move Down')}
+                            aria-label={t('تحريك لأسفل', 'Move Down')}
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveVerse(verse.id)}
+                            className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-text-secondary hover:text-danger hover:bg-danger-subtle transition"
+                            title={t('حذف من القائمة', 'Remove')}
+                            aria-label={t('حذف من القائمة', 'Remove')}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <p
+                        dir="rtl"
+                        lang="ar"
+                        className="font-quran text-lg md:text-xl text-text-primary text-start leading-[2.5] py-1 selection:bg-accent-tint"
+                      >
+                        {verse.uthmaniText}{' '}
+                        <span className="ayah-number-badge text-primary font-bold">
+                          {formatAyahOrnament(verse.ayahNumber)}
+                        </span>
+                      </p>
+                    </Card>
+                  </div>
                 ))}
               </div>
 
               {/* Mobile High-Density ListRows (< 768px) */}
               <div className="md:hidden divide-y divide-border border border-border rounded-xl bg-surface overflow-hidden">
                 {selectedVerses.map((verse, index) => (
-                  <ListRow
-                    key={verse.id}
-                    index={index + 1}
-                    title={`${t('سورة', 'Surah')} ${verse.surahNameArabic} (${isRtl ? toArabicDigits(verse.ayahNumber) : verse.ayahNumber})`}
-                    subtitle={verse.uthmaniText}
-                    actions={
-                      <div className="flex items-center gap-0.5">
-                        <button
-                          type="button"
-                          onClick={() => handleMoveUp(index)}
-                          disabled={index === 0}
-                          className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary disabled:opacity-20"
-                          aria-label={t('تحريك لأعلى', 'Move Up')}
-                        >
-                          <ChevronUp className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleMoveDown(index)}
-                          disabled={index === selectedVerses.length - 1}
-                          className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary disabled:opacity-20"
-                          aria-label={t('تحريك لأسفل', 'Move Down')}
-                        >
-                          <ChevronDown className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveVerse(verse.id)}
-                          className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-danger hover:bg-danger-subtle"
-                          aria-label={t('حذف من القائمة', 'Remove')}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    }
-                  />
+                  <div key={verse.id} style={{ contentVisibility: 'auto', containIntrinsicSize: '52px' }}>
+                    <ListRow
+                      index={index + 1}
+                      title={`${t('سورة', 'Surah')} ${verse.surahNameArabic} (${isRtl ? toArabicDigits(verse.ayahNumber) : verse.ayahNumber})`}
+                      subtitle={verse.uthmaniText}
+                      actions={
+                        <div className="flex items-center gap-0.5">
+                          <button
+                            type="button"
+                            onClick={() => handleMoveUp(index)}
+                            disabled={index === 0}
+                            className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary disabled:opacity-20"
+                            aria-label={t('تحريك لأعلى', 'Move Up')}
+                          >
+                            <ChevronUp className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveDown(index)}
+                            disabled={index === selectedVerses.length - 1}
+                            className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary disabled:opacity-20"
+                            aria-label={t('تحريك لأسفل', 'Move Down')}
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveVerse(verse.id)}
+                            className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-danger hover:bg-danger-subtle"
+                            aria-label={t('حذف من القائمة', 'Remove')}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      }
+                    />
+                  </div>
                 ))}
               </div>
             </>

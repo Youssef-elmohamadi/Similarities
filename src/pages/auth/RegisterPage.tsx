@@ -7,6 +7,7 @@ import { Input } from '@/components/common/Input';
 import { Seo } from '@/components/common/Seo';
 import { BookOpen, Lock, Mail, User, Eye, EyeOff, Globe } from 'lucide-react';
 import { getApiErrorMessage } from '@/lib/api';
+import { useNetworkStatus } from '@/offline/connectivity';
 
 export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
@@ -21,18 +22,8 @@ export const RegisterPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
-
-  React.useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
+  const isOnline = useNetworkStatus();
+  const isOffline = !isOnline;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

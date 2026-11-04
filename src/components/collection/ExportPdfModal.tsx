@@ -7,6 +7,8 @@ import { api } from '@/lib/api';
 import { exportCollectionToPdf } from '@/lib/collectionPdfGenerator';
 import { CollectionDetail } from '@/types/collection';
 import { toArabicDigits } from '@/lib/utils';
+import { useNetworkStatus } from '@/offline/connectivity';
+import { getCachedCollectionDetail } from '@/offline/userDataDb';
 
 export interface ExportPdfModalProps {
   isOpen: boolean;
@@ -61,21 +63,8 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
 
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
-  const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const isOnline = useNetworkStatus();
   const [ignoreUnsaved, setIgnoreUnsaved] = useState(false);
-
-  // Monitor network status
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
 
   // Save preferences to localStorage
   const handleColorChange = (newColor: boolean) => {
@@ -101,6 +90,20 @@ export const ExportPdfModal: React.FC<ExportPdfModalProps> = ({
 
     try {
       let targetCollection = collection;
+      if (!targetCollection) {
+        try {
+          const userStr = localStorage.getItem('user');
+          const userId = userStr ? JSON.parse(userStr)?.id : undefined;
+          if (userId) {
+            const cached = await getCachedCollectionDetail(userId, collectionId);
+            if (cached) {
+              targetCollection = cached as unknown as CollectionDetail;
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
       if (!targetCollection) {
         if (!isOnline) {
           throw new Error('OFFLINE_FETCH_REQUIRED');

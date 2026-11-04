@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -23,8 +23,11 @@ import {
   setCachedUserCollections,
   enqueueOutboxOperation,
   getUserDB,
+  getTombstonedEntityIds,
+  userDataMemoryStore,
 } from '@/offline/userDataDb';
 import { outboxSyncManager } from '@/offline/outboxSyncManager';
+import { connectivity } from '@/offline/connectivity';
 import { Search, PlusCircle, ArrowUpDown, BookmarkCheck, Edit2, Trash2, Check, X } from 'lucide-react';
 
 export const MyLibraryPage: React.FC = () => {
@@ -43,7 +46,7 @@ export const MyLibraryPage: React.FC = () => {
 
   // Auto sync on mount if online
   React.useEffect(() => {
-    if (user && navigator.onLine) {
+    if (user && connectivity.isOnline()) {
       outboxSyncManager.sync(user.id).then(({ synced }) => {
         if (synced > 0) {
           queryClient.invalidateQueries({ queryKey: ['collections'] });
@@ -54,6 +57,7 @@ export const MyLibraryPage: React.FC = () => {
 
   const { data: collections, isLoading } = useQuery<CollectionSummary[]>({
     queryKey: ['collections', search, sortBy, user?.id],
+    networkMode: 'always',
     queryFn: async () => {
       const filterAndSortLocal = (list: any[]) => {
         let filtered = list;
@@ -73,82 +77,116 @@ export const MyLibraryPage: React.FC = () => {
         return filtered;
       };
 
-      if (!navigator.onLine) {
-        if (!user) return [];
-        const cached = await getCachedUserCollections(user.id);
+      if (!user) return [];
+      const cached = await getCachedUserCollections(user.id);
+
+      // Local-first: trigger non-blocking background revalidation if online
+      if (connectivity.isOnline()) {
+        (async () => {
+          try {
+            const params = new URLSearchParams();
+            if (search.trim()) params.append('search', search.trim());
+            if (sortBy) params.append('sortBy', sortBy);
+
+            const res = await api.get<CollectionSummary[]>(`/collections?${params.toString()}`);
+            const tombstones = await getTombstonedEntityIds(user.id);
+            const filteredServer = (res.data || []).filter(c => !tombstones.has(c.id));
+            const localColls = await getCachedUserCollections(user.id);
+            const pendingTemps = localColls.filter(c => c.id.startsWith('temp-') && !tombstones.has(c.id));
+            const merged = [...pendingTemps, ...filteredServer];
+            await setCachedUserCollections(user.id, merged);
+            queryClient.setQueryData(['collections', search, sortBy, user.id], filterAndSortLocal(merged));
+          } catch {
+            // Background network refresh failed silently; local data remains authoritative
+          }
+        })();
+      }
+
+      if (cached.length > 0 || !connectivity.isOnline()) {
         return filterAndSortLocal(cached);
       }
 
+      // If cache is empty and online, await initial fetch
       try {
         const params = new URLSearchParams();
         if (search.trim()) params.append('search', search.trim());
         if (sortBy) params.append('sortBy', sortBy);
 
         const res = await api.get<CollectionSummary[]>(`/collections?${params.toString()}`);
-        if (user) {
-          // Keep offline pending creations merged, and filter out tombstones
-          const { getTombstonedEntityIds } = await import('@/offline/userDataDb');
-          const tombstones = await getTombstonedEntityIds(user.id);
-          const filteredServer = (res.data || []).filter(c => !tombstones.has(c.id));
-
-          const localColls = await getCachedUserCollections(user.id);
-          const pendingTemps = localColls.filter(c => c.id.startsWith('temp-') && !tombstones.has(c.id));
-          await setCachedUserCollections(user.id, [...pendingTemps, ...filteredServer]);
-          return filterAndSortLocal([...pendingTemps, ...filteredServer]);
-        }
-        return res.data;
-      } catch (err) {
-        if (user) {
-          const cached = await getCachedUserCollections(user.id);
-          if (cached.length > 0) return filterAndSortLocal(cached);
-        }
-        throw err;
+        const tombstones = await getTombstonedEntityIds(user.id);
+        const filteredServer = (res.data || []).filter(c => !tombstones.has(c.id));
+        await setCachedUserCollections(user.id, filteredServer);
+        return filterAndSortLocal(filteredServer);
+      } catch {
+        return filterAndSortLocal(cached);
       }
     },
     enabled: !!user,
   });
 
   const deleteMutation = useMutation({
+    networkMode: 'always',
     mutationFn: async (id: string) => {
-      if (!navigator.onLine) {
-        if (!user) return;
-        const db = await getUserDB();
-        await db.delete('collections', id);
-        await db.delete('collectionDetails', id);
-        await enqueueOutboxOperation({
-          id: crypto.randomUUID(),
-          userId: user.id,
-          type: 'DELETE_COLLECTION',
-          entityId: id,
-          payload: {},
-          timestamp: Date.now(),
-          status: 'PENDING',
-        });
-        return { isOffline: true };
+      if (!user) return { isOffline: true };
+      const isOnline = connectivity.isOnline();
+
+      // Local-first: delete from memory & local stores and enqueue outbox immediately
+      userDataMemoryStore.deleteCollectionSync(user.id, id);
+      const db = await getUserDB();
+      await db.delete('collections', id);
+      await db.delete('collectionDetails', id);
+
+      await enqueueOutboxOperation({
+        id: crypto.randomUUID(),
+        userId: user.id,
+        type: 'DELETE_COLLECTION',
+        entityId: id,
+        payload: {},
+        timestamp: Date.now(),
+        status: 'PENDING',
+      });
+
+      // Background sync on idle if online (never block UI)
+      if (isOnline) {
+        outboxSyncManager.scheduleIdleSync(user.id);
       }
 
-      await api.delete(`/collections/${id}`);
-      if (user) {
-        const db = await getUserDB();
-        await db.delete('collections', id);
-        await db.delete('collectionDetails', id);
-      }
-      return { isOffline: false };
+      return { isOffline: !isOnline };
     },
-    onSuccess: res => {
+    onMutate: async (id: string) => {
+      if (user) {
+        userDataMemoryStore.deleteCollectionSync(user.id, id);
+      }
+      await queryClient.cancelQueries({ queryKey: ['collections'] });
+      const previous = queryClient.getQueryData<CollectionSummary[]>(['collections', search, sortBy, user?.id]);
+      queryClient.setQueryData<CollectionSummary[]>(['collections', search, sortBy, user?.id], old =>
+        old ? old.filter(c => c.id !== id) : []
+      );
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['collections', search, sortBy, user?.id], context.previous);
+      }
+      toast.error(t('تعذر حذف المجموعة. يرجى المحاولة مرة أخرى.', 'Failed to delete collection.'));
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['collections'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      setDeleteTarget(null);
+    },
+    onSuccess: res => {
       if (res?.isOffline) {
         toast.info(t('تم حذف المجموعة محلياً — ستتم المزامنة عند الاتصال.', 'Deleted locally — will sync when back online.'));
       } else {
         toast.success(t('تم حذف المجموعة بنجاح.', 'Collection deleted successfully.'));
       }
-      setDeleteTarget(null);
-    },
-    onError: () => {
-      toast.error(t('تعذر حذف المجموعة. يرجى المحاولة مرة أخرى.', 'Failed to delete collection.'));
     },
   });
+
+  const handleDeleteTarget = useCallback((id: string, title: string) => {
+    setDeleteTarget({ id, title });
+  }, []);
 
   const handleDeleteConfirm = () => {
     if (deleteTarget) {
@@ -308,11 +346,12 @@ export const MyLibraryPage: React.FC = () => {
           {/* Desktop Cards Grid (>= 768px) - 100% Unchanged */}
           <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {collections.map(col => (
-              <CollectionCard
-                key={col.id}
-                collection={col}
-                onDelete={(id, title) => setDeleteTarget({ id, title })}
-              />
+              <div key={col.id} style={{ contentVisibility: 'auto', containIntrinsicSize: '210px' }}>
+                <CollectionCard
+                  collection={col}
+                  onDelete={handleDeleteTarget}
+                />
+              </div>
             ))}
           </div>
 
@@ -323,14 +362,14 @@ export const MyLibraryPage: React.FC = () => {
               const timeText = col.updatedAt ? formatRelativeTime(col.updatedAt) : '';
 
               return (
-                <ListRow
-                  key={col.id}
-                  index={idx + 1}
-                  title={col.title}
-                  subtitle={col.baseSurahNameArabic ? `${t('سورة', 'Surah')} ${col.baseSurahNameArabic}` : undefined}
-                  meta={`${countText} · ${timeText}`}
-                  onClick={() => navigate(`/collections/${col.id}`)}
-                  actions={
+                <div key={col.id} style={{ contentVisibility: 'auto', containIntrinsicSize: '52px' }}>
+                  <ListRow
+                    index={idx + 1}
+                    title={col.title}
+                    subtitle={col.baseSurahNameArabic ? `${t('سورة', 'Surah')} ${col.baseSurahNameArabic}` : undefined}
+                    meta={`${countText} · ${timeText}`}
+                    onClick={() => navigate(`/collections/${col.id}`)}
+                    actions={
                     <OverflowMenu
                       items={[
                         {
@@ -348,8 +387,9 @@ export const MyLibraryPage: React.FC = () => {
                     />
                   }
                 />
-              );
-            })}
+              </div>
+            );
+          })}
           </div>
         </>
       ) : (

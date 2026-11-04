@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -112,6 +112,7 @@ export const QuranSearchPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'verses' | 'words'>('verses');
 
   const [selectedVerses, setSelectedVerses] = useState<QuranVerse[]>([]);
+  const selectedVerseIds = useMemo(() => new Set(selectedVerses.map(v => v.id)), [selectedVerses]);
   const [isAddToModalOpen, setIsAddToModalOpen] = useState(false);
   const [previewVerse, setPreviewVerse] = useState<QuranVerse | null>(null);
 
@@ -365,7 +366,7 @@ export const QuranSearchPage: React.FC = () => {
         return;
       }
 
-      // 250ms debounce for typing with replaceState
+      // 200ms debounce for typing with replaceState
       debounceTimerRef.current = setTimeout(() => {
         updateUrl({ q: trimmed, page: 1 }, true);
 
@@ -373,7 +374,7 @@ export const QuranSearchPage: React.FC = () => {
         historyPushTimerRef.current = setTimeout(() => {
           updateUrl({ q: trimmed, page: 1 }, false);
         }, 1200);
-      }, 250);
+      }, 200);
     },
     [updateUrl, selectedSurahId, selectedJuz]
   );
@@ -440,7 +441,7 @@ export const QuranSearchPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleToggleSelect = (verse: QuranVerse) => {
+  const handleToggleSelect = useCallback((verse: QuranVerse) => {
     setSelectedVerses(prev => {
       const exists = prev.some(v => v.id === verse.id);
       if (exists) {
@@ -449,7 +450,7 @@ export const QuranSearchPage: React.FC = () => {
         return [...prev, verse];
       }
     });
-  };
+  }, []);
 
   const handleSelectPage = () => {
     if (!searchResponse?.items) return;
@@ -1406,16 +1407,20 @@ export const QuranSearchPage: React.FC = () => {
           ) : searchResponse && searchResponse.items.length > 0 ? (
             <div className="space-y-4">
               {searchResponse.items.map(verse => {
-                const isSelected = selectedVerses.some(v => v.id === verse.id);
+                const isSelected = selectedVerseIds.has(verse.id);
                 return (
-                  <VerseCard
+                  <div
                     key={verse.id}
-                    verse={verse}
-                    isSelected={isSelected}
-                    onToggleSelect={handleToggleSelect}
-                    onPreview={setPreviewVerse}
-                    searchQuery={queryParam}
-                  />
+                    style={{ contentVisibility: 'auto', containIntrinsicSize: '130px' }}
+                  >
+                    <VerseCard
+                      verse={verse}
+                      isSelected={isSelected}
+                      onToggleSelect={handleToggleSelect}
+                      onPreview={setPreviewVerse}
+                      searchQuery={queryParam}
+                    />
+                  </div>
                 );
               })}
 

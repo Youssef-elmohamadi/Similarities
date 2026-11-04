@@ -78,7 +78,10 @@ interface UserDBSchema extends DBSchema {
   collections: {
     key: string; // id
     value: CachedCollection;
-    indexes: { 'by-user': string };
+    indexes: {
+      'by-user': string;
+      'by-user-updated': [string, string];
+    };
   };
   collectionDetails: {
     key: string; // collectionId
@@ -103,7 +106,7 @@ interface UserDBSchema extends DBSchema {
 }
 
 const USER_DB_NAME = 'QuranUserOfflineDB';
-const USER_DB_VERSION = 2;
+const USER_DB_VERSION = 3;
 
 let userDbPromise: Promise<IDBPDatabase<UserDBSchema>> | null = null;
 
@@ -114,6 +117,12 @@ export function getUserDB(): Promise<IDBPDatabase<UserDBSchema>> {
         if (!db.objectStoreNames.contains('collections')) {
           const s = db.createObjectStore('collections', { keyPath: 'id' });
           s.createIndex('by-user', 'userId');
+          s.createIndex('by-user-updated', ['userId', 'updatedAt']);
+        } else {
+          const collStore = transaction.objectStore('collections');
+          if (!collStore.indexNames.contains('by-user-updated')) {
+            collStore.createIndex('by-user-updated', ['userId', 'updatedAt']);
+          }
         }
         if (!db.objectStoreNames.contains('collectionDetails')) {
           const s = db.createObjectStore('collectionDetails', { keyPath: 'id' });
@@ -149,6 +158,162 @@ export function getUserDB(): Promise<IDBPDatabase<UserDBSchema>> {
 }
 
 // ---------------------------------------------------------------------------
+// In-Memory L1 Cache & Batched Asynchronous Write-Through Store
+// ---------------------------------------------------------------------------
+export class UserDataMemoryStore {
+  private collectionsByUser = new Map<string, CachedCollection[]>();
+  private collectionDetails = new Map<string, CachedCollectionDetail>();
+  private pendingDetailWrites = new Map<string, CachedCollectionDetail>();
+  private pendingDeletes = new Set<string>();
+  private flushScheduled = false;
+
+  public getCollectionsSync(userId: string): CachedCollection[] | null {
+    return this.collectionsByUser.get(userId) || null;
+  }
+
+  public setCollectionsSync(userId: string, collections: CachedCollection[]): void {
+    this.collectionsByUser.set(userId, [...collections]);
+  }
+
+  public getCollectionDetailSync(collectionId: string): CachedCollectionDetail | null {
+    return this.collectionDetails.get(collectionId) || null;
+  }
+
+  public setCollectionDetailSync(userId: string, detail: CachedCollectionDetail): void {
+    const copy = { ...detail, userId };
+    this.collectionDetails.set(detail.id, copy);
+
+    // Synchronously update summary in collections list
+    const userList = this.collectionsByUser.get(userId);
+    if (userList) {
+      const idx = userList.findIndex(c => c.id === detail.id);
+      const summary: CachedCollection = {
+        id: detail.id,
+        userId: detail.userId || userId,
+        title: detail.title,
+        description: detail.description,
+        color: detail.color,
+        isFavorite: detail.isFavorite,
+        itemCount: detail.itemCount ?? (detail.items ? detail.items.length : 0),
+        tags: detail.tags,
+        baseSurahId: detail.baseSurahId,
+        baseSurahNameArabic: detail.baseSurahNameArabic,
+        createdAt: detail.createdAt,
+        updatedAt: detail.updatedAt,
+      };
+      if (idx >= 0) {
+        userList[idx] = summary;
+      } else {
+        userList.unshift(summary);
+      }
+    }
+
+    this.pendingDetailWrites.set(detail.id, copy);
+    this.scheduleBatchWrite();
+  }
+
+  public deleteCollectionSync(userId: string, collectionId: string): void {
+    this.collectionDetails.delete(collectionId);
+    const userList = this.collectionsByUser.get(userId);
+    if (userList) {
+      this.collectionsByUser.set(userId, userList.filter(c => c.id !== collectionId));
+    }
+    this.pendingDetailWrites.delete(collectionId);
+    this.pendingDeletes.add(collectionId);
+    this.scheduleBatchWrite();
+  }
+
+  public remapCollectionIdSync(userId: string, tempId: string, serverId: string, serverRecord?: any): void {
+    const detail = this.collectionDetails.get(tempId);
+    if (detail) {
+      this.collectionDetails.delete(tempId);
+      this.collectionDetails.set(serverId, {
+        ...(serverRecord || detail),
+        id: serverId,
+        userId,
+      });
+    }
+    const userList = this.collectionsByUser.get(userId);
+    if (userList) {
+      const idx = userList.findIndex(c => c.id === tempId);
+      if (idx >= 0) {
+        userList[idx] = {
+          ...(serverRecord || userList[idx]),
+          id: serverId,
+          userId,
+        };
+      }
+    }
+    if (this.pendingDetailWrites.has(tempId)) {
+      const p = this.pendingDetailWrites.get(tempId)!;
+      this.pendingDetailWrites.delete(tempId);
+      this.pendingDetailWrites.set(serverId, {
+        ...p,
+        id: serverId,
+      });
+    }
+  }
+
+  private scheduleBatchWrite(): void {
+    if (this.flushScheduled) return;
+    this.flushScheduled = true;
+
+    const flush = async () => {
+      this.flushScheduled = false;
+      try {
+        const db = await getUserDB();
+        const tx = db.transaction(['collections', 'collectionDetails'], 'readwrite');
+
+        for (const id of this.pendingDeletes) {
+          await tx.objectStore('collections').delete(id);
+          await tx.objectStore('collectionDetails').delete(id);
+        }
+        this.pendingDeletes.clear();
+
+        for (const [id, detail] of this.pendingDetailWrites.entries()) {
+          await tx.objectStore('collectionDetails').put(detail);
+          const summary: CachedCollection = {
+            id: detail.id,
+            userId: detail.userId,
+            title: detail.title,
+            description: detail.description,
+            color: detail.color,
+            isFavorite: detail.isFavorite,
+            itemCount: detail.itemCount ?? (detail.items ? detail.items.length : 0),
+            tags: detail.tags,
+            baseSurahId: detail.baseSurahId,
+            baseSurahNameArabic: detail.baseSurahNameArabic,
+            createdAt: detail.createdAt,
+            updatedAt: detail.updatedAt,
+          };
+          await tx.objectStore('collections').put(summary);
+        }
+        this.pendingDetailWrites.clear();
+
+        await tx.done;
+      } catch (err) {
+        console.warn('Background batch write-through to IndexedDB failed:', err);
+      }
+    };
+
+    if (typeof queueMicrotask !== 'undefined') {
+      queueMicrotask(flush);
+    } else {
+      setTimeout(flush, 0);
+    }
+  }
+
+  public clear(): void {
+    this.collectionsByUser.clear();
+    this.collectionDetails.clear();
+    this.pendingDetailWrites.clear();
+    this.pendingDeletes.clear();
+  }
+}
+
+export const userDataMemoryStore = new UserDataMemoryStore();
+
+// ---------------------------------------------------------------------------
 // 1. Tombstone Management
 // ---------------------------------------------------------------------------
 export async function addTombstone(
@@ -156,6 +321,7 @@ export async function addTombstone(
   entityId: string,
   entityType: TombstoneRecord['entityType'] = 'collection'
 ): Promise<void> {
+  userDataMemoryStore.deleteCollectionSync(userId, entityId);
   const db = await getUserDB();
   await db.put('tombstones', {
     entityId,
@@ -239,6 +405,7 @@ export async function remapLocalCollectionId(
   serverId: string,
   serverRecord?: any
 ): Promise<void> {
+  userDataMemoryStore.remapCollectionIdSync(userId, tempId, serverId, serverRecord);
   const db = await getUserDB();
 
   // 1. Collections store
@@ -265,36 +432,59 @@ export async function remapLocalCollectionId(
 }
 
 export async function removeStaleLocalEntity(userId: string, entityId: string): Promise<void> {
+  userDataMemoryStore.deleteCollectionSync(userId, entityId);
   const db = await getUserDB();
   await db.delete('collections', entityId);
   await db.delete('collectionDetails', entityId);
 }
 
 // ---------------------------------------------------------------------------
-// 3. Cached Collections (Tombstone-Aware)
+// 3. Cached Collections (Tombstone-Aware with In-Memory Acceleration)
 // ---------------------------------------------------------------------------
 export async function getCachedUserCollections(userId: string): Promise<CachedCollection[]> {
+  const tombstones = await getTombstonedEntityIds(userId);
+  const inMem = userDataMemoryStore.getCollectionsSync(userId);
+  if (inMem) {
+    return inMem
+      .filter(c => !tombstones.has(c.id))
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  }
+
   const db = await getUserDB();
   const all = await db.getAllFromIndex('collections', 'by-user', userId);
-  const tombstones = await getTombstonedEntityIds(userId);
-  return all
+  const valid = all
     .filter(c => !tombstones.has(c.id))
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
+  userDataMemoryStore.setCollectionsSync(userId, valid);
+  return valid;
 }
 
 export async function setCachedUserCollections(userId: string, collections: any[]): Promise<void> {
-  const db = await getUserDB();
   const tombstones = await getTombstonedEntityIds(userId);
-  const tx = db.transaction('collections', 'readwrite');
+  const valid: CachedCollection[] = [];
   for (const c of collections) {
     if (!tombstones.has(c.id)) {
-      await tx.store.put({ ...c, userId });
+      valid.push({ ...c, userId });
     }
+  }
+
+  userDataMemoryStore.setCollectionsSync(userId, valid);
+
+  const db = await getUserDB();
+  const tx = db.transaction('collections', 'readwrite');
+  for (const c of valid) {
+    await tx.store.put(c);
   }
   await tx.done;
 }
 
 export async function getCachedCollectionDetail(userId: string, collectionId: string): Promise<CachedCollectionDetail | null> {
+  const inMem = userDataMemoryStore.getCollectionDetailSync(collectionId);
+  if (inMem && inMem.userId === userId) {
+    return inMem;
+  }
+
   const db = await getUserDB();
   const tombstones = await getTombstonedEntityIds(userId);
   if (tombstones.has(collectionId)) {
@@ -302,18 +492,18 @@ export async function getCachedCollectionDetail(userId: string, collectionId: st
   }
   const detail = await db.get('collectionDetails', collectionId);
   if (detail && detail.userId === userId) {
+    userDataMemoryStore.setCollectionDetailSync(userId, detail);
     return detail;
   }
   return null;
 }
 
 export async function setCachedCollectionDetail(userId: string, detail: any): Promise<void> {
-  const db = await getUserDB();
   const tombstones = await getTombstonedEntityIds(userId);
   if (tombstones.has(detail.id)) {
     return;
   }
-  await db.put('collectionDetails', { ...detail, userId });
+  userDataMemoryStore.setCollectionDetailSync(userId, detail);
 }
 
 // ---------------------------------------------------------------------------
@@ -494,6 +684,7 @@ export async function resetLocalCache(userId: string): Promise<void> {
 // 6. User Isolation & Logout Wipe
 // ---------------------------------------------------------------------------
 export async function wipeUserDataOnLogout(userId: string): Promise<void> {
+  userDataMemoryStore.clear();
   const db = await getUserDB();
 
   // 1. Collections

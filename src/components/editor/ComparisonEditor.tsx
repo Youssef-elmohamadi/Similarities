@@ -13,6 +13,7 @@ import { toArabicDigits, formatAyahOrnament, cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { getVersesBySurahId, isOfflineDatasetAvailable, CompactVerse } from '@/offline/quranDb';
 import { searchLocalWorker } from '@/offline/searchWorkerClient';
+import { connectivity } from '@/offline/connectivity';
 import { api } from '@/lib/api';
 
 function normalizeArabicSearch(text: string): string {
@@ -169,26 +170,21 @@ export const ComparisonEditor: React.FC<ComparisonEditorProps> = ({
     networkMode: 'always',
     queryFn: async () => {
       if (!searchQuery.trim() || searchQuery.trim().length < 2) return [];
-      const hasLocal = await isOfflineDatasetAvailable();
-      if (hasLocal) {
+      try {
+        const localRes = await searchLocalWorker({ q: searchQuery.trim(), pageSize: 10 });
+        return localRes.items;
+      } catch (e) {
+        console.warn('Local search failed', e);
+      }
+      if (connectivity.isOnline()) {
         try {
-          const localRes = await searchLocalWorker({ q: searchQuery.trim(), pageSize: 10 });
-          return localRes.items;
-        } catch (e) {
-          console.warn('Local search failed', e);
+          const res = await api.get<{ items: QuranVerse[] }>(`/quran/search?q=${encodeURIComponent(searchQuery.trim())}&pageSize=10`);
+          return res.data.items;
+        } catch {
+          // ignore
         }
       }
-      if (!navigator.onLine) {
-        const localRes = await searchLocalWorker({ q: searchQuery.trim(), pageSize: 10 });
-        return localRes.items;
-      }
-      try {
-        const res = await api.get<{ items: QuranVerse[] }>(`/quran/search?q=${encodeURIComponent(searchQuery.trim())}&pageSize=10`);
-        return res.data.items;
-      } catch {
-        const localRes = await searchLocalWorker({ q: searchQuery.trim(), pageSize: 10 });
-        return localRes.items;
-      }
+      return [];
     },
     enabled: isCreateModalOpen && searchQuery.trim().length > 1,
   });

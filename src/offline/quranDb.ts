@@ -64,10 +64,14 @@ interface QuranDBSchema extends DBSchema {
       'by-skeleton': string;
     };
   };
+  binary_index_cache: {
+    key: string; // versionHash
+    value: any; // SerializedBinaryIndex
+  };
 }
 
 const DB_NAME = 'QuranOfflineDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise: Promise<IDBPDatabase<QuranDBSchema>> | null = null;
 
@@ -98,10 +102,36 @@ export function getQuranDB(): Promise<IDBPDatabase<QuranDBSchema>> {
           wordStore.createIndex('by-phonetic', 'phoneticWord');
           wordStore.createIndex('by-skeleton', 'skeletonWord');
         }
+        // Binary search index cache store (persists prebuilt index across cold starts)
+        if (!db.objectStoreNames.contains('binary_index_cache')) {
+          db.createObjectStore('binary_index_cache');
+        }
       },
     });
   }
   return dbPromise;
+}
+
+export async function getStoredBinaryIndex(versionHash: string): Promise<any | null> {
+  try {
+    const db = await getQuranDB();
+    const cached = await db.get('binary_index_cache', versionHash);
+    return cached || null;
+  } catch (err) {
+    console.warn('Failed to retrieve binary index from IndexedDB:', err);
+    return null;
+  }
+}
+
+export async function storeBinaryIndex(versionHash: string, index: any): Promise<void> {
+  try {
+    const db = await getQuranDB();
+    const tx = db.transaction('binary_index_cache', 'readwrite');
+    await tx.store.put(index, versionHash);
+    await tx.done;
+  } catch (err) {
+    console.warn('Failed to store binary index in IndexedDB:', err);
+  }
 }
 
 let isDatasetCachedAvailable: boolean | null = null;
@@ -226,11 +256,12 @@ export async function saveDatasetToIndexedDB(
 
   // 2. Clear existing data
   onProgress?.(25, 'جاري إعداد قاعدة البيانات المحلية...');
-  const txClear = db.transaction(['surahs', 'verses', 'words', 'metadata'], 'readwrite');
+  const txClear = db.transaction(['surahs', 'verses', 'words', 'metadata', 'binary_index_cache'], 'readwrite');
   await txClear.objectStore('surahs').clear();
   await txClear.objectStore('verses').clear();
   await txClear.objectStore('words').clear();
   await txClear.objectStore('metadata').clear();
+  await txClear.objectStore('binary_index_cache').clear();
   await txClear.done;
 
   // 3. Insert Surahs

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { DashboardStats } from '@/types/collection';
+import { DashboardStats, CollectionSummary } from '@/types/collection';
 import { Card } from '@/components/common/Card';
 import { Button } from '@/components/common/Button';
 import { Skeleton, CollectionCardSkeleton } from '@/components/common/Skeleton';
@@ -11,6 +11,9 @@ import { ListRow } from '@/components/common/ListRow';
 import { FAB } from '@/components/common/FAB';
 import { SectionToolbar } from '@/components/common/SectionToolbar';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
+import { getCachedUserCollections, getUserDB } from '@/offline/userDataDb';
+import { connectivity } from '@/offline/connectivity';
 import { toArabicDigits, formatRelativeTime } from '@/lib/utils';
 import { Seo } from '@/components/common/Seo';
 import {
@@ -27,6 +30,8 @@ import {
 
 export const DashboardPage: React.FC = () => {
   const { t, direction } = useLanguage();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [quickQuery, setQuickQuery] = useState('');
 
@@ -34,10 +39,83 @@ export const DashboardPage: React.FC = () => {
   const NextIcon = isRtl ? ArrowLeft : ArrowRight;
 
   const { data: stats, isLoading } = useQuery<DashboardStats>({
-    queryKey: ['dashboardStats'],
-    queryFn: async () => {
-      const res = await api.get<DashboardStats>('/collections/dashboard');
-      return res.data;
+    queryKey: ['dashboardStats', user?.id],
+    networkMode: 'always',
+    queryFn: async (): Promise<DashboardStats> => {
+      const computeLocalStats = async (): Promise<DashboardStats> => {
+        if (!user) {
+          return {
+            totalCollections: 0,
+            totalSavedVerses: 0,
+            totalComparisons: 0,
+            totalConnections: 0,
+            recentCollections: [],
+          };
+        }
+        const colls = await getCachedUserCollections(user.id);
+        const db = await getUserDB();
+        let totalVerses = 0;
+        let totalComparisons = 0;
+        let totalConnections = 0;
+        for (const c of colls) {
+          totalVerses += c.itemCount || 0;
+          const detail = await db.get('collectionDetails', c.id);
+          if (detail) {
+            totalComparisons += detail.comparisons?.length || 0;
+            totalConnections += detail.connections?.length || 0;
+          }
+        }
+        const recent: CollectionSummary[] = [];
+        for (const c of colls.slice(0, 5)) {
+          const detail = await db.get('collectionDetails', c.id);
+          recent.push({
+            id: c.id,
+            title: c.title,
+            description: c.description,
+            baseSurahId: c.baseSurahId,
+            baseSurahNameArabic: c.baseSurahNameArabic,
+            verseCount: detail?.verses?.length || c.itemCount || 0,
+            comparisonCount: detail?.comparisons?.length || 0,
+            connectionCount: detail?.connections?.length || 0,
+            createdAt: c.createdAt,
+            updatedAt: c.updatedAt,
+          });
+        }
+        return {
+          totalCollections: colls.length,
+          totalSavedVerses: totalVerses,
+          totalComparisons,
+          totalConnections,
+          recentCollections: recent,
+        };
+      };
+
+      const localStats = await computeLocalStats();
+
+      // Non-blocking background revalidation if online
+      if (connectivity.isOnline()) {
+        (async () => {
+          try {
+            const res = await api.get<DashboardStats>('/collections/dashboard');
+            queryClient.setQueryData(['dashboardStats', user?.id], res.data);
+          } catch {
+            // Background network failure ignored; local stats authoritative
+          }
+        })();
+      }
+
+      // If we have local collections or are offline, return immediately!
+      if (localStats.totalCollections > 0 || !connectivity.isOnline()) {
+        return localStats;
+      }
+
+      // If empty local cache and online, await initial load
+      try {
+        const res = await api.get<DashboardStats>('/collections/dashboard');
+        return res.data;
+      } catch {
+        return localStats;
+      }
     },
   });
 

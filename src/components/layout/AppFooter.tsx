@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { landingTranslations } from '@/i18n/landingTranslations';
 import { WHATSAPP_NUMBER, APP_VERSION, getWhatsAppUrl, formatWhatsAppDisplay } from '@/config/appConfig';
 import { ExternalLink, MessageCircle, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNetworkStatus } from '@/offline/connectivity';
 
 export interface AppFooterProps {
   className?: string;
@@ -12,19 +13,8 @@ export interface AppFooterProps {
 export const AppFooter: React.FC<AppFooterProps> = ({ className }) => {
   const { language } = useLanguage();
   const tData = landingTranslations[language].footer;
-
-  const [isOffline, setIsOffline] = useState(() => (typeof navigator !== 'undefined' ? !navigator.onLine : false));
-
-  useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
+  const isOnline = useNetworkStatus();
+  const isOffline = !isOnline;
 
   const hasWhatsApp = Boolean(WHATSAPP_NUMBER && WHATSAPP_NUMBER.length > 0);
   const whatsappUrl = hasWhatsApp ? getWhatsAppUrl(tData.whatsappPrefilledMessage) : '';

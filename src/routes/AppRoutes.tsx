@@ -1,19 +1,25 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AppLayout } from '../components/layout/AppLayout';
-import { LoginPage } from '../pages/auth/LoginPage';
-import { RegisterPage } from '../pages/auth/RegisterPage';
-import { DashboardPage } from '../pages/DashboardPage';
-import { QuranSearchPage } from '../pages/QuranSearchPage';
-import { MyLibraryPage } from '../pages/MyLibraryPage';
-import { CreateCollectionPage } from '../pages/CreateCollectionPage';
-import { CollectionDetailsPage } from '../pages/CollectionDetailsPage';
-import { EditCollectionPage } from '../pages/EditCollectionPage';
-import { SettingsPage } from '../pages/SettingsPage';
 import { Loader2 } from 'lucide-react';
 
 const LandingPage = React.lazy(() => import('../pages/LandingPage'));
+const LoginPage = React.lazy(() => import('../pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
+const RegisterPage = React.lazy(() => import('../pages/auth/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const DashboardPage = React.lazy(() => import('../pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
+const QuranSearchPage = React.lazy(() => import('../pages/QuranSearchPage').then(m => ({ default: m.QuranSearchPage })));
+const MyLibraryPage = React.lazy(() => import('../pages/MyLibraryPage').then(m => ({ default: m.MyLibraryPage })));
+const CreateCollectionPage = React.lazy(() => import('../pages/CreateCollectionPage').then(m => ({ default: m.CreateCollectionPage })));
+const CollectionDetailsPage = React.lazy(() => import('../pages/CollectionDetailsPage').then(m => ({ default: m.CollectionDetailsPage })));
+const EditCollectionPage = React.lazy(() => import('../pages/EditCollectionPage').then(m => ({ default: m.EditCollectionPage })));
+const SettingsPage = React.lazy(() => import('../pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
+
+const RouteLoadingFallback: React.FC = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background" aria-busy="true">
+    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+  </div>
+);
 
 const RootRoute: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -91,7 +97,9 @@ export const AppRoutes: React.FC = () => {
         path="/login"
         element={
           <PublicRoute>
-            <LoginPage />
+            <Suspense fallback={<RouteLoadingFallback />}>
+              <LoginPage />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -99,7 +107,9 @@ export const AppRoutes: React.FC = () => {
         path="/register"
         element={
           <PublicRoute>
-            <RegisterPage />
+            <Suspense fallback={<RouteLoadingFallback />}>
+              <RegisterPage />
+            </Suspense>
           </PublicRoute>
         }
       />
