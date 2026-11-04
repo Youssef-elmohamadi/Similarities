@@ -108,7 +108,7 @@ describe('AI Chat Phase 5 Evaluation Test Suite (Frontend)', () => {
     act(() => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <ProposalCard proposal={mockProp} onApproved={onApproveMock} />
+          <ProposalCard proposal={mockProp} />
         </QueryClientProvider>
       );
     });

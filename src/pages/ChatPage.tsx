@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import {
   useChatStatus,
   useChatConversations,
@@ -21,6 +22,7 @@ import {
   AlertCircle,
   RefreshCw,
   X,
+  Home,
 } from 'lucide-react';
 import { Button } from '@/components/common/Button';
 import { cn } from '@/lib/utils';
@@ -224,16 +226,27 @@ export const ChatPage: React.FC = () => {
   return (
     <div className="h-full w-full flex flex-col bg-background overflow-hidden min-h-0">
       {/* Mobile Header Bar */}
-      <div className="md:hidden flex items-center justify-between px-3 py-2 border-b border-border bg-surface shrink-0">
-        <button
-          type="button"
-          onClick={() => setIsMobileDrawerOpen(true)}
-          className="flex items-center gap-1.5 text-xs text-text-secondary hover:text-text-primary p-1.5 rounded-lg border border-border bg-background"
-          aria-label="عرض المحادثات السابقة"
-        >
-          <Menu className="w-4 h-4" />
-          <span>المحادثات ({conversations.length})</span>
-        </button>
+      <div className="md:hidden flex items-center justify-between px-3 py-2 border-b border-border bg-surface shrink-0 gap-2">
+        <div className="flex items-center gap-1.5">
+          <Link
+            to="/"
+            className="flex items-center justify-center p-1.5 rounded-lg border border-border bg-background text-text-secondary hover:text-text-primary transition"
+            aria-label="الرجوع للرئيسية"
+            title="الرجوع للرئيسية"
+          >
+            <Home className="w-4 h-4" />
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setIsMobileDrawerOpen(true)}
+            className="flex items-center gap-1.5 text-xs text-text-secondary hover:text-text-primary p-1.5 rounded-lg border border-border bg-background"
+            aria-label="عرض المحادثات السابقة"
+          >
+            <Menu className="w-4 h-4" />
+            <span>المحادثات ({conversations.length})</span>
+          </button>
+        </div>
 
         <div className="flex items-center gap-1.5 text-xs text-primary font-bold">
           <Sparkles className="w-3.5 h-3.5" />
@@ -243,7 +256,7 @@ export const ChatPage: React.FC = () => {
           </span>
         </div>
 
-        <span className="text-[11px] text-text-muted px-2 py-0.5 rounded-full bg-background border border-border">
+        <span className="text-[11px] text-text-muted px-2 py-0.5 rounded-full bg-background border border-border shrink-0">
           المتبقي: {remainingMessages}
         </span>
       </div>
@@ -424,7 +437,7 @@ export const ChatPage: React.FC = () => {
           )}
 
           {/* Chat Composer / Input Bar */}
-          <div className="p-3 md:p-4 bg-surface border-t border-border shrink-0 space-y-2">
+          <div className="p-2.5 sm:p-3 md:p-4 bg-surface border-t border-border shrink-0 space-y-1.5 pb-safe">
             {/* Meta indicator bar */}
             <div className="flex items-center justify-between text-[11px] text-text-muted px-1">
               <div className="flex items-center gap-2">

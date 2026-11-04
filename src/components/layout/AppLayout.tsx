@@ -59,11 +59,11 @@ export const AppLayout: React.FC = () => {
         <main
           className={
             isChat
-              ? 'flex-1 p-0 pb-16 md:pb-0 min-w-0 flex flex-col h-full overflow-hidden'
+              ? 'flex-1 p-0 min-w-0 flex flex-col h-full overflow-hidden'
               : 'flex-1 px-3 sm:px-6 lg:px-8 py-3 sm:py-6 md:py-8 pb-28 md:pb-12 min-w-0 flex flex-col justify-between'
           }
         >
-          <div className={isChat ? 'flex-1 h-full min-h-0 flex flex-col' : 'flex-1'}>
+          <div className={isChat ? 'flex-1 h-full min-h-0 flex flex-col overflow-hidden' : 'flex-1'}>
             <Suspense
               fallback={
                 <div className="flex-1 flex items-center justify-center p-8 min-h-[40vh]" aria-busy="true">
@@ -77,7 +77,7 @@ export const AppLayout: React.FC = () => {
           {!isChat && <AppFooter className="mt-12" />}
         </main>
       </div>
-      <BottomNav />
+      {!isChat && <BottomNav />}
     </div>
   );
 };
