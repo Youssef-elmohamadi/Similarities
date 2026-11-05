@@ -2,16 +2,35 @@ import React, { useState } from 'react';
 import type { ChatMessage, SimilarityProposal } from '@/types/chat';
 import { ProposalCard } from './ProposalCard';
 import { SanitizedMarkdown } from './SanitizedMarkdown';
+import { MessageActionBar } from './MessageActionBar';
 import { Bot, User, Wrench, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ChatMessageItemProps {
   message: ChatMessage;
+  onSendFollowUp?: (text: string) => void;
 }
 
-export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
+export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message, onSendFollowUp }) => {
   const isUser = message.role === 'user';
   const [showTools, setShowTools] = useState(false);
+  const bookmarkKey = `bookmark-msg-${message.id}`;
+  const [isBookmarked, setIsBookmarked] = useState(() => {
+    try {
+      return localStorage.getItem(bookmarkKey) === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleBookmark = () => {
+    const next = !isBookmarked;
+    setIsBookmarked(next);
+    try {
+      if (next) localStorage.setItem(bookmarkKey, '1');
+      else localStorage.removeItem(bookmarkKey);
+    } catch {}
+  };
 
   // Parse proposals if present
   let proposals: SimilarityProposal[] = [];
@@ -34,6 +53,64 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
       // Ignore JSON parse error
     }
   }
+
+  const [dynamicProposal, setDynamicProposal] = useState<SimilarityProposal | null>(null);
+
+  const handleAddToCollection = () => {
+    const matches = [...message.content.matchAll(/\[\[v:(\d+):(\d+)(?:#([0-9-]+))?\]\]/g)];
+    if (matches.length > 0) {
+      const verses = matches.map((m) => ({
+        verseId: 0,
+        surahNumber: parseInt(m[1], 10),
+        surahName: `سورة ${m[1]}`,
+        ayahNumber: parseInt(m[2], 10),
+        uthmaniText: '',
+        note: m[3] ? `الكلمات: ${m[3]}` : undefined,
+      }));
+      setDynamicProposal({
+        id: `manual-col-${message.id}`,
+        type: 'collection',
+        title: 'مجموعة متشابهات مقترحة',
+        description: 'تم إنشاؤها من مواضع الرد في المحادثة',
+        verses,
+      });
+    } else {
+      onSendFollowUp?.('اقترح لي إنشاء مجموعة متشابهات من الآيات المذكورة');
+    }
+  };
+
+  const handleSaveAsConnection = () => {
+    const matches = [...message.content.matchAll(/\[\[v:(\d+):(\d+)(?:#([0-9-]+))?\]\]/g)];
+    if (matches.length >= 2) {
+      const v1 = {
+        verseId: 0,
+        surahNumber: parseInt(matches[0][1], 10),
+        surahName: `سورة ${matches[0][1]}`,
+        ayahNumber: parseInt(matches[0][2], 10),
+        uthmaniText: '',
+      };
+      const v2 = {
+        verseId: 0,
+        surahNumber: parseInt(matches[1][1], 10),
+        surahName: `سورة ${matches[1][1]}`,
+        ayahNumber: parseInt(matches[1][2], 10),
+        uthmaniText: '',
+      };
+      setDynamicProposal({
+        id: `manual-conn-${message.id}`,
+        type: 'connection',
+        title: `رابط حفظ بين ${v1.surahNumber}:${v1.ayahNumber} و ${v2.surahNumber}:${v2.ayahNumber}`,
+        sourceVerse: v1,
+        targetVerse: v2,
+        verses: [v1, v2],
+        note: 'رابط حفظ مقترح للمراجعة والتثبيت',
+      });
+    } else {
+      onSendFollowUp?.('اقترح رابط حفظ بين الآيات المذكورة');
+    }
+  };
+
+  const allProposals = dynamicProposal ? [...proposals, dynamicProposal] : proposals;
 
   return (
     <div
@@ -96,7 +173,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
           </div>
         )}
 
-        {/* Message Content: Sanitized Markdown with [[v:...]] VerseText integration */}
+        {/* Message Content */}
         {isUser ? (
           <div className="whitespace-pre-wrap select-text leading-relaxed tracking-normal py-0.5">
             {message.content}
@@ -106,12 +183,29 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => 
         )}
 
         {/* Proposals Cards (if any) */}
-        {!isUser && proposals.length > 0 && (
+        {!isUser && allProposals.length > 0 && (
           <div className="mt-3 space-y-3">
-            {proposals.map((prop, idx) => (
+            {allProposals.map((prop, idx) => (
               <ProposalCard key={prop.id || idx} proposal={prop} />
             ))}
           </div>
+        )}
+
+        {/* Action Bar (assistant only) */}
+        {!isUser && (
+          <MessageActionBar
+            message={message}
+            onCopy={() => {}}
+            onAddToCollection={handleAddToCollection}
+            onSaveAsConnection={handleSaveAsConnection}
+            onSearchMore={() =>
+              onSendFollowUp?.(
+                `ابحث عن المزيد المتعلق بـ: ${message.content.substring(0, 60)}...`
+              )
+            }
+            onBookmark={handleBookmark}
+            isBookmarked={isBookmarked}
+          />
         )}
 
         {/* Timestamp */}

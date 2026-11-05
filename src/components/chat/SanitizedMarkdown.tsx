@@ -10,14 +10,33 @@ function stripHtmlTags(str: string): string {
   return str.replace(/<[^>]*>/g, '');
 }
 
-// Parse inline formatting: bold, italic, inline code, and verse tokens [[v:surah:ayah(#range)?]]
+/**
+ * Returns the safe-to-render portion of streaming text by stripping any
+ * trailing partial [[...]] token that has been opened but not yet closed.
+ */
+export function bufferPartialTokens(text: string): string {
+  const lastOpen = text.lastIndexOf('[[');
+  const lastClose = text.lastIndexOf(']]');
+  if (lastOpen > lastClose) {
+    // There's an unclosed [[ at the end — buffer it
+    return text.substring(0, lastOpen);
+  }
+  return text;
+}
+
+// Parse inline formatting: bold, italic, inline code, verse tokens, and src tokens
 function renderInlineText(text: string, keyPrefix: string): React.ReactNode[] {
-  // Regex matches:
-  // 1. Verse token: [[v:(\d+):(\d+)(?:#([0-9-]+))?]]
-  // 2. Bold: \*\*(.+?)\*\*
-  // 3. Inline code: `([^`]+)`
-  // 4. Italic: \*([^*]+)\*
-  const pattern = /(\[\[v:(\d+):(\d+)(?:#([0-9-]+))?\]\]|\*\*([^*]+)\*\*|`([^`]+)`|\*([^*]+)\*)/g;
+  // Regex group mapping:
+  // Group 1 (full match wrapper)
+  // Group 2: verse surah  [[v:(\d+):(\d+)(?:#([0-9-]+))?]]
+  // Group 3: verse ayah
+  // Group 4: verse word range (optional)
+  // Group 5: bold inner  \*\*([^*]+)\*\*
+  // Group 6: code inner  `([^`]+)`
+  // Group 7: italic inner  \*([^*]+)\*
+  // Group 8: src token id  \[\[src:([A-Za-z0-9_\-]+)\]\]
+  const pattern =
+    /(\[\[v:(\d+):(\d+)(?:#([0-9-]+))?\]\]|\*\*([^*]+)\*\*|`([^`]+)`|\*([^*]+)\*|\[\[src:([A-Za-z0-9_\-]+)\]\])/g;
 
   const elements: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -38,8 +57,8 @@ function renderInlineText(text: string, keyPrefix: string): React.ReactNode[] {
 
     const fullMatch = match[0];
 
-    // Check if verse token
     if (fullMatch.startsWith('[[v:')) {
+      // Verse token
       const surahNum = parseInt(match[2], 10);
       const ayahNum = parseInt(match[3], 10);
       const wordRange = match[4];
@@ -51,11 +70,22 @@ function renderInlineText(text: string, keyPrefix: string): React.ReactNode[] {
           wordRange={wordRange}
         />
       );
+    } else if (fullMatch.startsWith('[[src:')) {
+      // Source badge token
+      const srcId = match[8];
+      elements.push(
+        <span
+          key={`${keyPrefix}-src-${counter++}`}
+          className="inline-flex items-center gap-0.5 text-[10px] text-text-muted border border-border/50 rounded px-1 py-0.5"
+        >
+          <span>مصدر {srcId}</span>
+        </span>
+      );
     } else if (fullMatch.startsWith('**')) {
-      // Bold
+      // Bold — recursively parse inner content to catch verse tokens inside bold
       elements.push(
         <strong key={`${keyPrefix}-b-${counter++}`} className="font-bold text-text-primary">
-          {match[5]}
+          {renderInlineText(match[5], `${keyPrefix}-b-${counter}`)}
         </strong>
       );
     } else if (fullMatch.startsWith('`')) {
@@ -69,10 +99,10 @@ function renderInlineText(text: string, keyPrefix: string): React.ReactNode[] {
         </code>
       );
     } else if (fullMatch.startsWith('*')) {
-      // Italic
+      // Italic — recursively parse inner content to catch verse tokens inside italic
       elements.push(
         <em key={`${keyPrefix}-i-${counter++}`} className="italic text-text-secondary">
-          {match[7]}
+          {renderInlineText(match[7], `${keyPrefix}-i-${counter}`)}
         </em>
       );
     }
@@ -250,4 +280,3 @@ export const SanitizedMarkdown: React.FC<SanitizedMarkdownProps> = ({ content })
 
   return <div className="space-y-0.5 leading-relaxed select-text">{blocks}</div>;
 };
-

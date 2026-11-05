@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   useChatStatus,
   useChatConversations,
@@ -12,6 +12,7 @@ import {
 import { ChatDisclaimers } from '@/components/chat/ChatDisclaimers';
 import { ChatConversationList } from '@/components/chat/ChatConversationList';
 import { ChatMessageItem } from '@/components/chat/ChatMessageItem';
+import { bufferPartialTokens } from '@/components/chat/SanitizedMarkdown';
 import {
   Send,
   Loader2,
@@ -34,7 +35,16 @@ const STARTER_PROMPTS = [
   'اقترح مقارنة لمواضع {وما كان الله ليعذبهم} مع الفروق',
 ];
 
+const QUICK_MODES = [
+  { label: '📊 قارن آيتين', intent: 'قارن بين الآيتين اللتين ذكرناهما باستخدام أداة المقارنة' },
+  { label: '📋 اجمع المواضع', intent: 'اجمع كل مواضع العبارة التي بحثنا عنها في القرآن كاملاً' },
+  { label: '🎯 اختبرني', intent: 'اختبرني في الآيات التي راجعناها' },
+  { label: '📝 ضابط حفظي', intent: 'اقترح لي ضابطاً شعرياً أو لفظياً لتمييز هذه الآيات المتشابهة (قدّم نسختين)' },
+];
+
 export const ChatPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const contextCollectionId = searchParams.get('collectionId');
   const { data: status, isLoading: isStatusLoading } = useChatStatus();
   const { data: conversations = [], isLoading: isConvsLoading } = useChatConversations();
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
@@ -155,6 +165,11 @@ export const ChatPage: React.FC = () => {
     setActiveToolActivity(null);
     setLastFailedMessage(null);
 
+    let textToSend = text;
+    if (contextCollectionId && allMessages.length === 0) {
+      textToSend = `${text} (سياقي الحالي: معرف المجموعة ${contextCollectionId})`;
+    }
+
     // Abort controller for Stop button
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -162,7 +177,7 @@ export const ChatPage: React.FC = () => {
     try {
       await sendMutation.mutateAsync({
         conversationId: targetConvId,
-        content: text,
+        content: textToSend,
         signal: controller.signal,
         onDelta: (delta) => setStreamingDelta((prev) => prev + delta),
         onToolActivity: (msg) => setActiveToolActivity(msg),
@@ -323,6 +338,23 @@ export const ChatPage: React.FC = () => {
             className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 min-h-0"
           >
             <div className="max-w-3xl lg:max-w-4xl mx-auto w-full space-y-3.5">
+              {contextCollectionId && (
+                <div className="flex items-center justify-between text-xs px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/25 text-primary mb-2">
+                  <span className="font-medium">📍 سياقي الحالي: متصل بمجموعة ({contextCollectionId})</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const p = new URLSearchParams(searchParams);
+                      p.delete('collectionId');
+                      setSearchParams(p);
+                    }}
+                    className="text-text-muted hover:text-text-primary text-[11px] font-semibold"
+                  >
+                    إلغاء الربط
+                  </button>
+                </div>
+              )}
+
               {hasMoreMessages && (
                 <div className="text-center py-2">
                   <span className="text-xs text-text-muted">
@@ -366,7 +398,11 @@ export const ChatPage: React.FC = () => {
               ) : (
                 <>
                   {visibleMessages.map((msg) => (
-                    <ChatMessageItem key={msg.id} message={msg} />
+                    <ChatMessageItem
+                      key={msg.id}
+                      message={msg}
+                      onSendFollowUp={(text) => handleSend(text)}
+                    />
                   ))}
 
                   {/* Live streaming bubble & Tool activity */}
@@ -387,7 +423,7 @@ export const ChatPage: React.FC = () => {
                             <Sparkles className="w-4 h-4" />
                           </div>
                           <div className="bg-surface border border-border text-text-primary rounded-2xl rounded-ts-xs px-4 py-3 text-sm md:text-base leading-relaxed whitespace-pre-wrap select-text max-w-[85%] shadow-2xs">
-                            {streamingDelta}
+                            {bufferPartialTokens(streamingDelta)}
                           </div>
                         </div>
                       ) : !activeToolActivity ? (
@@ -467,6 +503,21 @@ export const ChatPage: React.FC = () => {
                     ? 'تم استهلاك رصيد اليوم بالكامل'
                     : `الرصيد المتبقي: ${remainingMessages} رسائل اليوم`}
                 </span>
+              </div>
+
+              {/* Quick mode shortcuts */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                {QUICK_MODES.map((mode, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSend(mode.intent)}
+                    disabled={!isOnline || isQuotaExceeded || sendMutation.isPending}
+                    className="shrink-0 text-[11px] px-2.5 py-1 rounded-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-colors disabled:opacity-50"
+                  >
+                    {mode.label}
+                  </button>
+                ))}
               </div>
 
               {/* Input Form with Multi-line textarea and Stop Streaming button */}
