@@ -74,9 +74,11 @@ export const ChatConversationList: React.FC<ChatConversationListProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
 
-  const filtered = conversations.filter((c) =>
-    search ? c.title.toLowerCase().includes(search.toLowerCase()) : true
-  );
+  const filtered = (conversations || [])
+    .filter((c): c is ChatConversation => Boolean(c && c.id && c.title))
+    .filter((c) =>
+      search ? c.title.toLowerCase().includes(search.toLowerCase()) : true
+    );
 
   const grouped = groupConversationsByDate(filtered);
 

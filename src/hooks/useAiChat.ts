@@ -47,15 +47,17 @@ export function useChatConversations(includeArchived = false) {
       if (typeof navigator !== 'undefined' && !navigator.onLine && user?.id) {
         const cached = await getCachedChatConversations(user.id);
         if (cached.length > 0) {
-          return cached.map((c) => ({
-            id: c.id,
-            title: c.title,
-            summary: c.summary,
-            isArchived: c.isArchived,
-            messageCount: c.messageCount ?? 0,
-            createdAt: c.createdAt,
-            updatedAt: c.updatedAt,
-          }));
+          return cached
+            .filter((c) => Boolean(c && c.id))
+            .map((c) => ({
+              id: c.id,
+              title: c.title || 'محادثة',
+              summary: c.summary,
+              isArchived: c.isArchived,
+              messageCount: c.messageCount ?? 0,
+              createdAt: c.createdAt,
+              updatedAt: c.updatedAt,
+            }));
         }
       }
 
@@ -64,24 +66,27 @@ export function useChatConversations(includeArchived = false) {
         const res = await api.get<ChatConversation[]>('/chat/conversations', {
           params: { includeArchived },
         });
+        const valid = (res.data || []).filter((c): c is ChatConversation => Boolean(c && c.id));
         if (user?.id) {
-          saveChatConversationsToCache(user.id, res.data);
+          saveChatConversationsToCache(user.id, valid);
         }
-        return res.data;
+        return valid;
       } catch (err) {
         // Fallback to IndexedDB cache
         if (user?.id) {
           const cached = await getCachedChatConversations(user.id);
           if (cached.length > 0) {
-            return cached.map((c) => ({
-              id: c.id,
-              title: c.title,
-              summary: c.summary,
-              isArchived: c.isArchived,
-              messageCount: c.messageCount ?? 0,
-              createdAt: c.createdAt,
-              updatedAt: c.updatedAt,
-            }));
+            return cached
+              .filter((c) => Boolean(c && c.id))
+              .map((c) => ({
+                id: c.id,
+                title: c.title || 'محادثة',
+                summary: c.summary,
+                isArchived: c.isArchived,
+                messageCount: c.messageCount ?? 0,
+                createdAt: c.createdAt,
+                updatedAt: c.updatedAt,
+              }));
           }
         }
         throw err;
@@ -122,24 +127,27 @@ export function useChatMessages(conversationId: string | null) {
         const res = await api.get<ChatMessage[]>(
           `/chat/conversations/${conversationId}/messages`
         );
+        const valid = (res.data || []).filter((m): m is ChatMessage => Boolean(m && m.id));
         if (user?.id) {
-          saveChatMessagesToCache(user.id, conversationId, res.data);
+          saveChatMessagesToCache(user.id, conversationId, valid);
         }
-        return res.data;
+        return valid;
       } catch (err) {
         // Fallback to IndexedDB cache
         const cached = await getCachedChatMessages(conversationId);
         if (cached.length > 0) {
-          return cached.map((m) => ({
-            id: m.id,
-            conversationId: m.conversationId,
-            role: m.role,
-            content: m.content,
-            toolCallsJson: m.toolCallsJson,
-            proposalsJson: m.proposalsJson,
-            tokenCount: m.tokenCount,
-            createdAt: m.createdAt,
-          }));
+          return cached
+            .filter((m) => Boolean(m && m.id))
+            .map((m) => ({
+              id: m.id,
+              conversationId: m.conversationId,
+              role: m.role,
+              content: m.content,
+              toolCallsJson: m.toolCallsJson,
+              proposalsJson: m.proposalsJson,
+              tokenCount: m.tokenCount,
+              createdAt: m.createdAt,
+            }));
         }
         throw err;
       }
@@ -377,16 +385,22 @@ export function useSendMessage() {
     onSuccess: (data, variables) => {
       const messagesKey = CHAT_KEYS.messages(variables.conversationId);
       queryClient.setQueryData<ChatMessage[]>(messagesKey, (old) => {
-        if (!old) return [data.userMessage, data.assistantMessage];
-        const filtered = old.filter((m) => !m.id.startsWith('optimistic-'));
-        return [...filtered, data.userMessage, data.assistantMessage];
+        const validNew = [data?.userMessage, data?.assistantMessage].filter(
+          (m): m is ChatMessage => Boolean(m && m.id)
+        );
+        if (!old) return validNew;
+        const filtered = old.filter((m) => Boolean(m && m.id && !m.id.startsWith('optimistic-')));
+        const existingIds = new Set(filtered.map((m) => m.id));
+        const toAdd = validNew.filter((m) => !existingIds.has(m.id));
+        return [...filtered, ...toAdd];
       });
 
       queryClient.setQueryData<ChatStatus>(CHAT_KEYS.status(), (old) => {
         if (!old) return old;
-        return { ...old, remainingToday: data.remainingMessagesToday };
+        return { ...old, remainingToday: data?.remainingMessagesToday ?? old.remainingToday };
       });
 
+      queryClient.invalidateQueries({ queryKey: messagesKey });
       queryClient.invalidateQueries({ queryKey: CHAT_KEYS.conversations(false) });
     },
   });

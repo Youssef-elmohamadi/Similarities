@@ -110,7 +110,9 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message, onSen
     }
   };
 
-  const allProposals = dynamicProposal ? [...proposals, dynamicProposal] : proposals;
+  const allProposals = (dynamicProposal ? [...proposals, dynamicProposal] : proposals).filter(
+    (p): p is SimilarityProposal => Boolean(p)
+  );
 
   return (
     <div

@@ -13,6 +13,7 @@ import { ChatDisclaimers } from '@/components/chat/ChatDisclaimers';
 import { ChatConversationList } from '@/components/chat/ChatConversationList';
 import { ChatMessageItem } from '@/components/chat/ChatMessageItem';
 import { bufferPartialTokens } from '@/components/chat/SanitizedMarkdown';
+import type { ChatMessage } from '@/types/chat';
 import {
   Send,
   Loader2,
@@ -235,8 +236,10 @@ export const ChatPage: React.FC = () => {
   const isQuotaExceeded = remainingMessages <= 0;
 
   // Window of visible messages for infinite scroll up
-  const visibleMessages = allMessages.slice(-visibleCount);
-  const hasMoreMessages = visibleCount < allMessages.length;
+  const visibleMessages = (allMessages || [])
+    .filter((m): m is ChatMessage => Boolean(m && m.id))
+    .slice(-visibleCount);
+  const hasMoreMessages = visibleCount < (allMessages || []).length;
 
   return (
     <div className="h-full w-full flex flex-col bg-background overflow-hidden min-h-0">
@@ -397,13 +400,15 @@ export const ChatPage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  {visibleMessages.map((msg) => (
-                    <ChatMessageItem
-                      key={msg.id}
-                      message={msg}
-                      onSendFollowUp={(text) => handleSend(text)}
-                    />
-                  ))}
+                  {visibleMessages.map((msg) =>
+                    msg && msg.id ? (
+                      <ChatMessageItem
+                        key={msg.id}
+                        message={msg}
+                        onSendFollowUp={(text) => handleSend(text)}
+                      />
+                    ) : null
+                  )}
 
                   {/* Live streaming bubble & Tool activity */}
                   {sendMutation.isPending && (
