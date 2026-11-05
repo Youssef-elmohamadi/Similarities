@@ -309,6 +309,8 @@ export function useSendMessage() {
                   onDelta?.(parsed.delta || '');
                 } else if (currentEvent === 'done') {
                   remainingToday = parsed.remainingToday ?? 20;
+                } else if (currentEvent === 'error') {
+                  throw new Error(parsed.message || parsed.error || 'حدث خطأ أثناء معالجة الرد');
                 }
               } catch {
                 // Ignore parse errors on individual SSE chunks
